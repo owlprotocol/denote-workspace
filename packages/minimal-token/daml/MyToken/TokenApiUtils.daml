@@ -1,0 +1,23 @@
+module MyToken.TokenApiUtils where
+
+-- DNS-scoped metadata keys that wallets can render consistently.
+-- Replace example.org with your domain when moving beyond placeholders.
+
+reasonKey : Text
+reasonKey = "example.org/reason"
+
+txKindKey : Text
+txKindKey = "example.org/tx-kind"
+
+senderKey : Text
+senderKey = "example.org/sender"
+
+burnedKey : Text
+burnedKey = "example.org/burned"
+
+-- Off-ledger choice context keys (examples).
+openRoundKey : Text
+openRoundKey = "open-round"    -- If not applicable to your token, ignore.
+
+expireLockKey : Text
+expireLockKey = "expire-lock"

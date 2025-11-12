@@ -1,0 +1,40 @@
+module MyToken.ReceiverMintRequest where
+
+import MyTokenFactory
+
+template ReceiverMintRequest
+  with
+    tokenFactoryCid: ContractId MyTokenFactory
+    -- ^ The factory that can mint tokens
+    issuer: Party
+    -- ^ The issuer of the tokens to be minted
+    receiver: Party
+    -- ^ The party to receive the minted tokens
+    amount: Decimal
+    -- ^ The amount of tokens to mint
+  where
+    signatory issuer
+    observer receiver
+
+    ensure amount > 0.0
+
+    choice Accept : MyTokenFactory.MintResult
+      -- ^ Accept the request.
+      controller receiver
+      do
+          exercise tokenFactoryCid MyTokenFactory.Mint with
+            receiver = receiver
+            amount = amount 
+
+    choice Decline : ()
+      -- ^ Decline the request.
+      controller receiver
+      do
+        pure ()
+
+    choice Withdraw : ()
+      -- ^ Withdraw the request.
+      controller receiver
+      do
+        pure ()
+

@@ -1,0 +1,5 @@
+ignores: [
+    "@types/node",
+    "vite",
+    "rimraf"
+]

@@ -1,0 +1,27 @@
+{
+  "name": "@owlprotocol/minimal-token",
+  "version": "0.1.0",
+  "keywords": [],
+  "private": true,
+  "homepage": "https://github.com/owlprotocol/denote-workspace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owlprotocol/denote-workspace.git"
+  },
+  "copyright": "Copyright 2025 Denote Capital",
+  "license": "BSL-1.1",
+  "author": {
+    "name": "Oscar Baracos",
+    "email": "oscar@denotecapital.com",
+    "url": "https://github.com/oscbacon"
+  },
+  "scripts": {
+    "build": "daml build",
+    "start": "daml start",
+    "test": "daml test"
+  },
+  "funding": "https://denote.capital",
+  "engines": {
+    "node": "^22.0.0"
+  }
+}

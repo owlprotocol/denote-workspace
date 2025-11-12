@@ -1,0 +1,33 @@
+{
+    "name": "@canton-network/scripts",
+    "private": true,
+    "version": "0.0.0",
+    "description": "Various scripts for the Wallet Gateway Project.",
+    "author": "Phillip Olesen <phillip.olesen@digitalasset.com>",
+    "license": "Apache-2.0",
+    "type": "module",
+    "scripts": {
+        "test": "tsc -b",
+        "clean": "tsc -b --clean"
+    },
+    "devDependencies": {
+        "@open-rpc/meta-schema": "^1.14.9",
+        "@types/node": "^24.0.4",
+        "@types/tar-fs": "^2.0.4",
+        "axios": "^1.12.0",
+        "colors": "^1.4.0",
+        "diff": "^8.0.2",
+        "openapi-typescript": "^6.0.0",
+        "tar-fs": "^3.1.1",
+        "tsx": "^4.20.3",
+        "typescript": "^5.8.3"
+    },
+    "dependencies": {
+        "@commander-js/extra-typings": "^14.0.0",
+        "@inquirer/prompts": "^7.9.0",
+        "commander": "^14.0.1",
+        "jsonc-parser": "^3.3.1",
+        "pm2": "^6.0.8",
+        "yoctocolors": "^2.1.1"
+    }
+}

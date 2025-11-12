@@ -1,0 +1,84 @@
+module MyAllocationFactory where
+
+import Splice.Api.Token.AllocationInstructionV1 as AI
+import Splice.Api.Token.AllocationV1 as A
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1()
+
+import MyAllocation
+import MyToken.TwoStepTransfer as TST
+import MyTokenRules
+
+-- | Allocation factory implementing CIP-56 AllocationFactory.
+-- It auto-locks funds using prepareTwoStepTransfer, then creates the Allocation directly.
+template MyAllocationFactory
+  with
+    registry : Party
+    rulesCid : ContractId MyTokenRules
+  where
+    signatory registry
+
+    interface instance AI.AllocationFactory for MyAllocationFactory where
+      view = AI.AllocationFactoryView with
+        admin = registry
+        meta = MD.emptyMetadata
+
+      allocationFactory_allocateImpl _self arg =
+        myAllocationFactory_allocateImpl this arg
+
+      allocationFactory_publicFetchImpl _self arg = do
+        assertMsg "expectedAdmin must match factory admin" (arg.expectedAdmin == registry)
+        pure (view $ toInterface @AI.AllocationFactory this)
+
+
+-- | Main implementation of AllocationFactory_Allocate.
+-- Validates, auto-locks via prepareTwoStepTransfer, creates Allocation, returns Completed.
+myAllocationFactory_allocateImpl
+  : MyAllocationFactory
+  -> AI.AllocationFactory_Allocate
+  -> Update AI.AllocationInstructionResult
+myAllocationFactory_allocateImpl factory arg = do
+  let AI.AllocationFactory_Allocate { expectedAdmin, allocation, requestedAt, inputHoldingCids, extraArgs } = arg
+
+  -- Validate admin
+  require "expectedAdmin mismatch" (expectedAdmin == factory.registry)
+
+  -- Basic validations
+  require "Amount must be positive" (allocation.transferLeg.amount > 0.0)
+  require "At least one holding must be provided" (not $ Prelude.null inputHoldingCids)
+  assertMsg "requestedAt must be < allocateBefore" (requestedAt < allocation.settlement.allocateBefore)
+  assertWithinDeadlineHelper "Settlement.settleBefore" allocation.settlement.settleBefore
+
+  -- Build two-step transfer from allocation spec
+  let twoStep = TST.TwoStepTransfer with
+        issuer = allocation.transferLeg.instrumentId.admin
+        sender = allocation.transferLeg.sender
+        receiver = allocation.transferLeg.receiver
+        amount = allocation.transferLeg.amount
+        executeBefore = allocation.settlement.settleBefore
+
+  (lockedCid, senderChangeCids, meta) <-
+    TST.prepareTwoStepTransfer twoStep requestedAt inputHoldingCids factory.rulesCid
+
+  -- Create Allocation directly
+  allocationCid <- create MyAllocation with
+    lockedMyToken = lockedCid
+    allocation = allocation
+
+  pure AI.AllocationInstructionResult with
+    senderChangeCids = senderChangeCids
+    output = AI.AllocationInstructionResult_Completed with
+      allocationCid = toInterfaceContractId @A.Allocation allocationCid
+    meta = meta
+
+
+-- Helpers
+assertWithinDeadlineHelper : Text -> Time -> Update ()
+assertWithinDeadlineHelper name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has passed") (now <= deadline)
+
+require : CanAssert m => Text -> Bool -> m ()
+require msg condition = assertMsg msg condition
+
+

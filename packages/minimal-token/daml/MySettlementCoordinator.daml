@@ -1,0 +1,41 @@
+module MySettlementCoordinator where
+
+import Splice.Api.Token.AllocationV1 as A
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.MetadataV1 as MD
+
+-- | Minimal coordinator to execute multiple Allocation legs atomically.
+-- NOTE: In production, ExtraArgs.context and disclosed contracts should be
+-- assembled via a registry helper per leg; this template focuses on orchestration.
+template MySettlementCoordinator
+  with
+    executor : Party
+    settlementRef : Text
+    legs : [ContractId A.Allocation]
+  where
+    signatory executor
+
+    -- | Add a funded leg. All legs must share the same settlementRef externally.
+    nonconsuming choice AddLeg : ContractId MySettlementCoordinator
+      with
+        leg : ContractId A.Allocation
+      controller executor
+      do
+        create this with legs = leg :: legs
+
+    -- | Execute all legs atomically.
+    -- Controllers: executor + union of senders and receivers from all legs.
+    -- For simplicity, we require executor only here; scripts should use submitMulti with all controllers.
+    nonconsuming choice ExecuteAll : ([ContractId H.Holding], [ContractId H.Holding])
+      with
+        extraActors : [Party]
+        extraArgs : MD.ExtraArgs
+      controller executor, extraActors
+      do
+        -- Execute each leg once and aggregate outputs
+        results <- forA legs $ \legCid -> exercise legCid A.Allocation_ExecuteTransfer with extraArgs
+        let senderChanges = concatMap (.senderHoldingCids) results
+        let receiverAdds  = concatMap (.receiverHoldingCids) results
+        pure (senderChanges, receiverAdds)
+
+

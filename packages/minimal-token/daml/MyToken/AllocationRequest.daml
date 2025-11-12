@@ -1,0 +1,49 @@
+module MyToken.AllocationRequest where
+
+import Splice.Api.Token.AllocationInstructionV1 as AI
+import Splice.Api.Token.AllocationV1 as A
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1 as H
+import MyAllocationFactory
+
+template AllocationRequest
+  with
+    allocationFactoryCid: ContractId MyAllocationFactory
+    -- ^ The factory that can create allocations
+    expectedAdmin: Party
+    -- ^ The expected admin party of the factory
+    allocation: A.AllocationSpecification
+    -- ^ The allocation specification
+    requestedAt: Time
+    -- ^ The time at which the allocation was requested
+    inputHoldingCids: [ContractId H.Holding]
+    -- ^ The holdings to use for the allocation
+    extraArgs: MD.ExtraArgs
+    -- ^ Additional arguments for the factory operation
+  where
+    signatory allocation.transferLeg.sender
+    observer expectedAdmin
+
+    choice Accept : AI.AllocationInstructionResult
+      -- ^ Accept the request and create the allocation.
+      controller expectedAdmin
+      do
+        exercise (toInterfaceContractId @AI.AllocationFactory allocationFactoryCid) AI.AllocationFactory_Allocate with
+          expectedAdmin
+          allocation
+          requestedAt
+          inputHoldingCids
+          extraArgs
+
+    choice Decline : ()
+      -- ^ Decline the request.
+      controller expectedAdmin
+      do
+        pure ()
+
+    choice Withdraw : ()
+      -- ^ Withdraw the request.
+      controller allocation.transferLeg.sender
+      do
+        pure ()
+

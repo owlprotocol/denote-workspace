@@ -1,0 +1,108 @@
+module MyToken.TwoStepTransfer where
+
+import DA.TextMap as TextMap
+import Splice.Api.Token.MetadataV1
+import Splice.Api.Token.HoldingV1 
+import MyToken
+import MyTokenRules
+
+-- Minimal structure that your TransferInstruction/Allocation will delegate to.
+-- In a real implementation, these helpers would:
+--  1) assert deadlines,
+--  2) unlock the LockedMyToken,
+--  3) transfer/mint/burn as per rules,
+--  4) return (senderChanges, receiverAdds, txMeta).
+
+data TwoStepTransfer = TwoStepTransfer
+  with
+    issuer : Party
+    sender : Party
+    receiver : Party
+    amount : Decimal
+    executeBefore : Time
+  deriving (Eq, Show)
+
+-- Check deadline hasn't passed. See: DA.Time.assertWithinDeadline
+assertWithinDeadline : Text -> Time -> Update ()
+assertWithinDeadline name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has passed") (now <= deadline)
+
+executeTwoStepTransfer
+  : TwoStepTransfer
+  -> ContractId LockedMyToken
+  -> ExtraArgs
+  -> Update ([ContractId Holding], [ContractId Holding], Metadata)
+executeTwoStepTransfer TwoStepTransfer{..} lockedMyTokenCid extraArgs = do
+  -- 1. Check deadline hasn't passed
+  assertWithinDeadline "executeBefore" executeBefore
+  
+  -- 2. Fetch the locked token
+  locked <- fetch lockedMyTokenCid
+  
+  -- 3. Validate amount matches locked amount
+  assertMsg "Transfer amount must match locked amount" (locked.amount == amount)
+  assertMsg "Sender must be owner" (locked.owner == sender)
+  
+  -- 4. Unlock the token (must be exercised by holders, controller is holders)
+  -- Note: In a real impl, we'd check dso is in holders and use that to unlock
+  unlockedCid : ContractId MyToken <- exercise lockedMyTokenCid Unlock
+  
+  -- 5. Archive the unlocked token (consume sender's token)
+  -- Note: This requires both issuer and owner (sender) signatures
+  archive unlockedCid
+  
+  -- 6. Create new token for receiver
+  -- Note: This requires both issuer and receiver to sign (MyToken has signatory issuer, owner)
+  -- In a real implementation, you'd use a factory or different authority model
+  receiverTokenCid : ContractId MyToken <- create MyToken with
+    issuer = locked.issuer
+    owner = receiver
+    instrumentId = locked.instrumentId
+    amount = amount
+  
+  -- Convert to Holding interface (MyToken implements Api.Token.HoldingV1.Holding)
+  let receiverCid : ContractId Holding = toInterfaceContractId @Holding receiverTokenCid
+  
+  -- 7. Return results: no sender change (we consumed it), receiver gets new token
+  let emptyMeta = Metadata with values = TextMap.empty
+  pure ([], [receiverCid], emptyMeta)
+
+-- Prepare (lock) step using MyTokenRules to create a LockedMyToken for a future transfer.
+prepareTwoStepTransfer
+  : TwoStepTransfer
+  -> Time
+  -> [ContractId Holding]
+  -> ContractId MyTokenRules
+  -> Update (ContractId LockedMyToken, [ContractId Holding], Metadata)
+prepareTwoStepTransfer TwoStepTransfer{..} requestedAt inputHoldingCids rulesCid = do
+  -- requestedAt < executeBefore
+  assertMsg "requestedAt must be < executeBefore" (requestedAt < executeBefore)
+  -- For minimal impl require exactly 1 input
+  case inputHoldingCids of
+    [inputCid] -> do
+      -- Lock via rules (issuer + sender sign)
+      (lockedCid, meta) <- exercise rulesCid MyTokenRules_LockForTransfer with
+        sender = sender
+        inputHoldingCid = inputCid
+        desiredAmount = amount
+        transferBefore = executeBefore
+        contextText = "transfer to " <> show receiver
+      pure (lockedCid, [], meta)
+    _ -> fail "prepareTwoStepTransfer: exactly one input holding required"
+
+abortTwoStepTransfer
+  : TwoStepTransfer
+  -> ContractId LockedMyToken
+  -> ExtraArgs
+  -> Update [ContractId Holding]
+abortTwoStepTransfer TwoStepTransfer{..} lockedMyTokenCid extraArgs = do
+  -- On abort, unlock the token back to sender (no transfer happens)
+  locked <- fetch lockedMyTokenCid
+  assertMsg "Sender must be owner" (locked.owner == sender)
+  
+  -- Unlock returns token to sender
+  unlockedTokenCid : ContractId MyToken <- exercise lockedMyTokenCid Unlock
+  -- Convert to Holding interface
+  let unlockedCid : ContractId Holding = toInterfaceContractId @Holding unlockedTokenCid
+  pure [unlockedCid]

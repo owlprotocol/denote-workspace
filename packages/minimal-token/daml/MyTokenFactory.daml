@@ -1,0 +1,43 @@
+module MyTokenFactory where
+
+import MyToken
+import Splice.Api.Token.MetadataV1 as MD
+
+-- | A factory for minting MyToken tokens.
+-- Allows issuer-controlled minting where both issuer and receiver sign during mint.
+-- This enables TransferFactory to mint and lock tokens atomically.
+-- Pattern matches Splice AmuletRules_Mint choice behavior.
+template MyTokenFactory
+  with
+    issuer : Party
+    instrumentId : Text -- e.g., show issuer <> "#MyToken"
+  where
+    signatory issuer
+
+    -- | Mint tokens to a receiver.
+    -- Requires both issuer and receiver to sign (controller issuer, receiver)
+    -- This allows issuer to initiate mints while ensuring receiver authorization.
+    nonconsuming choice Mint : MintResult
+      with
+        receiver : Party
+        amount : Decimal
+      controller issuer, receiver
+      do
+        assertMsg "Amount must be positive" (amount > 0.0)
+        
+        tokenCid <- create MyToken with
+          issuer
+          owner = receiver
+          instrumentId = instrumentId
+          amount = amount
+
+        pure MintResult with
+          tokenCid
+          meta = MD.emptyMetadata
+
+-- | Result of minting tokens
+data MintResult = MintResult with
+    tokenCid : ContractId MyToken
+    meta : MD.Metadata
+  deriving (Show, Eq)
+

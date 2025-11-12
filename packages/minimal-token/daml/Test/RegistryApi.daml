@@ -1,0 +1,23 @@
+module Test.RegistryApi where
+
+import Daml.Script
+import Splice.Api.Token.TransferInstructionV1 as TI
+import MyTokenTransferInstruction
+import MyToken
+
+-- | Get disclosure for LockedMyToken from a transfer instruction
+-- The issuer/registry party has visibility to the LockedMyToken contract
+-- Inspired by https://github.com/hyperledger-labs/splice/blob/80796b3491f2aedc782cdd78460282a6b7efa49c/token-standard/splice-token-standard-test/daml/Splice/Testing/Registries/AmuletRegistry.daml#L212-L219
+getTransferInstructionDisclosure
+  : Party  -- issuer/registry party who can see the LockedMyToken
+  -> ContractId TI.TransferInstruction
+  -> Script Disclosure
+getTransferInstructionDisclosure issuer instrCid = do
+  -- Query the transfer instruction to get the locked token CID
+  Some instr <- queryContractId @MyTransferInstruction issuer (coerceContractId instrCid)
+  -- Get disclosure for LockedMyToken from issuer (who has visibility)
+  optDisc <- queryDisclosure @LockedMyToken issuer instr.lockedMyToken
+  case optDisc of
+    None -> fail $ "Disclosure not found for LockedMyToken: " <> show instr.lockedMyToken
+    Some d -> pure d
+

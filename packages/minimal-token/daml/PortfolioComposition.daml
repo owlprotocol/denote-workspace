@@ -1,0 +1,18 @@
+module PortfolioComposition where
+
+data PortfolioItem = PortfolioItem
+  with
+    instrumentId: Text
+    weight: Decimal
+  deriving (Eq, Show)
+
+-- | PortfolioComposition defines a named collection of assets and weights
+template PortfolioComposition
+  with
+    owner : Party
+    name : Text
+    items : [PortfolioItem]
+  where
+    signatory owner
+
+

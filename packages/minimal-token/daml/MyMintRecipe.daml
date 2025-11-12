@@ -1,0 +1,83 @@
+module MyMintRecipe where
+
+import MyToken
+import MyTokenFactory
+import PortfolioComposition
+
+-- | MyMintRecipe defines how to mint MyToken tokens based on a portfolio composition.
+-- It allows an issuer to authorize multiple parties to mint tokens according to the defined composition.
+-- This composition can be updated over time by the issuer.
+template MyMintRecipe
+  with 
+    issuer : Party
+    instrumentId : Text
+    tokenFactory : ContractId MyTokenFactory
+    authorizedMinters: [Party]
+    composition: ContractId PortfolioComposition 
+  where
+    signatory issuer
+    observer authorizedMinters
+
+    -- | Mint MyToken tokens to a receiver according to the composition
+    -- Requires the receiver to be an authorized minter and to have the underlying assets.
+    nonconsuming choice MyMintRecipe_Mint : ContractId MyToken
+      with
+        receiver : Party
+        amount: Decimal -- number of tokens to mint
+      controller receiver
+      
+      do
+        assertMsg "Receiver is not an authorized minter" (receiver `elem` authorizedMinters)
+        -- TODO:check that the user has the underlying assets and lock them up
+        -- In pracice, we might need to create a ProposeMint that the issuer can approve, and lock the underlying assets first
+
+        create MyToken with
+          issuer = issuer
+          owner = receiver
+          instrumentId = instrumentId
+          amount = amount
+
+    -- | Create the new portfolio composition used for minting and optionally archive the old one
+    nonconsuming choice MyMintRecipe_CreateAndUpdateComposition : ContractId MyMintRecipe
+      with
+        newCompositionItems : [PortfolioItem]
+        compositionName : Text
+        archiveOld : Bool
+      controller issuer
+      do
+        newCompositionCid <- create PortfolioComposition with
+          owner = issuer
+          name = compositionName
+          items = newCompositionItems
+
+        if archiveOld then (archive this.composition) else pure ()
+
+        create this with composition = newCompositionCid
+
+    -- | Update the existing portfolio composition used for minting
+    nonconsuming choice MyMintRecipe_UpdateComposition : ContractId MyMintRecipe
+      with
+        newComposition : ContractId PortfolioComposition
+      controller issuer
+      do
+        create this with composition = newComposition
+
+    -- | Add a new authorized minter
+    nonconsuming choice MyMintRecipe_AddAuthorizedMinter : ContractId MyMintRecipe
+      with
+        newMinter : Party
+      controller issuer
+      do
+        assertMsg "Minter already authorized" (newMinter `notElem` authorizedMinters)
+        let updatedMinters = newMinter :: authorizedMinters
+        create this with authorizedMinters = updatedMinters
+
+    -- | Remove an authorized minter
+    nonconsuming choice MyMintRecipe_RemoveAuthorizedMinter : ContractId MyMintRecipe
+      with
+        minterToRemove : Party
+      controller issuer
+      do
+        assertMsg "Minter not found" (minterToRemove `elem` authorizedMinters)
+        let updatedMinters = filter (/= minterToRemove) authorizedMinters
+        create this with authorizedMinters = updatedMinters

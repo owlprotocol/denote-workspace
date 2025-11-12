@@ -1,0 +1,72 @@
+module MyTokenTransferInstruction where
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import MyToken
+import MyToken.TwoStepTransfer as TST
+
+template MyTransferInstruction
+  with
+    lockedMyToken : ContractId LockedMyToken
+    transfer      : TI.Transfer
+  where
+    signatory transfer.instrumentId.admin, transfer.sender
+    observer  transfer.receiver
+
+    interface instance TI.TransferInstruction for MyTransferInstruction where
+      view = TI.TransferInstructionView with
+        originalInstructionCid = None
+        transfer = transfer
+        status   = TI.TransferPendingReceiverAcceptance
+        meta     = MD.emptyMetadata
+
+      -- Accept => unlock + transfer (atomic), return receiver holdings & sender change
+      transferInstruction_acceptImpl _self arg =
+        executeTransferInstr this arg.extraArgs
+
+      -- Reject => abort; returns sender change (unlocks the token)
+      transferInstruction_rejectImpl _self arg =
+        abortMyTokenTransferInstruction this arg.extraArgs
+
+      -- Update flow (not used by minimal implementation)
+      transferInstruction_updateImpl _self _arg =
+        fail "MyTransferInstruction.updateImpl: not implemented"
+
+      -- Withdraw => same as reject for proposer-initiated cancel
+      transferInstruction_withdrawImpl _self arg =
+        abortMyTokenTransferInstruction this arg.extraArgs
+
+
+-- | Map the standard Transfer (TI.Transfer) into our TwoStepTransfer type.
+-- Matches the pattern from AmuletTransferInstruction.
+standardTransferToTwoStepTransfer : TI.Transfer -> TST.TwoStepTransfer
+standardTransferToTwoStepTransfer tr =
+  TST.TwoStepTransfer with
+    issuer  = tr.instrumentId.admin
+    sender = tr.sender
+    receiver = tr.receiver
+    amount = tr.amount
+    executeBefore = tr.executeBefore
+
+
+-- | Accept path: delegates to two-step helper (deadline check, unlock, transfer).
+executeTransferInstr : MyTransferInstruction -> MD.ExtraArgs -> Update TI.TransferInstructionResult
+executeTransferInstr instr extraArgs = do
+  let twoStepTransfer = standardTransferToTwoStepTransfer instr.transfer
+  (senderChangeCids, receiverHoldingCids, meta) <-
+    TST.executeTwoStepTransfer twoStepTransfer instr.lockedMyToken extraArgs
+  pure TI.TransferInstructionResult with
+    senderChangeCids
+    output = TI.TransferInstructionResult_Completed with receiverHoldingCids
+    meta
+
+
+-- | Reject/Withdraw path: delegates to abort (unlocks token back to sender).
+abortMyTokenTransferInstruction : MyTransferInstruction -> MD.ExtraArgs -> Update TI.TransferInstructionResult
+abortMyTokenTransferInstruction instr extraArgs = do
+  let twoStepTransfer = standardTransferToTwoStepTransfer instr.transfer
+  senderChangeCids <- TST.abortTwoStepTransfer twoStepTransfer instr.lockedMyToken extraArgs
+  pure TI.TransferInstructionResult with
+    senderChangeCids
+    output = TI.TransferInstructionResult_Failed
+    meta   = MD.emptyMetadata

@@ -1,0 +1,97 @@
+module MyToken where
+
+import DA.TextMap as TextMap
+
+import Splice.Api.Token.HoldingV1 qualified as Api.Token.HoldingV1
+import Splice.Api.Token.MetadataV1 qualified as Api.Token.MetadataV1
+
+-- Placeholder token instrument that will implement CIP-0056 holdings view.
+data MyTokenKey = MyTokenKey
+  with
+    issuer : Party
+    owner  : Party
+    instrumentId : Text
+  deriving (Eq, Show)
+
+template MyToken
+  with
+    issuer : Party
+    owner  : Party
+    instrumentId : Text -- e.g., issuer <> "#MyToken"
+    amount : Decimal
+  where
+    signatory issuer, owner
+
+    interface instance Api.Token.HoldingV1.Holding for MyToken where
+      view = Api.Token.HoldingV1.HoldingView with
+        instrumentId = Api.Token.HoldingV1.InstrumentId with admin = issuer, id = instrumentId
+        owner = owner
+        amount = amount
+        lock = None
+        meta = myTokenMetadata this
+
+    choice Lock : ContractId LockedMyToken
+      with
+        holders    : [Party]
+        expiresAt  : Time
+        lockContext: Optional Text
+      controller owner
+      do
+        create LockedMyToken with
+          issuer
+          owner
+          instrumentId
+          amount
+          holders
+          expiresAt
+          lockContext
+
+myTokenMetadata : MyToken -> Api.Token.MetadataV1.Metadata
+myTokenMetadata MyToken{..} =
+  Api.Token.MetadataV1.Metadata with
+    -- Empty for placeholder
+    values = TextMap.fromList [ ]
+
+
+template LockedMyToken
+  with
+    issuer : Party
+    owner  : Party
+    instrumentId : Text
+    amount : Decimal
+    holders : [Party]
+    expiresAt : Time
+    lockContext : Optional Text
+  where
+    signatory issuer, owner
+    observer holders
+
+    interface instance Api.Token.HoldingV1.Holding for LockedMyToken where
+      view = Api.Token.HoldingV1.HoldingView with
+        instrumentId = Api.Token.HoldingV1.InstrumentId with admin = issuer, id = instrumentId
+        owner = owner
+        amount = amount
+        -- Must expose lock details when token is locked (matches Amulet reference impl).
+        -- See: https://github.com/global-synchronizer-foundation/cips/blob/main/cip-0056/cip-0056.md
+        lock = Some (Api.Token.HoldingV1.Lock with
+          holders = holders
+          expiresAt = Some expiresAt
+          expiresAfter = None
+          context = lockContext)
+        meta = lockedMyTokenMetadata this
+
+    choice Unlock : ContractId MyToken
+      controller holders
+      do
+        create MyToken with issuer, owner, instrumentId, amount
+
+    choice OwnerExpireLock : ()
+      controller owner
+      do
+        -- TODO: add deadline check
+        return ()
+
+lockedMyTokenMetadata : LockedMyToken -> Api.Token.MetadataV1.Metadata
+lockedMyTokenMetadata LockedMyToken{..} =
+  Api.Token.MetadataV1.Metadata with
+    values = TextMap.fromList []

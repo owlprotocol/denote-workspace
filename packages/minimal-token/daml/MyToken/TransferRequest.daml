@@ -1,0 +1,41 @@
+module MyToken.TransferRequest where
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import MyTransferFactory
+
+template TransferRequest
+  with
+    transferFactoryCid: ContractId MyTransferFactory
+    -- ^ The factory that can create transfer instructions
+    expectedAdmin: Party
+    -- ^ The expected admin party of the factory
+    transfer: TI.Transfer
+    -- ^ The transfer specification
+    extraArgs: MD.ExtraArgs
+    -- ^ Additional arguments for the factory operation
+  where
+    signatory transfer.sender
+    observer expectedAdmin
+
+    choice Accept : TI.TransferInstructionResult
+      -- ^ Accept the request and create the transfer instruction.
+      controller expectedAdmin
+      do
+        exercise (toInterfaceContractId @TI.TransferFactory transferFactoryCid) TI.TransferFactory_Transfer with
+          expectedAdmin
+          transfer
+          extraArgs
+
+    choice Decline : ()
+      -- ^ Decline the request.
+      controller expectedAdmin
+      do
+        pure ()
+
+    choice Withdraw : ()
+      -- ^ Withdraw the request.
+      controller transfer.sender
+      do
+        pure ()
+

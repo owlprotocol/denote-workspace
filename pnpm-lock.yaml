@@ -19,13 +19,21 @@ importers:
         version: 16.4.7
       dotenv-vault:
         specifier: 1.26.2
+<<<<<<< HEAD
         version: 1.26.2(@types/node@22.13.10)(typescript@5.8.2)
+=======
+        version: 1.26.2(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
       syncpack:
         specifier: ^13.0.3
+<<<<<<< HEAD
         version: 13.0.3(typescript@5.8.2)
+=======
+        version: 13.0.3(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       turbo:
         specifier: ^2.4.4
         version: 2.4.4
@@ -56,7 +64,11 @@ importers:
         version: 9.22.0
       '@stylistic/eslint-plugin':
         specifier: ^4.2.0
+<<<<<<< HEAD
         version: 4.2.0(eslint@9.22.0)(typescript@5.8.2)
+=======
+        version: 4.2.0(eslint@9.22.0)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       eslint:
         specifier: ^9.22.0
         version: 9.22.0
@@ -65,7 +77,11 @@ importers:
         version: 16.0.0
       typescript-eslint:
         specifier: ^8.26.1
+<<<<<<< HEAD
         version: 8.26.1(eslint@9.22.0)(typescript@5.8.2)
+=======
+        version: 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     devDependencies:
       depcheck:
         specifier: ^1.4.7
@@ -77,6 +93,11 @@ importers:
         specifier: ^1.4.7
         version: 1.4.7
 
+<<<<<<< HEAD
+=======
+  packages/minimal-token: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   packages/starter-typescript:
     devDependencies:
       '@types/node':
@@ -87,6 +108,7 @@ importers:
         version: 0.10.1
       '@veraswap/esbuild-config':
         specifier: latest
+<<<<<<< HEAD
         version: link:../../configs/esbuild-config
       '@veraswap/eslint-config':
         specifier: latest
@@ -94,6 +116,15 @@ importers:
       '@veraswap/tsconfig':
         specifier: latest
         version: link:../../configs/tsconfig
+=======
+        version: 0.1.2(@esbuild-plugins/node-resolve@0.2.2(esbuild@0.25.1))(esbuild@0.25.1)(glob@11.0.1)
+      '@veraswap/eslint-config':
+        specifier: latest
+        version: 0.1.4(@eslint/js@9.22.0)(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint-plugin-prettier@5.5.4(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint@9.22.0)(prettier@2.8.8))(eslint@9.22.0)(globals@16.0.0)(prettier@2.8.8)(typescript-eslint@8.26.1(eslint@9.22.0)(typescript@5.8.2))
+      '@veraswap/tsconfig':
+        specifier: latest
+        version: 0.1.1
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       depcheck:
         specifier: ^1.4.7
         version: 1.4.7
@@ -111,10 +142,124 @@ importers:
         version: 5.8.2
       vite:
         specifier: ^6.2.2
+<<<<<<< HEAD
         version: 6.2.2(@types/node@22.13.10)(yaml@2.7.0)
       vitest:
         specifier: ^3.0.8
         version: 3.0.9(@types/node@22.13.10)(yaml@2.7.0)
+=======
+        version: 6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+
+  packages/token-frontend:
+    dependencies:
+      '@canton-network/wallet-sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
+      openapi-fetch:
+        specifier: ^0.15.0
+        version: 0.15.0
+      pino:
+        specifier: ^10.1.0
+        version: 10.1.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.13.10
+      '@typescript/analyze-trace':
+        specifier: ^0.10.1
+        version: 0.10.1
+      '@veraswap/esbuild-config':
+        specifier: latest
+        version: 0.1.2(@esbuild-plugins/node-resolve@0.2.2(esbuild@0.25.1))(esbuild@0.25.1)(glob@11.0.1)
+      '@veraswap/eslint-config':
+        specifier: latest
+        version: 0.1.4(@eslint/js@9.22.0)(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint-plugin-prettier@5.5.4(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint@9.22.0)(prettier@2.8.8))(eslint@9.22.0)(globals@16.0.0)(prettier@2.8.8)(typescript-eslint@8.26.1(eslint@9.22.0)(typescript@5.8.2))
+      '@veraswap/tsconfig':
+        specifier: latest
+        version: 0.1.1
+      depcheck:
+        specifier: ^1.4.7
+        version: 1.4.7
+      madge:
+        specifier: ^8.0.0
+        version: 8.0.0(typescript@5.8.2)
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      openapi-typescript:
+        specifier: ^7.10.1
+        version: 7.10.1(typescript@5.8.2)
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      typescript:
+        specifier: 5.8.2
+        version: 5.8.2
+      vite:
+        specifier: ^6.2.2
+        version: 6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+
+  scripts:
+    dependencies:
+      '@commander-js/extra-typings':
+        specifier: ^14.0.0
+        version: 14.0.0(commander@14.0.2)
+      '@inquirer/prompts':
+        specifier: ^7.9.0
+        version: 7.10.0(@types/node@24.10.1)
+      commander:
+        specifier: ^14.0.1
+        version: 14.0.2
+      jsonc-parser:
+        specifier: ^3.3.1
+        version: 3.3.1
+      pm2:
+        specifier: ^6.0.8
+        version: 6.0.13
+      yoctocolors:
+        specifier: ^2.1.1
+        version: 2.1.2
+    devDependencies:
+      '@open-rpc/meta-schema':
+        specifier: ^1.14.9
+        version: 1.14.9
+      '@types/node':
+        specifier: ^24.0.4
+        version: 24.10.1
+      '@types/tar-fs':
+        specifier: ^2.0.4
+        version: 2.0.4
+      axios:
+        specifier: ^1.12.0
+        version: 1.13.2
+      colors:
+        specifier: ^1.4.0
+        version: 1.4.0
+      diff:
+        specifier: ^8.0.2
+        version: 8.0.2
+      openapi-typescript:
+        specifier: ^6.0.0
+        version: 6.7.6
+      tar-fs:
+        specifier: ^3.1.1
+        version: 3.1.1
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.6
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
 packages:
 
@@ -155,6 +300,39 @@ packages:
     resolution: {integrity: sha512-emqcG3vHrpxUKTrxcblR36dcrcoRDvKmnL/dCL6ZsHaShW80qxCAcNhzQZrpeM765VzEos+xOi4s+r4IXzTwdQ==}
     engines: {node: '>=6.9.0'}
 
+<<<<<<< HEAD
+=======
+  '@canton-network/core-ledger-client@0.17.0':
+    resolution: {integrity: sha512-dAoOIwEXAC3aaX5VTjBNt0v5/hpBrXCzb0kuGCPWD5djK4aQBHIVCaZQA/b+JEvnOjqU6KNzl4fl1sbR9ntMcA==}
+
+  '@canton-network/core-ledger-proto@0.11.0':
+    resolution: {integrity: sha512-B1e27w3MY4yBcCYjLzHaj/+EVB2zAigY6xAyk94geyp3LOWiy8CUGYrW2c+v73I/N4B7VdzyowBzw+bCN9rOpA==}
+
+  '@canton-network/core-rpc-errors@0.7.0':
+    resolution: {integrity: sha512-rQvX0Zt2rQoxasxULjna3q9VSILF1NlyefwAHb6gUuETz3bqSuw1Z+o9MJh2CL9c9/kNtsdAFKqAxCUNyt7tUw==}
+
+  '@canton-network/core-signing-lib@0.12.0':
+    resolution: {integrity: sha512-mpKh3T2NzGu9ZQuLsP8lESy+JQUFfapFYTmiIyR+3eO+raIE49FK48lunjPP+o3wRbbZZCnZAxvDz0VQPRO77Q==}
+
+  '@canton-network/core-splice-client@0.13.0':
+    resolution: {integrity: sha512-y3rcZFVRCoGdP+zCg4jEeLcdGG7imlL4hJkKiPNuH1rJvE8YQdDW9k0VuVhmwMVwRoR3dPLH60g2qgPSppNz5Q==}
+
+  '@canton-network/core-token-standard@0.11.0':
+    resolution: {integrity: sha512-cIcS28J0yxNy9Qf/vXrrTBDL3MuZkZjFV3qPpCnJwRaq+bU4CEYGRPubIjzI85/oRsWu/5kwoUFByDRPIAMf8w==}
+
+  '@canton-network/core-tx-visualizer@0.11.0':
+    resolution: {integrity: sha512-7lVHQ62gMGx6ezmXff7l5eKzFSzAHDFYHrbxzjiMv2YVmQGMOWs6LpZMO1Ju5+/bQ/4q0hT4xvGE447O8cmscw==}
+
+  '@canton-network/core-types@0.10.0':
+    resolution: {integrity: sha512-CLf8VakEsSduzcQVwYTIxuX8h6qnkhVTQ3MDNd2RABp2FwT+MNEyXD4b9Va2HNKS5Va2buiraAXUuVnIpWeFaQ==}
+
+  '@canton-network/core-wallet-auth@0.11.0':
+    resolution: {integrity: sha512-KX356ZL8JfJK7qwhuW+eban1iLw1Q6zBKThvnEHurZOSkEKSKM/hbScTKgyR5lFAOSsoyCYUdQ1cz73CzaZvrw==}
+
+  '@canton-network/wallet-sdk@0.16.0':
+    resolution: {integrity: sha512-7vrGdaxFh7uirPigMX877wMxJuR3oyp/rOFcCfCaey910rYM7moWln3uNPTbp8XFTX6bcOjqs2pFnLaSakxb7g==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@changesets/apply-release-plan@7.0.10':
     resolution: {integrity: sha512-wNyeIJ3yDsVspYvHnEz1xQDq18D9ifed3lI+wxRQRK4pArUcuHgCTrHv0QRnnwjhVCQACxZ+CBih3wgOct6UXw==}
 
@@ -210,6 +388,14 @@ packages:
   '@changesets/write@0.4.0':
     resolution: {integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==}
 
+<<<<<<< HEAD
+=======
+  '@commander-js/extra-typings@14.0.0':
+    resolution: {integrity: sha512-hIn0ncNaJRLkZrxBIp5AsW/eXEHNKYQBh0aPdoUqNgD+Io3NIykQqpKFyKcuasZhicGaEZJX/JBSIkZ4e5x8Dg==}
+    peerDependencies:
+      commander: ~14.0.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
@@ -417,6 +603,38 @@ packages:
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+<<<<<<< HEAD
+=======
+  '@ethereumjs/common@3.2.0':
+    resolution: {integrity: sha512-pksvzI0VyLgmuEF2FA/JR/4/y6hcPq8OUail3/AvycBaW1d5VSauOZzqGvJ3RTmR4MU35lWE8KseKOsEhrFRBA==}
+
+  '@ethereumjs/rlp@4.0.1':
+    resolution: {integrity: sha512-tqsQiBQDQdmPWE1xkkBq4rlSW5QZpLOUJ5RJh2/9fug+q9tnUhuZoVLk7s0scUIKTOzEtR72DFBXI4WiZcMpvw==}
+    engines: {node: '>=14'}
+    hasBin: true
+
+  '@ethereumjs/tx@4.2.0':
+    resolution: {integrity: sha512-1nc6VO4jtFd172BbSnTnDQVr9IYBFl1y4xPzZdtkrkKIncBCkdbgfdRV+MiTkJYAtTxvV12GRZLqBFT1PNK6Yw==}
+    engines: {node: '>=14'}
+
+  '@ethereumjs/util@8.1.0':
+    resolution: {integrity: sha512-zQ0IqbdX8FZ9aw11vP+dZkKDkS+kgIvQPHnSAXzP9pLu+Rfu3D3XEeLbicvoXJTYnhZiPmsZUxgdzXwNKxRPbA==}
+    engines: {node: '>=14'}
+
+  '@fastify/busboy@2.1.1':
+    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
+    engines: {node: '>=14'}
+
+  '@grpc/grpc-js@1.14.1':
+    resolution: {integrity: sha512-sPxgEWtPUR3EnRJCEtbGZG2iX8LQDUls2wUS3o27jg07KqJFMq6YDeWvMo1wfpmy3rqRdS0rivpLwhqQtEyCuQ==}
+    engines: {node: '>=12.10.0'}
+
+  '@grpc/proto-loader@0.8.0':
+    resolution: {integrity: sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ==}
+    engines: {node: '>=6'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -437,6 +655,143 @@ packages:
     resolution: {integrity: sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==}
     engines: {node: '>=18.18'}
 
+<<<<<<< HEAD
+=======
+  '@inquirer/ansi@1.0.2':
+    resolution: {integrity: sha512-S8qNSZiYzFd0wAcyG5AXCvUHC5Sr7xpZ9wZ2py9XR88jUz8wooStVx5M6dRzczbBWjic9NP7+rY0Xi7qqK/aMQ==}
+    engines: {node: '>=18'}
+
+  '@inquirer/checkbox@4.3.1':
+    resolution: {integrity: sha512-rOcLotrptYIy59SGQhKlU0xBg1vvcVl2FdPIEclUvKHh0wo12OfGkId/01PIMJ/V+EimJ77t085YabgnQHBa5A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/confirm@5.1.20':
+    resolution: {integrity: sha512-HDGiWh2tyRZa0M1ZnEIUCQro25gW/mN8ODByicQrbR1yHx4hT+IOpozCMi5TgBtUdklLwRI2mv14eNpftDluEw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/core@10.3.1':
+    resolution: {integrity: sha512-hzGKIkfomGFPgxKmnKEKeA+uCYBqC+TKtRx5LgyHRCrF6S2MliwRIjp3sUaWwVzMp7ZXVs8elB0Tfe682Rpg4w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/editor@4.2.22':
+    resolution: {integrity: sha512-8yYZ9TCbBKoBkzHtVNMF6PV1RJEUvMlhvmS3GxH4UvXMEHlS45jFyqFy0DU+K42jBs5slOaA78xGqqqWAx3u6A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/expand@4.0.22':
+    resolution: {integrity: sha512-9XOjCjvioLjwlq4S4yXzhvBmAXj5tG+jvva0uqedEsQ9VD8kZ+YT7ap23i0bIXOtow+di4+u3i6u26nDqEfY4Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/external-editor@1.0.3':
+    resolution: {integrity: sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/figures@1.0.15':
+    resolution: {integrity: sha512-t2IEY+unGHOzAaVM5Xx6DEWKeXlDDcNPeDyUpsRc6CUhBfU3VQOEl+Vssh7VNp1dR8MdUJBWhuObjXCsVpjN5g==}
+    engines: {node: '>=18'}
+
+  '@inquirer/input@4.3.0':
+    resolution: {integrity: sha512-h4fgse5zeGsBSW3cRQqu9a99OXRdRsNCvHoBqVmz40cjYjYFzcfwD0KA96BHIPlT7rZw0IpiefQIqXrjbzjS4Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/number@3.0.22':
+    resolution: {integrity: sha512-oAdMJXz++fX58HsIEYmvuf5EdE8CfBHHXjoi9cTcQzgFoHGZE+8+Y3P38MlaRMeBvAVnkWtAxMUF6urL2zYsbg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/password@4.0.22':
+    resolution: {integrity: sha512-CbdqK1ioIr0Y3akx03k/+Twf+KSlHjn05hBL+rmubMll7PsDTGH0R4vfFkr+XrkB0FOHrjIwVP9crt49dgt+1g==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/prompts@7.10.0':
+    resolution: {integrity: sha512-X2HAjY9BClfFkJ2RP3iIiFxlct5JJVdaYYXhA7RKxsbc9KL+VbId79PSoUGH/OLS011NFbHHDMDcBKUj3T89+Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/rawlist@4.1.10':
+    resolution: {integrity: sha512-Du4uidsgTMkoH5izgpfyauTL/ItVHOLsVdcY+wGeoGaG56BV+/JfmyoQGniyhegrDzXpfn3D+LFHaxMDRygcAw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/search@3.2.1':
+    resolution: {integrity: sha512-cKiuUvETublmTmaOneEermfG2tI9ABpb7fW/LqzZAnSv4ZaJnbEis05lOkiBuYX5hNdnX0Q9ryOQyrNidb55WA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/select@4.4.1':
+    resolution: {integrity: sha512-E9hbLU4XsNe2SAOSsFrtYtYQDVi1mfbqJrPDvXKnGlnRiApBdWMJz7r3J2Ff38AqULkPUD3XjQMD4492TymD7Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+  '@inquirer/type@3.0.10':
+    resolution: {integrity: sha512-BvziSRxfz5Ov8ch0z/n3oijRSEcEsHnhggm4xFZe93DHcUCTlutlq9Ox4SVENAfcRD22UQq7T/atg9Wr3k09eA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
@@ -462,12 +817,44 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+<<<<<<< HEAD
+=======
+  '@js-sdsl/ordered-map@4.4.2':
+    resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
 
   '@manypkg/get-packages@1.1.3':
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
 
+<<<<<<< HEAD
+=======
+  '@metamask/rpc-errors@7.0.3':
+    resolution: {integrity: sha512-nrEaeBawm8yFU7hetJKok/CUs0tQsWtTqp3OLbFhPUMXYqU7uI5LAV5vi9o7rTjFkUyof7Nzbw5bea5+1ou+dg==}
+    engines: {node: ^18.20 || ^20.17 || >=22}
+
+  '@metamask/superstruct@3.2.1':
+    resolution: {integrity: sha512-fLgJnDOXFmuVlB38rUN5SmU7hAFQcCjrg3Vrxz67KTY7YHFnSNEKvX4avmEBdOI0yTCxZjwMCFEqsC8k2+Wd3g==}
+    engines: {node: '>=16.0.0'}
+
+  '@metamask/utils@11.8.1':
+    resolution: {integrity: sha512-DIbsNUyqWLFgqJlZxi1OOCMYvI23GqFCvNJAtzv8/WXWzJfnJnvp1M24j7VvUe3URBi3S86UgQ7+7aWU9p/cnQ==}
+    engines: {node: ^18.18 || ^20.14 || >=22}
+
+  '@noble/curves@1.4.2':
+    resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
+
+  '@noble/hashes@1.4.0':
+    resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
+    engines: {node: '>= 16'}
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -512,6 +899,89 @@ packages:
     engines: {node: '>=12.0.0'}
     deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
+<<<<<<< HEAD
+=======
+  '@open-rpc/meta-schema@1.14.9':
+    resolution: {integrity: sha512-2/CbDzOVpcaSnMs28TsRv8MKJwJi0TTYFlQ6q6qobAH26oIuhYgcZooKf4l71emgntU6MMcFQCA0h4mJ4dBCdA==}
+
+  '@pinojs/redact@0.4.0':
+    resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
+
+  '@pkgr/core@0.2.9':
+    resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
+    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+
+  '@pm2/agent@2.1.1':
+    resolution: {integrity: sha512-0V9ckHWd/HSC8BgAbZSoq8KXUG81X97nSkAxmhKDhmF8vanyaoc1YXwc2KVkbWz82Rg4gjd2n9qiT3i7bdvGrQ==}
+
+  '@pm2/blessed@0.1.81':
+    resolution: {integrity: sha512-ZcNHqQjMuNRcQ7Z1zJbFIQZO/BDKV3KbiTckWdfbUaYhj7uNmUwb+FbdDWSCkvxNr9dBJQwvV17o6QBkAvgO0g==}
+    engines: {node: '>= 0.8.0'}
+    hasBin: true
+
+  '@pm2/io@6.1.0':
+    resolution: {integrity: sha512-IxHuYURa3+FQ6BKePlgChZkqABUKFYH6Bwbw7V/pWU1pP6iR1sCI26l7P9ThUEB385ruZn/tZS3CXDUF5IA1NQ==}
+    engines: {node: '>=6.0'}
+
+  '@pm2/js-api@0.8.0':
+    resolution: {integrity: sha512-nmWzrA/BQZik3VBz+npRcNIu01kdBhWL0mxKmP1ciF/gTcujPTQqt027N9fc1pK9ERM8RipFhymw7RcmCyOEYA==}
+    engines: {node: '>=4.0'}
+
+  '@pm2/pm2-version-check@1.0.4':
+    resolution: {integrity: sha512-SXsM27SGH3yTWKc2fKR4SYNxsmnvuBQ9dd6QHtEWmiZ/VqaOYPAIlS8+vMcn27YLtAEBGvNRSh3TPNvtjZgfqA==}
+
+  '@protobuf-ts/grpc-transport@2.11.1':
+    resolution: {integrity: sha512-l6wrcFffY+tuNnuyrNCkRM8hDIsAZVLA8Mn7PKdVyYxITosYh60qW663p9kL6TWXYuDCL3oxH8ih3vLKTDyhtg==}
+    peerDependencies:
+      '@grpc/grpc-js': ^1.6.0
+
+  '@protobuf-ts/runtime-rpc@2.11.1':
+    resolution: {integrity: sha512-4CqqUmNA+/uMz00+d3CYKgElXO9VrEbucjnBFEjqI4GuDrEQ32MaI3q+9qPBvIGOlL4PmHXrzM32vBPWRhQKWQ==}
+
+  '@protobuf-ts/runtime@2.11.1':
+    resolution: {integrity: sha512-KuDaT1IfHkugM2pyz+FwiY80ejWrkH1pAtOBOZFuR6SXEFTsnb/jiQWQ1rCIrcKx2BtyxnxW6BWwsVSA/Ie+WQ==}
+
+  '@protobufjs/aspromise@1.1.2':
+    resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
+
+  '@protobufjs/base64@1.1.2':
+    resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==}
+
+  '@protobufjs/codegen@2.0.4':
+    resolution: {integrity: sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==}
+
+  '@protobufjs/eventemitter@1.1.0':
+    resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
+
+  '@protobufjs/fetch@1.1.0':
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
+
+  '@protobufjs/float@1.0.2':
+    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
+
+  '@protobufjs/inquire@1.1.0':
+    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
+
+  '@protobufjs/path@1.1.2':
+    resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}
+
+  '@protobufjs/pool@1.1.0':
+    resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==}
+
+  '@protobufjs/utf8@1.1.0':
+    resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
+
+  '@redocly/ajv@8.17.1':
+    resolution: {integrity: sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==}
+
+  '@redocly/config@0.22.2':
+    resolution: {integrity: sha512-roRDai8/zr2S9YfmzUfNhKjOF0NdcOIqF7bhf4MVC5UxpjIysDjyudvlAiVbpPHp3eDRWbdzUgtkK1a7YiDNyQ==}
+
+  '@redocly/openapi-core@1.34.5':
+    resolution: {integrity: sha512-0EbE8LRbkogtcCXU7liAyC00n9uNG9hJ+eMyHFdUsy9lB/WGqnEBgwjA9q2cyzAVcdTkQqTBBU1XePNnN3OijA==}
+    engines: {node: '>=18.17.0', npm: '>=9.5.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@rollup/rollup-android-arm-eabi@4.35.0':
     resolution: {integrity: sha512-uYQ2WfPaqz5QtVgMxfN6NpLD+no0MYHDBywl7itPYd3K5TjjSghNKmX8ic9S8NU8w81NVhJv/XojcHptRly7qQ==}
     cpu: [arm]
@@ -607,6 +1077,21 @@ packages:
     cpu: [x64]
     os: [win32]
 
+<<<<<<< HEAD
+=======
+  '@scure/base@1.1.9':
+    resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
+
+  '@scure/base@1.2.6':
+    resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
+
+  '@scure/bip32@1.4.0':
+    resolution: {integrity: sha512-sVUpc0Vq3tXCkDGYVWGIZTRfnvu8LoTDaev7vbwh0omSvVORONr960MQWdKqJDCReIEmTj3PAr73O3aoxz7OPg==}
+
+  '@scure/bip39@1.3.0':
+    resolution: {integrity: sha512-disdg7gHuTDZtY+ZdkmLpPCk7fxZSu3gBiEGuoC1XYxv9cGx3Z6cpTggCgW6odSOOIXCiDjuGejW+aJKCY/pIQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@sindresorhus/merge-streams@2.3.0':
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
@@ -620,6 +1105,12 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
+<<<<<<< HEAD
+=======
+  '@tootallnate/quickjs-emscripten@0.23.0':
+    resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@ts-graphviz/adapter@2.0.6':
     resolution: {integrity: sha512-kJ10lIMSWMJkLkkCG5gt927SnGZcBuG0s0HHswGzcHTgvtUe7yk5/3zTEr0bafzsodsOq5Gi6FhQeV775nC35Q==}
     engines: {node: '>=18'}
@@ -651,27 +1142,63 @@ packages:
   '@types/cli-progress@3.11.6':
     resolution: {integrity: sha512-cE3+jb9WRlu+uOSAugewNpITJDt1VF8dHOopPO4IABFc3SXYL5WE/+PTz/FCdZRRfIujiWW3n3aMbv1eIGVRWA==}
 
+<<<<<<< HEAD
+=======
+  '@types/debug@4.1.12':
+    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+<<<<<<< HEAD
   '@types/minimatch@3.0.5':
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
 
+=======
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
+  '@types/minimatch@3.0.5':
+    resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
+
+  '@types/ms@2.1.0':
+    resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
   '@types/node@22.13.10':
     resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
 
+<<<<<<< HEAD
+=======
+  '@types/node@22.19.1':
+    resolution: {integrity: sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ==}
+
+  '@types/node@24.10.1':
+    resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
   '@types/resolve@1.20.6':
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
 
+<<<<<<< HEAD
+=======
+  '@types/tar-fs@2.0.4':
+    resolution: {integrity: sha512-ipPec0CjTmVDWE+QKr9cTmIIoTl7dFG/yARCM5MqK8i6CNLIG1P8x4kwDsOQY1ChZOZjH0wO9nvfgBvWl4R3kA==}
+
+  '@types/tar-stream@3.1.4':
+    resolution: {integrity: sha512-921gW0+g29mCJX0fRvqeHzBlE/XclDaAG0Ousy1LCghsOhvaKacDeRGEVzQP9IPfKn8Vysy7FEXAIxycpc/CMg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/eslint-plugin@8.26.1':
     resolution: {integrity: sha512-2X3mwqsj9Bd3Ciz508ZUtoQQYpOhU/kWoUqIf49H8Z0+Vbh6UF/y0OEYp0Q0axOGzaBGs7QxRwq0knSQ8khQNA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -723,6 +1250,33 @@ packages:
     resolution: {integrity: sha512-RnlSOPh14QbopGCApgkSx5UBgGda5MX1cHqp2fsqfiDyCwGL/m1jaeB9fzu7didVS81LQqGZZuxFBcg8YU8EVw==}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  '@veraswap/esbuild-config@0.1.2':
+    resolution: {integrity: sha512-i/sVxrAF6LF0NaAavbPWzTRVE0LC1ngZhk0w0flAPm3FcikCvNBEv1yARZOFWZKd2TBAVP949XLUvSEHxi7Jfg==}
+    engines: {node: ^18.0.0}
+    peerDependencies:
+      '@esbuild-plugins/node-resolve': ^0.2.2
+      esbuild: ^0.25.1
+      glob: 11.0.1
+
+  '@veraswap/eslint-config@0.1.4':
+    resolution: {integrity: sha512-mSEkvTE+6I+KxkyZH1emU+1olWvch9c1xRo+Uihf/BJfhUShDtbg3DcN0EoxcBggcYfsJq+esbu9i0F9JwsDsw==}
+    engines: {node: ^18.0.0}
+    peerDependencies:
+      '@eslint/js': ^9.22.0
+      eslint: ^9.22.0
+      eslint-config-prettier: ^10.1.1
+      eslint-plugin-prettier: ^5.2.3
+      globals: ^16.0.0
+      prettier: ^3.5.3
+      typescript-eslint: ^8.26.1
+
+  '@veraswap/tsconfig@0.1.1':
+    resolution: {integrity: sha512-F2EZUeTOmZEz7XAWb7Wdur4Gh4Il3sUPrtEAgmFNUOrptiLo6CwAmhCaHzzYH7RVgZyvC7QzqqPRYZE5uIt9fw==}
+    engines: {node: ^18.0.0}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@vitest/expect@3.0.9':
     resolution: {integrity: sha512-5eCqRItYgIML7NNVgJj6TVCmdzE7ZVgJhruW0ziSQV4V7PvLkDL1bBkBdcTs/VuIz0IxPb5da1IDSqc1TR9eig==}
 
@@ -781,9 +1335,25 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+<<<<<<< HEAD
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
+=======
+  agent-base@7.1.4:
+    resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
+    engines: {node: '>= 14'}
+
+  ajv@6.12.6:
+    resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+
+  amp-message@0.1.2:
+    resolution: {integrity: sha512-JqutcFwoU1+jhv7ArgW38bqrE+LQdcRv4NxNw0mp0JHQyB6tXesWRjtYKlDgHRY2o3JE5UTaBGUK8kSWUdxWUg==}
+
+  amp@0.3.1:
+    resolution: {integrity: sha512-OwIuC4yZaRogHKiuU5WlMR5Xk/jAcpPtawWL05Gj8Lvm2F6mwoJt4O/bHI+DHwG79vWd+8OFYM4/BzYqyRd3qw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
     engines: {node: '>=6'}
@@ -815,9 +1385,23 @@ packages:
   ansicolors@0.3.2:
     resolution: {integrity: sha512-QXu7BPrP29VllRxH8GwB7x5iX5qWKAAMLqKQGWTeLWVlNHNOpVMJ91dsxQAIWXpjuW5wqvxu3Jd/nRjrJ+0pqg==}
 
+<<<<<<< HEAD
   any-promise@1.3.0:
     resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
 
+=======
+  ansis@4.0.0-node10:
+    resolution: {integrity: sha512-BRrU0Bo1X9dFGw6KgGz6hWrqQuOlVEDOzkb0QSLZY9sXHqA7pNj7yHPVJRz7y/rj4EOJ3d/D5uxH+ee9leYgsg==}
+    engines: {node: '>=10'}
+
+  any-promise@1.3.0:
+    resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
+
+  anymatch@3.1.3:
+    resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
+    engines: {node: '>= 8'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   app-module-path@2.2.0:
     resolution: {integrity: sha512-gkco+qxENJV+8vFcDiiFhuoSvRXb2a/QPqpSoWhVz829VNJfOTnELbBmPmNKFxf3xdNnw4DWCkzkDaavcX/1YQ==}
 
@@ -858,6 +1442,13 @@ packages:
     resolution: {integrity: sha512-WHw67kLXYbZuHTmcdbIrVArCq5wxo6NEuj3hiYAWr8mwJeC+C2mMCIBIWCiDoCye/OF/xelc+teJ1ERoWmnEIA==}
     engines: {node: '>=18'}
 
+<<<<<<< HEAD
+=======
+  ast-types@0.13.4:
+    resolution: {integrity: sha512-x1FCFnFifvYDDzTaLII71vG5uvDwgtmDTEVWAxrgeiR8VjMONcCXJx7E+USjDtHlwFmt9MysbqgF9b9Vjr6w+w==}
+    engines: {node: '>=4'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   astral-regex@2.0.0:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
@@ -866,6 +1457,12 @@ packages:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  async@2.6.4:
+    resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
 
@@ -876,26 +1473,110 @@ packages:
     resolution: {integrity: sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==}
     engines: {node: '>= 4.0.0'}
 
+<<<<<<< HEAD
+=======
+  atomic-sleep@1.0.0:
+    resolution: {integrity: sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==}
+    engines: {node: '>=8.0.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
   axios@1.8.3:
     resolution: {integrity: sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==}
+=======
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
+
+  b4a@1.7.3:
+    resolution: {integrity: sha512-5Q2mfq2WfGuFp3uS//0s6baOJLMoVduPYVeNmDYxu5OUA1/cBfvr2RIS7vi62LdNj/urk1hfmj867I3qt6uZ7Q==}
+    peerDependencies:
+      react-native-b4a: '*'
+    peerDependenciesMeta:
+      react-native-b4a:
+        optional: true
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
+<<<<<<< HEAD
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
+=======
+  bare-events@2.8.2:
+    resolution: {integrity: sha512-riJjyv1/mHLIPX4RwiK+oW9/4c3TEUeORHKefKAKnZ5kyslbN+HXowtbaVEqt4IMUB7OXlfixcs6gsFeo/jhiQ==}
+    peerDependencies:
+      bare-abort-controller: '*'
+    peerDependenciesMeta:
+      bare-abort-controller:
+        optional: true
+
+  bare-fs@4.5.1:
+    resolution: {integrity: sha512-zGUCsm3yv/ePt2PHNbVxjjn0nNB1MkIaR4wOCxJ2ig5pCf5cCVAYJXVhQg/3OhhJV6DB1ts7Hv0oUaElc2TPQg==}
+    engines: {bare: '>=1.16.0'}
+    peerDependencies:
+      bare-buffer: '*'
+    peerDependenciesMeta:
+      bare-buffer:
+        optional: true
+
+  bare-os@3.6.2:
+    resolution: {integrity: sha512-T+V1+1srU2qYNBmJCXZkUY5vQ0B4FSlL3QDROnKQYOqeiQR8UbjNHlPa+TIbM4cuidiN9GaTaOZgSEgsvPbh5A==}
+    engines: {bare: '>=1.14.0'}
+
+  bare-path@3.0.0:
+    resolution: {integrity: sha512-tyfW2cQcB5NN8Saijrhqn0Zh7AnFNsnczRcuWODH0eYAXBsJ5gVxAUuNr7tsHSC6IZ77cA0SitzT+s47kot8Mw==}
+
+  bare-stream@2.7.0:
+    resolution: {integrity: sha512-oyXQNicV1y8nc2aKffH+BUHFRXmx6VrPzlnaEvMhram0nPBrKcEdcyBg5r08D0i8VxngHFAiVyn1QKXpSG0B8A==}
+    peerDependencies:
+      bare-buffer: '*'
+      bare-events: '*'
+    peerDependenciesMeta:
+      bare-buffer:
+        optional: true
+      bare-events:
+        optional: true
+
+  bare-url@2.3.2:
+    resolution: {integrity: sha512-ZMq4gd9ngV5aTMa5p9+UfY0b3skwhHELaDkhEHetMdX0LRkW9kzaym4oo/Eh+Ghm0CCDuMTsRIGM/ytUc1ZYmw==}
+
+  base64-js@1.5.1:
+    resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  basic-ftp@5.0.5:
+    resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
+    engines: {node: '>=10.0.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
     engines: {node: '>=4'}
 
+<<<<<<< HEAD
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
 
+=======
+  bignumber.js@9.3.1:
+    resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
+
+  binary-extensions@2.3.0:
+    resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
+    engines: {node: '>=8'}
+
+  bl@4.1.0:
+    resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
+
+  bodec@0.1.0:
+    resolution: {integrity: sha512-Ylo+MAo5BDUq1KA3f3R/MFhh+g8cnHmo8bz3YPGhI1znrMaf77ol1sfvYJzsw3nTE+Y2GryfDxBaR+AqpAkEHQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
 
@@ -906,6 +1587,12 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
+<<<<<<< HEAD
+=======
+  buffer-from@1.1.2:
+    resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
@@ -936,10 +1623,24 @@ packages:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
+=======
+  camelcase-keys@9.1.3:
+    resolution: {integrity: sha512-Rircqi9ch8AnZscQcsA1C47NFdaO3wukpmIRzYcDOrmvgt78hM/sj5pZhZNec2NM12uk5vTwRHZ4anGcrC4ZTg==}
+    engines: {node: '>=16'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   camelcase@6.3.0:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  camelcase@8.0.0:
+    resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
+    engines: {node: '>=16'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cardinal@2.1.1:
     resolution: {integrity: sha512-JSr5eOgoEymtYHBjNWyjrMqet9Am2miJhlfKNdqLp6zoeAh0KN5dRAcxlecj5mAJrmQomgiOBj35xHLrFjqBpw==}
     hasBin: true
@@ -956,6 +1657,13 @@ packages:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
 
+<<<<<<< HEAD
+=======
+  chalk@3.0.0:
+    resolution: {integrity: sha512-4D3B6Wf41KOYRFdszmDqMCGq5VV/uMAB273JILmO+3jAlh8X4qDtdtgCR3fxtbLEMzSx22QdhnDcJvu2u1fVwg==}
+    engines: {node: '>=8'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -964,13 +1672,35 @@ packages:
     resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
+<<<<<<< HEAD
   chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
 
+=======
+  change-case@5.4.4:
+    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
+
+  chardet@0.7.0:
+    resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
+
+  chardet@2.1.1:
+    resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
+
+  charm@0.1.2:
+    resolution: {integrity: sha512-syedaZ9cPe7r3hoQA9twWYKu5AIyCswN5+szkmPBe9ccdLrj4bYaCnLVPTLd2kgVRc7+zoX4tyPgRnFKCj5YjQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
     engines: {node: '>= 16'}
 
+<<<<<<< HEAD
+=======
+  chokidar@3.6.0:
+    resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
+    engines: {node: '>= 8.10.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
 
@@ -998,13 +1728,34 @@ packages:
     resolution: {integrity: sha512-ywqV+5MmyL4E7ybXgKys4DugZbX0FC6LnwrhjuykIjnK9k8OQacQ7axGKnjDXWNhns0xot3bZI5h55H8yo9cJg==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
+=======
+  cli-tableau@2.0.1:
+    resolution: {integrity: sha512-he+WTicka9cl0Fg/y+YyxcN6/bfQ/1O3QmgxRXDhABKqLzvoOSM4fMzp39uMyLBulAFuywD2N7UaoQE7WaADxQ==}
+    engines: {node: '>=8.10.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cli-width@3.0.0:
     resolution: {integrity: sha512-FxqpkPPwu1HjuN93Omfm4h8uIanXofW0RxVEW3k5RKx+mJJYSthzNhp32Kzxxy3YAEZ/Dc/EWN1vZRY0+kOhbw==}
     engines: {node: '>= 10'}
 
+<<<<<<< HEAD
   cliui@7.0.4:
     resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
 
+=======
+  cli-width@4.1.0:
+    resolution: {integrity: sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ==}
+    engines: {node: '>= 12'}
+
+  cliui@7.0.4:
+    resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
+
+  cliui@8.0.1:
+    resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   clone@1.0.4:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
@@ -1022,6 +1773,16 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
+<<<<<<< HEAD
+=======
+  colorette@1.4.0:
+    resolution: {integrity: sha512-Y2oEozpomLn7Q3HFP7dpww7AtMJplbM9lGZP6RDfHqmbeRjiwRg4n6VM6j4KLmRke85uWEI7JqF17f3pqdRA0g==}
+
+  colors@1.4.0:
+    resolution: {integrity: sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==}
+    engines: {node: '>=0.1.90'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
@@ -1034,6 +1795,16 @@ packages:
     resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
     engines: {node: '>=18'}
 
+<<<<<<< HEAD
+=======
+  commander@14.0.2:
+    resolution: {integrity: sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ==}
+    engines: {node: '>=20'}
+
+  commander@2.15.1:
+    resolution: {integrity: sha512-VlfT9F3V0v+jr4yxPc5gg9s62/fIVWsd2Bk2iD435um1NlGMYdVCq+MjcXnhYq2icNOizHr1kK+5TI6H0Hy0ag==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
     engines: {node: '>= 10'}
@@ -1061,9 +1832,23 @@ packages:
       typescript:
         optional: true
 
+<<<<<<< HEAD
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
+=======
+  crc-32@1.2.2:
+    resolution: {integrity: sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==}
+    engines: {node: '>=0.8'}
+    hasBin: true
+
+  create-require@1.1.1:
+    resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+
+  croner@4.1.97:
+    resolution: {integrity: sha512-/f6gpQuxDaqXu+1kwQYSckUglPaOrHdbIlBAu0YuW8/Cdb45XwXYNUBXg3r/9Mo6n540Kn/smKcZWko5x99KrQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cross-spawn@6.0.6:
     resolution: {integrity: sha512-VqCUuhcd1iB+dsv8gxPttb5iZh/D0iubSP21g36KXdEuf6I5JiioesUVjpCdHV9MZRUfVFlvwtIUyPfxo5trtw==}
     engines: {node: '>=4.8'}
@@ -1072,6 +1857,16 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
+<<<<<<< HEAD
+=======
+  culvert@0.1.2:
+    resolution: {integrity: sha512-yi1x3EAWKjQTreYWeSd98431AV+IEE0qoDyOoaHJ7KJ21gv6HtBXHVLX74opVSGqcR8/AbjJBHAHpcOy2bj5Gg==}
+
+  data-uri-to-buffer@6.0.2:
+    resolution: {integrity: sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw==}
+    engines: {node: '>= 14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   data-view-buffer@1.0.2:
     resolution: {integrity: sha512-EmKO5V3OLXh1rtK2wgXRansaK1/mtVdTUEiEI0W8RkvgT05kfxaH29PliLnpLP73yYO6142Q72QNa8Wx/A5CqQ==}
     engines: {node: '>= 0.4'}
@@ -1084,6 +1879,35 @@ packages:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  dayjs@1.11.15:
+    resolution: {integrity: sha512-MC+DfnSWiM9APs7fpiurHGCoeIx0Gdl6QZBy+5lu8MbYKN5FZEXqOgrundfibdfhGZ15o9hzmZ2xJjZnbvgKXQ==}
+
+  dayjs@1.11.19:
+    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
+
+  dayjs@1.8.36:
+    resolution: {integrity: sha512-3VmRXEtw7RZKAf+4Tv1Ym9AGeo8r8+CjDi26x+7SYQil1UqtqdaokhzoEJohqlzt0m5kacJSDhJQkG/LWhpRBw==}
+
+  debug@3.2.7:
+    resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  debug@4.3.7:
+    resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   debug@4.4.0:
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
     engines: {node: '>=6.0'}
@@ -1093,6 +1917,18 @@ packages:
       supports-color:
         optional: true
 
+<<<<<<< HEAD
+=======
+  debug@4.4.3:
+    resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   deep-eql@5.0.2:
     resolution: {integrity: sha512-h5k/5U50IJJFpzfL6nO9jaaumfjO/f2NjK/oYB2Djzm4p9L+3T9qWpZqZ2hAbLPuuYq9wrU08WQyBTL5GbPk5Q==}
     engines: {node: '>=6'}
@@ -1115,6 +1951,13 @@ packages:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  degenerator@5.0.1:
+    resolution: {integrity: sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==}
+    engines: {node: '>= 14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
@@ -1187,6 +2030,13 @@ packages:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
 
+<<<<<<< HEAD
+=======
+  diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
+    engines: {node: '>=0.3.1'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
@@ -1231,6 +2081,13 @@ packages:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==}
     engines: {node: '>=10.13.0'}
 
+<<<<<<< HEAD
+=======
+  enquirer@2.3.6:
+    resolution: {integrity: sha512-yjNnPr315/FjS4zIsUxYguYUPP2e1NK4d7E7ZOLiyYCcbFBiTMyID+2wvm2w6+pZ/odMA7cRkjhsPbltwBOrLg==}
+    engines: {node: '>=8.6'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   enquirer@2.4.1:
     resolution: {integrity: sha512-rRqJg/6gd538VHvR3PSrdRBb/1Vy2YfzHqzvbhGIQpDRKIa4FgV/54b5Q1xYSxOOwKvjXweS26E0Q+nAMwp2pQ==}
     engines: {node: '>=8.6'}
@@ -1295,6 +2152,29 @@ packages:
     engines: {node: '>=6.0'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  eslint-config-prettier@10.1.8:
+    resolution: {integrity: sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
+
+  eslint-plugin-prettier@5.5.4:
+    resolution: {integrity: sha512-swNtI95SToIz05YINMA6Ox5R057IMAmWZ26GqPxusAp1TZzj+IdY9tXNWWD3vkF/wEqydCONcwjTFpxybBqZsg==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      '@types/eslint': '>=8.0.0'
+      eslint: '>=8.0.0'
+      eslint-config-prettier: '>= 7.0.0 <10.0.0 || >=10.1.0'
+      prettier: '>=3.0.0'
+    peerDependenciesMeta:
+      '@types/eslint':
+        optional: true
+      eslint-config-prettier:
+        optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   eslint-scope@8.3.0:
     resolution: {integrity: sha512-pUNxi75F8MJ/GdeKtVLSbYg4ZI34J6C0C7sbL4YOp2exGwen7ZsuBqKzUhXd0qMQ362yET3z+uPwKeg/0C2XCQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -1348,6 +2228,21 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
+=======
+  ethereum-cryptography@2.2.1:
+    resolution: {integrity: sha512-r/W8lkHSiTLxUxW8Rf3u4HGB0xQweG2RyETjywylKZSzLWoWAijRz8WCuOtJ6wah+avllXBqZuk29HCCvhEIRg==}
+
+  eventemitter2@5.0.1:
+    resolution: {integrity: sha512-5EM1GHXycJBS6mauYAbVKT1cVs7POKWb2NXD4Vyt8dDqeZa7LaDK1/sjtL+Zb0lzTpSNil4596Dyu97hz37QLg==}
+
+  eventemitter2@6.4.9:
+    resolution: {integrity: sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==}
+
+  events-universal@1.0.1:
+    resolution: {integrity: sha512-LUd5euvbMLpwOF8m6ivPCbhQeSiYVNb8Vs0fQ8QjXo0JTkEHpz8pxdQf0gStltaPpw0Cca8b39KxvK9cfKRiAw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   exit@0.1.2:
     resolution: {integrity: sha512-Zk/eNKV2zbjpKzrsQ+n1G6poVbErQxJ0LBOJXaKZ1EViLzH+hrLu9cdXI4zw9dBQJslwBEpbQ2P1oS7nDxs6jQ==}
     engines: {node: '>= 0.8.0'}
@@ -1367,6 +2262,12 @@ packages:
     resolution: {integrity: sha512-hMQ4CX1p1izmuLYyZqLMO/qGNw10wSv9QDCPfzXfyFrOaCSSoRfqE1Kf1s5an66J5JZC62NewG+mK49jOCtQew==}
     engines: {node: '>=4'}
 
+<<<<<<< HEAD
+=======
+  extrareqp2@1.0.0:
+    resolution: {integrity: sha512-Gum0g1QYb6wpPJCVypWP3bbIuaibcFiJcpuPM10YSXp/tzqi84x9PJageob+eN4xVRIOto4wjSGNLyMD54D2xA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-check@3.23.2:
     resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
     engines: {node: '>=8.0.0'}
@@ -1374,10 +2275,25 @@ packages:
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
+<<<<<<< HEAD
+=======
+  fast-diff@1.3.0:
+    resolution: {integrity: sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==}
+
+  fast-fifo@1.3.2:
+    resolution: {integrity: sha512-/d9sfos4yxzpwkDkuN7k2SqFKtYNmCTzgfEpz82x34IM9/zc8KGxQoXg1liNC/izpRM/MBdt44Nmx41ZWqk+FQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
 
+<<<<<<< HEAD
+=======
+  fast-json-patch@3.1.1:
+    resolution: {integrity: sha512-vf6IHUX2SBcA+5/+4883dsIjpBTqmfBjmYiWK1savxQmFk4JfBMLa7ynTYOs1Rolp/T1betJxHiGD3g1Mn8lUQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
@@ -1387,6 +2303,15 @@ packages:
   fast-levenshtein@3.0.0:
     resolution: {integrity: sha512-hKKNajm46uNmTlhHSyZkmToAc56uZJwYq7yrciZjqOxnlfQwERDQJmHPUp7m1m9wx8vgOe8IaCKZ5Kv2k1DdCQ==}
 
+<<<<<<< HEAD
+=======
+  fast-safe-stringify@2.1.1:
+    resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
+
+  fast-uri@3.1.0:
+    resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fastest-levenshtein@1.0.16:
     resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
     engines: {node: '>= 4.9.1'}
@@ -1394,6 +2319,12 @@ packages:
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
 
+<<<<<<< HEAD
+=======
+  fclone@1.0.11:
+    resolution: {integrity: sha512-GDqVQezKzRABdeqflsgMr7ktzgF9CyS+p2oe0jJqUY6izSSbhPIQJDpoU4PtGcD7VPM9xh/dVrTu6z1nwgmEGw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
     engines: {node: '>=8'}
@@ -1454,13 +2385,25 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
+<<<<<<< HEAD
   form-data@4.0.2:
     resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
+=======
+  form-data@4.0.4:
+    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     engines: {node: '>= 6'}
 
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
+<<<<<<< HEAD
+=======
+  fs-extra@11.3.2:
+    resolution: {integrity: sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A==}
+    engines: {node: '>=14.14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fs-extra@7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
     engines: {node: '>=6 <7 || >=8'}
@@ -1522,6 +2465,27 @@ packages:
     resolution: {integrity: sha512-w9UMqWwJxHNOvoNzSJ2oPF5wvYcvP7jUvYzhp67yEhTi17ZDBBC1z9pTdGuzjD+EFIqLSYRweZjqfiPzQ06Ebg==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  get-tsconfig@4.13.0:
+    resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
+
+  get-uri@6.0.5:
+    resolution: {integrity: sha512-b1O07XYq8eRuVzBNgJLstU6FYc1tS6wnMtF1I1D9lE8LxZSOGZ7LhxN54yPP6mGw5f2CkXY2BQUL9Fx41qvcIg==}
+    engines: {node: '>= 14'}
+
+  git-node-fs@1.0.0:
+    resolution: {integrity: sha512-bLQypt14llVXBg0S0u8q8HmU7g9p3ysH+NvVlae5vILuUvs759665HvmR5+wb04KjHyjFcDRxdYb4kyNnluMUQ==}
+    peerDependencies:
+      js-git: ^0.7.8
+    peerDependenciesMeta:
+      js-git:
+        optional: true
+
+  git-sha1@0.1.2:
+    resolution: {integrity: sha512-2e/nZezdVlyCopOCYHeW0onkbZg7xP1Ad6pndPy1rCygeRykefUS6r7oA5cJRGEFvseiaz5a/qUHFVX1dd6Isg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -1632,6 +2596,17 @@ packages:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
 
+<<<<<<< HEAD
+=======
+  http-proxy-agent@7.0.2:
+    resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
+    engines: {node: '>= 14'}
+
+  https-proxy-agent@7.0.6:
+    resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
+    engines: {node: '>= 14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   human-id@4.1.1:
     resolution: {integrity: sha512-3gKm/gCSUipeLsRYZbbdA1BD83lBoWUkZ7G9VFrhWPAU76KwYo5KR8V28bpoPm/ygy0x5/GCbpRQdY7VLYCoIg==}
     hasBin: true
@@ -1644,6 +2619,13 @@ packages:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
+=======
+  iconv-lite@0.7.0:
+    resolution: {integrity: sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ==}
+    engines: {node: '>=0.10.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
@@ -1667,6 +2649,13 @@ packages:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
     engines: {node: '>=8'}
 
+<<<<<<< HEAD
+=======
+  index-to-position@1.2.0:
+    resolution: {integrity: sha512-Yg7+ztRkqslMAS2iFaU+Oa4KTSidr63OsFGlOrJoW981kIYO3CGCS3wA95P1mUi/IVSJkn0D479KTJpVpvFNuw==}
+    engines: {node: '>=18'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
     deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
@@ -1685,6 +2674,13 @@ packages:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  ip-address@10.1.0:
+    resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
+    engines: {node: '>= 12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   is-array-buffer@3.0.5:
     resolution: {integrity: sha512-DDfANUiiG2wC1qawP66qlTugJeL5HyzMpfr8lLK+jMQirGzNod0B12cFB/9q838Ru27sBwfw78/rdoU7RERz6A==}
     engines: {node: '>= 0.4'}
@@ -1700,6 +2696,13 @@ packages:
     resolution: {integrity: sha512-n4ZT37wG78iz03xPRKJrHTdZbe3IicyucEtdRsV5yglwc3GyUfbAfpSeD0FJ41NbUNSt5wbhqfp1fS+BgnvDFQ==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  is-binary-path@2.1.0:
+    resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
+    engines: {node: '>=8'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   is-boolean-object@1.2.2:
     resolution: {integrity: sha512-wa56o2/ElJMYqjCjGkXri7it5FbebW5usLw/nPmCMs5DeZ7eziSYZhSmPRn0txqeW4LnAmQQU7FgqLpsEFKM4A==}
     engines: {node: '>= 0.4'}
@@ -1863,6 +2866,19 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  jose@5.10.0:
+    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
+
+  js-git@0.7.8:
+    resolution: {integrity: sha512-+E5ZH/HeRnoc/LW0AmAyhU+mNcWBzAKE+30+IDMLSLbbK+Tdt02AdkOKq9u15rlJsDEGFqtgckc8ZM59LhhiUA==}
+
+  js-levenshtein@1.1.6:
+    resolution: {integrity: sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==}
+    engines: {node: '>=0.10.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -1891,9 +2907,21 @@ packages:
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
 
+<<<<<<< HEAD
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+=======
+  json-schema-traverse@1.0.0:
+    resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
+
+  json-stable-stringify-without-jsonify@1.0.1:
+    resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
+
+  json-stringify-safe@5.0.1:
+    resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   json5@2.2.3:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
@@ -1946,6 +2974,12 @@ packages:
   lodash._reinterpolate@3.0.0:
     resolution: {integrity: sha512-xYHt68QRoYGjeeM/XOE1uJtvXQAgvszfBhjV4yvsQH0u2i9I6cI6c6/eG4Hh3UAOVn0y/xAXwmTzEay49Q//HA==}
 
+<<<<<<< HEAD
+=======
+  lodash.camelcase@4.3.0:
+    resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
@@ -1977,6 +3011,12 @@ packages:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
     engines: {node: '>=18'}
 
+<<<<<<< HEAD
+=======
+  long@5.3.2:
+    resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   loupe@3.1.3:
     resolution: {integrity: sha512-kkIp7XSkP78ZxJEsSxW3712C6teJVoeHHwgo9zJ380de7IYyJ2ISlxojcH2pC5OFLewESmnRi/+XCDIEEVyoug==}
 
@@ -1987,6 +3027,17 @@ packages:
     resolution: {integrity: sha512-123qHRfJBmo2jXDbo/a5YOQrJoHF/GNQTLzQ5+IdK5pWpceK17yRc6ozlWd25FxvGKQbIUs91fDFkXmDHTKcyA==}
     engines: {node: 20 || >=22}
 
+<<<<<<< HEAD
+=======
+  lru-cache@6.0.0:
+    resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
+    engines: {node: '>=10'}
+
+  lru-cache@7.18.3:
+    resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   madge@8.0.0:
     resolution: {integrity: sha512-9sSsi3TBPhmkTCIpVQF0SPiChj1L7Rq9kU2KDG1o6v2XH9cCw086MopjVCD+vuoL5v8S77DTbVopTO8OUiQpIw==}
     engines: {node: '>=18'}
@@ -2003,6 +3054,13 @@ packages:
   make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
 
+<<<<<<< HEAD
+=======
+  map-obj@5.0.0:
+    resolution: {integrity: sha512-2L3MIgJynYrZ3TYMriLDLWocz15okFakV6J12HXvMXDHui2x/zgChzg1u9mFFGbbGWE+GsLpQByt4POb9Or+uA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
@@ -2015,6 +3073,12 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
+<<<<<<< HEAD
+=======
+  micro-ftch@0.3.1:
+    resolution: {integrity: sha512-/0LLxhzP0tfiR5hcQebtudP56gUurs2CLkGarnCiB/OqEyUFQ6U3paQi/tgLv0hBJYt2rnr9MNpxz4fiiugstg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
@@ -2064,11 +3128,25 @@ packages:
   mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
 
+<<<<<<< HEAD
+=======
+  mkdirp@1.0.4:
+    resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   module-definition@6.0.1:
     resolution: {integrity: sha512-FeVc50FTfVVQnolk/WQT8MX+2WVcDnTGiq6Wo+/+lJ2ET1bRVi3HG3YlJUfqagNMc/kUlFSoR96AJkxGpKz13g==}
     engines: {node: '>=18'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  module-details-from-path@1.0.4:
+    resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   module-lookup-amd@9.0.4:
     resolution: {integrity: sha512-DWJEuLVvjxh5b8wrvJC5wr2a7qo7pOWXIgdCBNazU416kcIyzO4drxvlqKhsHzYwxcC4cWuhoK+MiWCKCGnv7A==}
     engines: {node: '>=18'}
@@ -2088,6 +3166,13 @@ packages:
   mute-stream@0.0.8:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
 
+<<<<<<< HEAD
+=======
+  mute-stream@3.0.0:
+    resolution: {integrity: sha512-dkEJPVvun4FryqBmZ5KhDo0K9iDXAwn08tMLDinNdRBNPcYEDiWYysLcc6k3mjTMlbP9KyylvRpd4wFtwrT9rw==}
+    engines: {node: ^20.17.0 || >=22.9.0}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   nanoid@3.3.10:
     resolution: {integrity: sha512-vSJJTG+t/dIKAUhUDw/dLdZ9s//5OxcHqLaDWWrW4Cdq7o6tdLIczUkMXt2MBNmk6sJRZBZRXVixs7URY1CmIg==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -2099,6 +3184,18 @@ packages:
   natural-orderby@2.0.3:
     resolution: {integrity: sha512-p7KTHxU0CUrcOXe62Zfrb5Z13nLvPhSWR/so3kFulUQU0sgUll2Z0LwpsLN351eOOD+hRGu/F1g+6xDfPeD++Q==}
 
+<<<<<<< HEAD
+=======
+  needle@2.4.0:
+    resolution: {integrity: sha512-4Hnwzr3mi5L97hMYeNl8wRW/Onhy4nUKR/lVemJ8gJedxxUyBLm9kkrDColJvoSfwi0jCNhD+xCdOtiGDQiRZg==}
+    engines: {node: '>= 4.4.x'}
+    hasBin: true
+
+  netmask@2.0.2:
+    resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
+    engines: {node: '>= 0.4.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
 
@@ -2109,6 +3206,13 @@ packages:
   normalize-package-data@2.5.0:
     resolution: {integrity: sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA==}
 
+<<<<<<< HEAD
+=======
+  normalize-path@3.0.0:
+    resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
+    engines: {node: '>=0.10.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   npm-package-arg@12.0.2:
     resolution: {integrity: sha512-f1NpFjNI9O4VbKMOlA5QoBq/vSQPORHcTZ2feJpFkTHJ9eQkdlmZEKSjcAhxTGInC7RlEyScT9ui67NaOsjFWA==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -2134,6 +3238,13 @@ packages:
     resolution: {integrity: sha512-nK28WOo+QIjBkDduTINE4JkF/UJJKyf2EJxvJKfblDpyg0Q+pkOHNTL0Qwy6NP6FhE/EnzV73BxxqcJaXY9anw==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  on-exit-leak-free@2.1.2:
+    resolution: {integrity: sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA==}
+    engines: {node: '>=14.0.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
@@ -2145,6 +3256,28 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
+<<<<<<< HEAD
+=======
+  openapi-fetch@0.14.1:
+    resolution: {integrity: sha512-l7RarRHxlEZYjMLd/PR0slfMVse2/vvIAGm75/F7J6MlQ8/b9uUQmUF2kCPrQhJqMXSxmYWObVgeYXbFYzZR+A==}
+
+  openapi-fetch@0.15.0:
+    resolution: {integrity: sha512-OjQUdi61WO4HYhr9+byCPMj0+bgste/LtSBEcV6FzDdONTs7x0fWn8/ndoYwzqCsKWIxEZwo4FN/TG1c1rI8IQ==}
+
+  openapi-typescript-helpers@0.0.15:
+    resolution: {integrity: sha512-opyTPaunsklCBpTK8JGef6mfPhLSnyy5a0IN9vKtx3+4aExf+KxEqYwIy3hqkedXIB97u357uLMJsOnm3GVjsw==}
+
+  openapi-typescript@6.7.6:
+    resolution: {integrity: sha512-c/hfooPx+RBIOPM09GSxABOZhYPblDoyaGhqBkD/59vtpN21jEuWKDlM0KYTvqJVlSYjKs0tBcIdeXKChlSPtw==}
+    hasBin: true
+
+  openapi-typescript@7.10.1:
+    resolution: {integrity: sha512-rBcU8bjKGGZQT4K2ekSTY2Q5veOQbVG/lTKZ49DeCyT9z62hM2Vj/LLHjDHC9W7LJG8YMHcdXpRZDqC1ojB/lw==}
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.x
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -2196,12 +3329,29 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
+=======
+  pac-proxy-agent@7.2.0:
+    resolution: {integrity: sha512-TEB8ESquiLMc0lV8vcd5Ql/JAKAoyzHFXaStwjkzpOpC5Yv+pIzLfHvjTSdf3vpa2bMiUQrg9i6276yn8666aA==}
+    engines: {node: '>= 14'}
+
+  pac-resolver@7.0.1:
+    resolution: {integrity: sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==}
+    engines: {node: '>= 14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
   package-manager-detector@0.2.11:
     resolution: {integrity: sha512-BEnLolu+yuz22S56CU1SUKq3XC3PkwD5wv4ikR4MfGvnRVcmzXR9DwSlW2fEamyTPyXHomBJRzgapeuBvRNzJQ==}
 
+<<<<<<< HEAD
+=======
+  pako@0.2.9:
+    resolution: {integrity: sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -2214,6 +3364,13 @@ packages:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
     engines: {node: '>=8'}
 
+<<<<<<< HEAD
+=======
+  parse-json@8.3.0:
+    resolution: {integrity: sha512-ybiGyvspI+fAoRQbIPRddCcSTV9/LsJbf0e/S85VLowVGzRmokfneg2kwVW/KU5rOXrPSbF1qAKPMgNTqqROQQ==}
+    engines: {node: '>=18'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   parse-ms@2.1.0:
     resolution: {integrity: sha512-kHt7kzLoS9VBZfUsiKjv43mr91ea+U05EyKkEtqp7vNbHxmaVuEqN7XxeEVnGrMtYOAxGrDElSi96K7EgO1zCA==}
     engines: {node: '>=6'}
@@ -2283,6 +3440,17 @@ packages:
     engines: {node: '>=0.10'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  pidusage@2.0.21:
+    resolution: {integrity: sha512-cv3xAQos+pugVX+BfXpHsbyz/dLzX+lr44zNMsYiGxUw+kV5sgQCIcLd1z+0vq+KyC7dJ+/ts2PsfgWfSC3WXA==}
+    engines: {node: '>=8'}
+
+  pidusage@3.0.2:
+    resolution: {integrity: sha512-g0VU+y08pKw5M8EZ2rIGiEBaB8wrQMjYGFfW2QVIfyT8V+fq8YFLkvlz4bz5ljvFDJYNFCWT3PWqcRr2FKO81w==}
+    engines: {node: '>=10'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   pify@3.0.0:
     resolution: {integrity: sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==}
     engines: {node: '>=4'}
@@ -2291,6 +3459,19 @@ packages:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
+=======
+  pino-abstract-transport@2.0.0:
+    resolution: {integrity: sha512-F63x5tizV6WCh4R6RHyi2Ml+M70DNRXt/+HANowMflpgGFMAym/VKm6G7ZOQRjqN7XbGxK1Lg9t6ZrtzOaivMw==}
+
+  pino-std-serializers@7.0.0:
+    resolution: {integrity: sha512-e906FRY0+tV27iq4juKzSYPbUj2do2X2JX4EzSca1631EB2QJQUqGbDuERal7LCtOpxl6x3+nvo9NPZcmjkiFA==}
+
+  pino@10.1.0:
+    resolution: {integrity: sha512-0zZC2ygfdqvqK8zJIr1e+wT1T/L+LF6qvqvbzEQ6tiMAoTqEVK9a1K3YRu8HEUvGEvNqZyPJTtb2sNIoTkB83w==}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   please-upgrade-node@3.2.0:
     resolution: {integrity: sha512-gQR3WpIgNIKwBMVLkpMUeR3e1/E1y42bqDQZfql+kDeXd8COYfM8PQA4X6y7a8u9Ua9FHmsrrmirW2vHs45hWg==}
 
@@ -2298,6 +3479,36 @@ packages:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
 
+<<<<<<< HEAD
+=======
+  pm2-axon-rpc@0.7.1:
+    resolution: {integrity: sha512-FbLvW60w+vEyvMjP/xom2UPhUN/2bVpdtLfKJeYM3gwzYhoTEEChCOICfFzxkxuoEleOlnpjie+n1nue91bDQw==}
+    engines: {node: '>=5'}
+
+  pm2-axon@4.0.1:
+    resolution: {integrity: sha512-kES/PeSLS8orT8dR5jMlNl+Yu4Ty3nbvZRmaAtROuVm9nYYGiaoXqqKQqQYzWQzMYWUKHMQTvBlirjE5GIIxqg==}
+    engines: {node: '>=5'}
+
+  pm2-deploy@1.0.2:
+    resolution: {integrity: sha512-YJx6RXKrVrWaphEYf++EdOOx9EH18vM8RSZN/P1Y+NokTKqYAca/ejXwVLyiEpNju4HPZEk3Y2uZouwMqUlcgg==}
+    engines: {node: '>=4.0.0'}
+
+  pm2-multimeter@0.1.2:
+    resolution: {integrity: sha512-S+wT6XfyKfd7SJIBqRgOctGxaBzUOmVQzTAS+cg04TsEUObJVreha7lvCfX8zzGVr871XwCSnHUU7DQQ5xEsfA==}
+
+  pm2-sysmonit@1.2.8:
+    resolution: {integrity: sha512-ACOhlONEXdCTVwKieBIQLSi2tQZ8eKinhcr9JpZSUAL8Qy0ajIgRtsLxG/lwPOW3JEKqPyw/UaHmTWhUzpP4kA==}
+
+  pm2@6.0.13:
+    resolution: {integrity: sha512-1hS/adMgKoDpX4S1ichJW8SiGpex+oBSZK31dP1FSYOOGtaeuemXzhXPOCefmddgIY4K6v7uu+7xNPnmEnK3ag==}
+    engines: {node: '>=16.0.0'}
+    hasBin: true
+
+  pony-cause@2.1.11:
+    resolution: {integrity: sha512-M7LhCsdNbNgiLYiP4WjsfLUuFmCfnjdF6jKe2R9NKl4WFN+HZPGHJZ9lnLP7f9ZnKe3U9nuWD0szirmj+migUg==}
+    engines: {node: '>=12.0.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -2321,6 +3532,13 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
+<<<<<<< HEAD
+=======
+  prettier-linter-helpers@1.0.0:
+    resolution: {integrity: sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==}
+    engines: {node: '>=6.0.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
@@ -2334,10 +3552,30 @@ packages:
     resolution: {integrity: sha512-Azwzvl90HaF0aCz1JrDdXQykFakSSNPaPoiZ9fm5qJIMHioDZEi7OAdRwSm6rSoPtY3Qutnm3L7ogmg3dc+wbQ==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
+<<<<<<< HEAD
+=======
+  process-warning@5.0.0:
+    resolution: {integrity: sha512-a39t9ApHNx2L4+HBnQKqxxHNs1r7KF+Intd8Q/g1bUh6q0WIp9voPXJ/x0j+ZL45KF1pJd9+q2jLIRMfvEshkA==}
+
+  promptly@2.2.0:
+    resolution: {integrity: sha512-aC9j+BZsRSSzEsXBNBwDnAxujdx19HycZoKgRgzWnS8eOHg1asuf9heuLprfbe739zY3IdUQx+Egv6Jn135WHA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   prompts@2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
 
+<<<<<<< HEAD
+=======
+  protobufjs@7.5.4:
+    resolution: {integrity: sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg==}
+    engines: {node: '>=12.0.0'}
+
+  proxy-agent@6.4.0:
+    resolution: {integrity: sha512-u0piLU+nCOHMgGjRbimiXmA9kM/L9EHh3zL81xCdp7m+Y2pHIsnmbdDoEDoAz5geaonNR6q6+yOPQs6n4T6sBQ==}
+    engines: {node: '>= 14'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
@@ -2357,6 +3595,16 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
+<<<<<<< HEAD
+=======
+  quick-format-unescaped@4.0.4:
+    resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
+
+  quick-lru@6.1.2:
+    resolution: {integrity: sha512-AAFUA5O1d83pIHEhJwWCq/RQcRukCkn/NSm2QsTEMle5f2hP0ChI2+3Xb051PZCkLryI/Ir1MVKviT2FIloaTQ==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   quote-unquote@1.0.0:
     resolution: {integrity: sha512-twwRO/ilhlG/FIgYeKGFqyHhoEhqgnKVkcmqMKi2r524gz3ZbDTcyFt38E9xjJI2vT+KbRNHVbnJ/e0I25Azwg==}
 
@@ -2376,6 +3624,13 @@ packages:
     resolution: {integrity: sha512-UkRNRIwnhG+y7hpqnycCL/xbTk7+ia9VuVTC0S+zVbwd65DI9eUpRMfsWIGrCWxTU/mi+JW8cHQCrv+zfCbEPQ==}
     engines: {node: '>=10.13'}
 
+<<<<<<< HEAD
+=======
+  read@1.0.7:
+    resolution: {integrity: sha512-rSOKNYUmaxy0om1BNjMN4ezNT6VKK+2xF4GBhc81mkH7L60i6dp8qPYrkndNLT3QPphoII3maL9PVC9XmhHwVQ==}
+    engines: {node: '>=0.8'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
@@ -2384,6 +3639,13 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
+<<<<<<< HEAD
+=======
+  real-require@0.2.0:
+    resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
+    engines: {node: '>= 12.13.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   redeyed@2.1.1:
     resolution: {integrity: sha512-FNpGGo1DycYAdnrKFxCMmKYgo/mILAqtRYbkdQD8Ep/Hk2PQ5+aEAEx+IU713RTDmuBaH0c8P5ZozurNu5ObRQ==}
 
@@ -2402,6 +3664,17 @@ packages:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
+=======
+  require-from-string@2.0.2:
+    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
+    engines: {node: '>=0.10.0'}
+
+  require-in-the-middle@5.2.0:
+    resolution: {integrity: sha512-efCx3b+0Z69/LGJmm9Yvi4cqEdxnoGnxYxGxBghkkTTFeXRtTCmmhO0AnAfHz59k957uTSuy8WaHqOs8wbYUWg==}
+    engines: {node: '>=6'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   require-package-name@2.0.1:
     resolution: {integrity: sha512-uuoJ1hU/k6M0779t3VMVIYpb2VMJk05cehCaABFhXaibcbvfgR8wKiozLjVFSzJPmQMRqIcO0HMyTFqfV09V6Q==}
 
@@ -2430,6 +3703,12 @@ packages:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
     engines: {node: '>=8'}
 
+<<<<<<< HEAD
+=======
+  resolve-pkg-maps@1.0.0:
+    resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   resolve@1.22.10:
     resolution: {integrity: sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==}
     engines: {node: '>= 0.4'}
@@ -2464,6 +3743,12 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
+<<<<<<< HEAD
+=======
+  run-series@1.1.9:
+    resolution: {integrity: sha512-Arc4hUN896vjkqCYrUXquBFtRZdv1PfLbTYP71efP6butxyQ0kWpiNJyAgsxscmQg1cqvHY32/UCBzXedTpU2g==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
@@ -2482,6 +3767,13 @@ packages:
     resolution: {integrity: sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  safe-stable-stringify@2.5.0:
+    resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
+    engines: {node: '>=10'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
@@ -2490,6 +3782,12 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  sax@1.4.3:
+    resolution: {integrity: sha512-yqYn1JhPczigF94DMS+shiDMjDowYO6y9+wB/4WgO0Y19jWYk0lQ4tuG5KI7kj4FTp1wxPj5IFfcrz/s1c3jjQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   semver-compare@1.0.0:
     resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
 
@@ -2497,11 +3795,27 @@ packages:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  semver@7.5.4:
+    resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   semver@7.7.1:
     resolution: {integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==}
     engines: {node: '>=10'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  semver@7.7.2:
+    resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
     engines: {node: '>= 0.4'}
@@ -2534,6 +3848,12 @@ packages:
     resolution: {integrity: sha512-AzqKpGKjrj7EM6rKVQEPpB288oCfnrEIuyoT9cyF4nmGa7V8Zk6f7RRqYisX8X9m+Q7bd632aZW4ky7EhbQztA==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  shimmer@1.2.1:
+    resolution: {integrity: sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
     engines: {node: '>= 0.4'}
@@ -2575,10 +3895,34 @@ packages:
     resolution: {integrity: sha512-qMCMfhY040cVHT43K9BFygqYbUPFZKHOg7K73mtTWJRb8pyP3fzf4Ixd5SzdEJQ6MRUg/WBnOLxghZtKKurENQ==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  smart-buffer@4.2.0:
+    resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
+    engines: {node: '>= 6.0.0', npm: '>= 3.0.0'}
+
+  socks-proxy-agent@8.0.5:
+    resolution: {integrity: sha512-HehCEsotFqbPW9sJ8WVYB6UbmIMv7kUUORIF2Nncq4VQvBfNBLibW9YZR5dlYCSUhwcD628pRllm7n+E+YTzJw==}
+    engines: {node: '>= 14'}
+
+  socks@2.8.7:
+    resolution: {integrity: sha512-HLpt+uLy/pxB+bum/9DzAgiKS8CX1EvbWxI4zlmgGCExImLdiad2iCwXT5Z4c9c3Eq8rP2318mPW2c+QbtjK8A==}
+    engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
+
+  sonic-boom@4.2.0:
+    resolution: {integrity: sha512-INb7TM37/mAcsGmc9hyyI6+QR3rR1zVRu36B0NeGXKnOOLiZOfER5SA+N7X7k3yUYRzLWafduTDvJAfDswwEww==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
+=======
+  source-map-support@0.5.21:
+    resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   source-map@0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
@@ -2601,9 +3945,22 @@ packages:
   split2@3.2.2:
     resolution: {integrity: sha512-9NThjpgZnifTkJpzTZ7Eue85S49QwpNhZTq6GRJwObb6jnLFNGB7Qm73V5HewTROPyxD0C29xqmaI68bQtV+hg==}
 
+<<<<<<< HEAD
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
 
+=======
+  split2@4.2.0:
+    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
+    engines: {node: '>= 10.x'}
+
+  sprintf-js@1.0.3:
+    resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
+
+  sprintf-js@1.1.2:
+    resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
@@ -2617,6 +3974,12 @@ packages:
   stream-to-array@2.3.0:
     resolution: {integrity: sha512-UsZtOYEn4tWU2RGLOXr/o/xjRBftZRlG3dEWoaHr8j4GuypJ3isitGbVyjQKAuMu+xbiop8q224TjiZWc4XTZA==}
 
+<<<<<<< HEAD
+=======
+  streamx@2.23.0:
+    resolution: {integrity: sha512-kn+e44esVfn2Fa/O0CPFcex27fjIL6MkVae0Mm6q+E6f0hWv578YCERbv+4m02cjxvDsPKLnmxral/rR6lBMAg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -2681,6 +4044,13 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  supports-color@10.2.2:
+    resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
+    engines: {node: '>=18'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
@@ -2693,6 +4063,13 @@ packages:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  supports-color@9.4.0:
+    resolution: {integrity: sha512-VL+lNrEoIXww1coLPOmiEmK/0sGigko5COxI09KzHc2VJXJsQ37UaQ+8quuxjDeA7+KnLGTWRyOXSLLR2Wb4jw==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   supports-hyperlinks@2.3.0:
     resolution: {integrity: sha512-RpsAZlpWcDwOPQA22aCH4J0t7L8JmAvsCxfOSEwm7cQs3LshN36QaTkwd70DnBOXDWGssw2eUoc8CaRWT0XunA==}
     engines: {node: '>=8'}
@@ -2701,11 +4078,27 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
+=======
+  synckit@0.11.11:
+    resolution: {integrity: sha512-MeQTA1r0litLUf0Rp/iisCaL8761lKAZHaimlbGK4j0HysC4PLfqygQj9srcs0m2RdtDYnF8UuYyKpbjHYp7Jw==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   syncpack@13.0.3:
     resolution: {integrity: sha512-ZKrdDVmOUBWeaTVaxRnfwtqBJ5rMzMo7Lfdp04wtORwHEcvrq6M+NzCwS4PPIhTucD005wD8wumy90Ucz3lwXg==}
     engines: {node: '>=18.18.0'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  systeminformation@5.27.11:
+    resolution: {integrity: sha512-K3Lto/2m3K2twmKHdgx5B+0in9qhXK4YnoT9rIlgwN/4v7OV5c8IjbeAUkuky/6VzCQC7iKCAqi8rZathCdjHg==}
+    engines: {node: '>=8.0.0'}
+    os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tapable@2.2.1:
     resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
     engines: {node: '>=6'}
@@ -2713,14 +4106,35 @@ packages:
   tar-fs@2.1.2:
     resolution: {integrity: sha512-EsaAXwxmx8UB7FRKqeozqEPop69DXcmYwTQwXvyAPF352HJsPdkVhvTaDPYqfNgruveJIJy3TA2l+2zj8LJIJA==}
 
+<<<<<<< HEAD
+=======
+  tar-fs@3.1.1:
+    resolution: {integrity: sha512-LZA0oaPOc2fVo82Txf3gw+AkEd38szODlptMYejQUhndHMLQ9M059uXR+AfS7DNo0NpINvSqDsvyaCrBVkptWg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
+=======
+  tar-stream@3.1.7:
+    resolution: {integrity: sha512-qJj60CXt7IU1Ffyc3NJMjh6EkuCFej46zUqJ4J7pqYlThyd9bO0XBTmcOIhSzZJVWfsLks0+nle/j538YAW9RQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
+<<<<<<< HEAD
+=======
+  text-decoder@1.2.3:
+    resolution: {integrity: sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==}
+
+  thread-stream@3.1.0:
+    resolution: {integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   through2@4.0.2:
     resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
 
@@ -2792,9 +4206,23 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
+<<<<<<< HEAD
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+=======
+  tslib@1.9.3:
+    resolution: {integrity: sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==}
+
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tsx@4.20.6:
+    resolution: {integrity: sha512-ytQKuwgmrrkDTFP4LjR0ToE2nqgy886GpvRSpU0JAnrdBYppuY5rLkRUYPU1yCryb24SsKBTL/hlDQAEFVwtZg==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
 
@@ -2832,6 +4260,22 @@ packages:
     resolution: {integrity: sha512-N9FDOVaY3yz0YCOhYIgOGYad7+m2ptvinXygw27WPLQvcZDl3+0Sa77KGVlLSiuPDChOUEnTKE9VJwLSi9BPGQ==}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  tv4@1.3.0:
+    resolution: {integrity: sha512-afizzfpJgvPr+eDkREK4MxJ/+r8nEEHcmitwgnPUqpaP+FpwQyadnxNoSACbgc/b1LsZYtODGoPiFxQrgJgjvw==}
+    engines: {node: '>= 0.8.0'}
+
+  tweetnacl-util@0.15.1:
+    resolution: {integrity: sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==}
+
+  tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
+
+  tx2@1.0.5:
+    resolution: {integrity: sha512-sJ24w0y03Md/bxzK4FU8J8JveYYUbSs2FViLJ2D/8bytSiyPRbuE3DyL/9UKYXTZlV3yXq0L8GLlhobTnekCVg==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -2840,6 +4284,13 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  type-fest@4.41.0:
+    resolution: {integrity: sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA==}
+    engines: {node: '>=16'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   typed-array-buffer@1.0.3:
     resolution: {integrity: sha512-nAYYwfY3qnzX30IkA6AQZjVbtK6duGontcQm1WSG1MD94YLqK0515GNApXkoxKOWMusVssAHWLh9SeaoefYFGw==}
     engines: {node: '>= 0.4'}
@@ -2863,11 +4314,25 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <5.9.0'
 
+<<<<<<< HEAD
+=======
+  typescript-lru-cache@2.0.0:
+    resolution: {integrity: sha512-Jp57Qyy8wXeMkdNuZiglE6v2Cypg13eDA1chHwDG6kq51X7gk4K7P7HaDdzZKCxkegXkVHNcPD0n5aW6OZH3aA==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   typescript@5.8.2:
     resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
+<<<<<<< HEAD
+=======
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
@@ -2875,6 +4340,19 @@ packages:
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
+<<<<<<< HEAD
+=======
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+  undici-types@7.16.0:
+    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
+
+  undici@5.29.0:
+    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
+    engines: {node: '>=14.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
     engines: {node: '>=18'}
@@ -2893,6 +4371,21 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+<<<<<<< HEAD
+=======
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
+
+  uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
@@ -2976,6 +4469,13 @@ packages:
       jsdom:
         optional: true
 
+<<<<<<< HEAD
+=======
+  vizion@2.2.1:
+    resolution: {integrity: sha512-sfAcO2yeSU0CSPFI/DmZp3FsFE9T+8913nv1xWBOyzODv13fwkn6Vl7HqxGpkr9F608M+8SuFId3s+BlZqfXww==}
+    engines: {node: '>=4.0'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   walkdir@0.4.1:
     resolution: {integrity: sha512-3eBwRyEln6E1MSzcxcVpQIhRG8Q1jLvEqRmCZqS3dsfXEDR/AhOF4d+jHg1qvDCpYaVRZjENPQyrVxAkQqxPgQ==}
     engines: {node: '>=6.0.0'}
@@ -3039,10 +4539,34 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+<<<<<<< HEAD
+=======
+  ws@7.5.10:
+    resolution: {integrity: sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==}
+    engines: {node: '>=8.3.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  yallist@4.0.0:
+    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
+  yaml-ast-parser@0.0.43:
+    resolution: {integrity: sha512-2PTINUwsRqSd+s8XxKaJWQlUuEMHJQyEuh2edBbW8KNJz0SJPwUSD2zRWqezFEdN7IzAgeuYHFUCF7o8zRdZ0A==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   yaml@1.10.2:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
@@ -3056,10 +4580,24 @@ packages:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  yargs-parser@21.1.1:
+    resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   yargs@16.2.0:
     resolution: {integrity: sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  yargs@17.7.2:
+    resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
+    engines: {node: '>=12'}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
@@ -3068,6 +4606,20 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
+=======
+  yoctocolors-cjs@2.1.3:
+    resolution: {integrity: sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw==}
+    engines: {node: '>=18'}
+
+  yoctocolors@2.1.2:
+    resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
+    engines: {node: '>=18'}
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 snapshots:
 
   '@babel/code-frame@7.26.2':
@@ -3119,6 +4671,101 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
+<<<<<<< HEAD
+=======
+  '@canton-network/core-ledger-client@0.17.0':
+    dependencies:
+      '@canton-network/core-ledger-proto': 0.11.0
+      '@canton-network/core-splice-client': 0.13.0
+      '@canton-network/core-token-standard': 0.11.0
+      '@canton-network/core-types': 0.10.0
+      '@canton-network/core-wallet-auth': 0.11.0
+      '@grpc/grpc-js': 1.14.1
+      '@protobuf-ts/grpc-transport': 2.11.1(@grpc/grpc-js@1.14.1)
+      bignumber.js: 9.3.1
+      dayjs: 1.11.19
+      openapi-fetch: 0.14.1
+      pino: 10.1.0
+      typescript-lru-cache: 2.0.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@canton-network/core-ledger-proto@0.11.0':
+    dependencies:
+      '@protobuf-ts/runtime': 2.11.1
+      '@protobuf-ts/runtime-rpc': 2.11.1
+
+  '@canton-network/core-rpc-errors@0.7.0':
+    dependencies:
+      '@metamask/rpc-errors': 7.0.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@canton-network/core-signing-lib@0.12.0':
+    dependencies:
+      '@canton-network/core-wallet-auth': 0.11.0
+      fs-extra: 11.3.2
+      lodash: 4.17.21
+      tweetnacl: 1.0.3
+      tweetnacl-util: 0.15.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@canton-network/core-splice-client@0.13.0':
+    dependencies:
+      '@canton-network/core-types': 0.10.0
+      '@canton-network/core-wallet-auth': 0.11.0
+      openapi-fetch: 0.14.1
+      uuid: 11.1.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - supports-color
+
+  '@canton-network/core-token-standard@0.11.0':
+    dependencies:
+      '@canton-network/core-types': 0.10.0
+      lodash: 4.17.21
+      openapi-fetch: 0.14.1
+      uuid: 11.1.0
+      zod: 3.25.76
+
+  '@canton-network/core-tx-visualizer@0.11.0':
+    dependencies:
+      '@canton-network/core-ledger-proto': 0.11.0
+      '@types/node': 22.19.1
+      camelcase-keys: 9.1.3
+
+  '@canton-network/core-types@0.10.0':
+    dependencies:
+      uuid: 11.1.0
+      zod: 3.25.76
+
+  '@canton-network/core-wallet-auth@0.11.0':
+    dependencies:
+      '@canton-network/core-rpc-errors': 0.7.0
+      '@canton-network/core-types': 0.10.0
+      jose: 5.10.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - supports-color
+
+  '@canton-network/wallet-sdk@0.16.0':
+    dependencies:
+      '@canton-network/core-ledger-client': 0.17.0
+      '@canton-network/core-ledger-proto': 0.11.0
+      '@canton-network/core-signing-lib': 0.12.0
+      '@canton-network/core-splice-client': 0.13.0
+      '@canton-network/core-token-standard': 0.11.0
+      '@canton-network/core-tx-visualizer': 0.11.0
+      '@canton-network/core-types': 0.10.0
+      '@canton-network/core-wallet-auth': 0.11.0
+      jose: 5.10.0
+      pino: 10.1.0
+      uuid: 11.1.0
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@changesets/apply-release-plan@7.0.10':
     dependencies:
       '@changesets/config': 3.1.1
@@ -3261,6 +4908,13 @@ snapshots:
       human-id: 4.1.1
       prettier: 2.8.8
 
+<<<<<<< HEAD
+=======
+  '@commander-js/extra-typings@14.0.0(commander@14.0.2)':
+    dependencies:
+      commander: 14.0.2
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -3404,6 +5058,43 @@ snapshots:
       '@eslint/core': 0.12.0
       levn: 0.4.1
 
+<<<<<<< HEAD
+=======
+  '@ethereumjs/common@3.2.0':
+    dependencies:
+      '@ethereumjs/util': 8.1.0
+      crc-32: 1.2.2
+
+  '@ethereumjs/rlp@4.0.1': {}
+
+  '@ethereumjs/tx@4.2.0':
+    dependencies:
+      '@ethereumjs/common': 3.2.0
+      '@ethereumjs/rlp': 4.0.1
+      '@ethereumjs/util': 8.1.0
+      ethereum-cryptography: 2.2.1
+
+  '@ethereumjs/util@8.1.0':
+    dependencies:
+      '@ethereumjs/rlp': 4.0.1
+      ethereum-cryptography: 2.2.1
+      micro-ftch: 0.3.1
+
+  '@fastify/busboy@2.1.1': {}
+
+  '@grpc/grpc-js@1.14.1':
+    dependencies:
+      '@grpc/proto-loader': 0.8.0
+      '@js-sdsl/ordered-map': 4.4.2
+
+  '@grpc/proto-loader@0.8.0':
+    dependencies:
+      lodash.camelcase: 4.3.0
+      long: 5.3.2
+      protobufjs: 7.5.4
+      yargs: 17.7.2
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -3417,6 +5108,134 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.2': {}
 
+<<<<<<< HEAD
+=======
+  '@inquirer/ansi@1.0.2': {}
+
+  '@inquirer/checkbox@4.3.1(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/confirm@5.1.20(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/core@10.3.1(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      cli-width: 4.1.0
+      mute-stream: 3.0.0
+      signal-exit: 4.1.0
+      wrap-ansi: 6.2.0
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/editor@4.2.22(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/external-editor': 1.0.3(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/expand@4.0.22(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/external-editor@1.0.3(@types/node@24.10.1)':
+    dependencies:
+      chardet: 2.1.1
+      iconv-lite: 0.7.0
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/figures@1.0.15': {}
+
+  '@inquirer/input@4.3.0(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/number@3.0.22(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/password@4.0.22(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/prompts@7.10.0(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/checkbox': 4.3.1(@types/node@24.10.1)
+      '@inquirer/confirm': 5.1.20(@types/node@24.10.1)
+      '@inquirer/editor': 4.2.22(@types/node@24.10.1)
+      '@inquirer/expand': 4.0.22(@types/node@24.10.1)
+      '@inquirer/input': 4.3.0(@types/node@24.10.1)
+      '@inquirer/number': 3.0.22(@types/node@24.10.1)
+      '@inquirer/password': 4.0.22(@types/node@24.10.1)
+      '@inquirer/rawlist': 4.1.10(@types/node@24.10.1)
+      '@inquirer/search': 3.2.1(@types/node@24.10.1)
+      '@inquirer/select': 4.4.1(@types/node@24.10.1)
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/rawlist@4.1.10(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/search@3.2.1(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/select@4.4.1(@types/node@24.10.1)':
+    dependencies:
+      '@inquirer/ansi': 1.0.2
+      '@inquirer/core': 10.3.1(@types/node@24.10.1)
+      '@inquirer/figures': 1.0.15
+      '@inquirer/type': 3.0.10(@types/node@24.10.1)
+      yoctocolors-cjs: 2.1.3
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+  '@inquirer/type@3.0.10(@types/node@24.10.1)':
+    optionalDependencies:
+      '@types/node': 24.10.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
@@ -3448,6 +5267,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+<<<<<<< HEAD
+=======
+  '@js-sdsl/ordered-map@4.4.2': {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@manypkg/find-root@1.1.0':
     dependencies:
       '@babel/runtime': 7.26.10
@@ -3464,6 +5288,42 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
+<<<<<<< HEAD
+=======
+  '@metamask/rpc-errors@7.0.3':
+    dependencies:
+      '@metamask/utils': 11.8.1
+      fast-safe-stringify: 2.1.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/superstruct@3.2.1': {}
+
+  '@metamask/utils@11.8.1':
+    dependencies:
+      '@ethereumjs/tx': 4.2.0
+      '@metamask/superstruct': 3.2.1
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+      '@types/debug': 4.1.12
+      '@types/lodash': 4.17.20
+      debug: 4.4.0(supports-color@8.1.1)
+      lodash: 4.17.21
+      pony-cause: 2.1.11
+      semver: 7.7.1
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@noble/curves@1.4.2':
+    dependencies:
+      '@noble/hashes': 1.4.0
+
+  '@noble/hashes@1.4.0': {}
+
+  '@noble/hashes@1.8.0': {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -3507,7 +5367,11 @@ snapshots:
       widest-line: 3.1.0
       wrap-ansi: 7.0.0
 
+<<<<<<< HEAD
   '@oclif/core@2.16.0(@types/node@22.13.10)(typescript@5.8.2)':
+=======
+  '@oclif/core@2.16.0(@types/node@24.10.1)(typescript@5.9.3)':
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       '@types/cli-progress': 3.11.6
       ansi-escapes: 4.3.2
@@ -3532,7 +5396,11 @@ snapshots:
       strip-ansi: 6.0.1
       supports-color: 8.1.1
       supports-hyperlinks: 2.3.0
+<<<<<<< HEAD
       ts-node: 10.9.2(@types/node@22.13.10)(typescript@5.8.2)
+=======
+      ts-node: 10.9.2(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       tslib: 2.8.1
       widest-line: 3.1.0
       wordwrap: 1.0.0
@@ -3545,18 +5413,30 @@ snapshots:
 
   '@oclif/linewrap@1.0.0': {}
 
+<<<<<<< HEAD
   '@oclif/plugin-help@5.2.20(@types/node@22.13.10)(typescript@5.8.2)':
     dependencies:
       '@oclif/core': 2.16.0(@types/node@22.13.10)(typescript@5.8.2)
+=======
+  '@oclif/plugin-help@5.2.20(@types/node@24.10.1)(typescript@5.9.3)':
+    dependencies:
+      '@oclif/core': 2.16.0(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
       - '@types/node'
       - typescript
 
+<<<<<<< HEAD
   '@oclif/plugin-not-found@2.4.3(@types/node@22.13.10)(typescript@5.8.2)':
     dependencies:
       '@oclif/core': 2.16.0(@types/node@22.13.10)(typescript@5.8.2)
+=======
+  '@oclif/plugin-not-found@2.4.3(@types/node@24.10.1)(typescript@5.9.3)':
+    dependencies:
+      '@oclif/core': 2.16.0(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       chalk: 4.1.2
       fast-levenshtein: 3.0.0
     transitivePeerDependencies:
@@ -3565,9 +5445,15 @@ snapshots:
       - '@types/node'
       - typescript
 
+<<<<<<< HEAD
   '@oclif/plugin-update@3.2.4(@types/node@22.13.10)(typescript@5.8.2)':
     dependencies:
       '@oclif/core': 2.16.0(@types/node@22.13.10)(typescript@5.8.2)
+=======
+  '@oclif/plugin-update@3.2.4(@types/node@24.10.1)(typescript@5.9.3)':
+    dependencies:
+      '@oclif/core': 2.16.0(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       chalk: 4.1.2
       cross-spawn: 7.0.6
       debug: 4.4.0(supports-color@8.1.1)
@@ -3586,9 +5472,15 @@ snapshots:
       - supports-color
       - typescript
 
+<<<<<<< HEAD
   '@oclif/plugin-warn-if-update-available@2.1.1(@types/node@22.13.10)(typescript@5.8.2)':
     dependencies:
       '@oclif/core': 2.16.0(@types/node@22.13.10)(typescript@5.8.2)
+=======
+  '@oclif/plugin-warn-if-update-available@2.1.1(@types/node@24.10.1)(typescript@5.9.3)':
+    dependencies:
+      '@oclif/core': 2.16.0(@types/node@24.10.1)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       chalk: 4.1.2
       debug: 4.4.0(supports-color@8.1.1)
       http-call: 5.3.0
@@ -3603,6 +5495,125 @@ snapshots:
 
   '@oclif/screen@3.0.8': {}
 
+<<<<<<< HEAD
+=======
+  '@open-rpc/meta-schema@1.14.9': {}
+
+  '@pinojs/redact@0.4.0': {}
+
+  '@pkgr/core@0.2.9': {}
+
+  '@pm2/agent@2.1.1':
+    dependencies:
+      async: 3.2.6
+      chalk: 3.0.0
+      dayjs: 1.8.36
+      debug: 4.3.7
+      eventemitter2: 5.0.1
+      fast-json-patch: 3.1.1
+      fclone: 1.0.11
+      pm2-axon: 4.0.1
+      pm2-axon-rpc: 0.7.1
+      proxy-agent: 6.4.0
+      semver: 7.5.4
+      ws: 7.5.10
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@pm2/blessed@0.1.81': {}
+
+  '@pm2/io@6.1.0':
+    dependencies:
+      async: 2.6.4
+      debug: 4.3.7
+      eventemitter2: 6.4.9
+      require-in-the-middle: 5.2.0
+      semver: 7.5.4
+      shimmer: 1.2.1
+      signal-exit: 3.0.7
+      tslib: 1.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@pm2/js-api@0.8.0':
+    dependencies:
+      async: 2.6.4
+      debug: 4.3.7
+      eventemitter2: 6.4.9
+      extrareqp2: 1.0.0(debug@4.3.7)
+      ws: 7.5.10
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@pm2/pm2-version-check@1.0.4':
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@protobuf-ts/grpc-transport@2.11.1(@grpc/grpc-js@1.14.1)':
+    dependencies:
+      '@grpc/grpc-js': 1.14.1
+      '@protobuf-ts/runtime': 2.11.1
+      '@protobuf-ts/runtime-rpc': 2.11.1
+
+  '@protobuf-ts/runtime-rpc@2.11.1':
+    dependencies:
+      '@protobuf-ts/runtime': 2.11.1
+
+  '@protobuf-ts/runtime@2.11.1': {}
+
+  '@protobufjs/aspromise@1.1.2': {}
+
+  '@protobufjs/base64@1.1.2': {}
+
+  '@protobufjs/codegen@2.0.4': {}
+
+  '@protobufjs/eventemitter@1.1.0': {}
+
+  '@protobufjs/fetch@1.1.0':
+    dependencies:
+      '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/inquire': 1.1.0
+
+  '@protobufjs/float@1.0.2': {}
+
+  '@protobufjs/inquire@1.1.0': {}
+
+  '@protobufjs/path@1.1.2': {}
+
+  '@protobufjs/pool@1.1.0': {}
+
+  '@protobufjs/utf8@1.1.0': {}
+
+  '@redocly/ajv@8.17.1':
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-uri: 3.1.0
+      json-schema-traverse: 1.0.0
+      require-from-string: 2.0.2
+
+  '@redocly/config@0.22.2': {}
+
+  '@redocly/openapi-core@1.34.5(supports-color@10.2.2)':
+    dependencies:
+      '@redocly/ajv': 8.17.1
+      '@redocly/config': 0.22.2
+      colorette: 1.4.0
+      https-proxy-agent: 7.0.6(supports-color@10.2.2)
+      js-levenshtein: 1.1.6
+      js-yaml: 4.1.0
+      minimatch: 5.1.6
+      pluralize: 8.0.0
+      yaml-ast-parser: 0.0.43
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@rollup/rollup-android-arm-eabi@4.35.0':
     optional: true
 
@@ -3660,13 +5671,37 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.35.0':
     optional: true
 
+<<<<<<< HEAD
+=======
+  '@scure/base@1.1.9': {}
+
+  '@scure/base@1.2.6': {}
+
+  '@scure/bip32@1.4.0':
+    dependencies:
+      '@noble/curves': 1.4.2
+      '@noble/hashes': 1.4.0
+      '@scure/base': 1.1.9
+
+  '@scure/bip39@1.3.0':
+    dependencies:
+      '@noble/hashes': 1.4.0
+      '@scure/base': 1.1.9
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@standard-schema/spec@1.0.0': {}
 
+<<<<<<< HEAD
   '@stylistic/eslint-plugin@4.2.0(eslint@9.22.0)(typescript@5.8.2)':
     dependencies:
       '@typescript-eslint/utils': 8.26.1(eslint@9.22.0)(typescript@5.8.2)
+=======
+  '@stylistic/eslint-plugin@4.2.0(eslint@9.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       eslint: 9.22.0
       eslint-visitor-keys: 4.2.0
       espree: 10.3.0
@@ -3676,6 +5711,11 @@ snapshots:
       - supports-color
       - typescript
 
+<<<<<<< HEAD
+=======
+  '@tootallnate/quickjs-emscripten@0.23.0': {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@ts-graphviz/adapter@2.0.6':
     dependencies:
       '@ts-graphviz/common': 2.1.5
@@ -3701,24 +5741,64 @@ snapshots:
 
   '@types/cli-progress@3.11.6':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.13.10
+=======
+      '@types/node': 22.19.1
+
+  '@types/debug@4.1.12':
+    dependencies:
+      '@types/ms': 2.1.0
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   '@types/estree@1.0.6': {}
 
   '@types/json-schema@7.0.15': {}
 
+<<<<<<< HEAD
   '@types/minimatch@3.0.5': {}
 
+=======
+  '@types/lodash@4.17.20': {}
+
+  '@types/minimatch@3.0.5': {}
+
+  '@types/ms@2.1.0': {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@types/node@12.20.55': {}
 
   '@types/node@22.13.10':
     dependencies:
       undici-types: 6.20.0
 
+<<<<<<< HEAD
+=======
+  '@types/node@22.19.1':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/node@24.10.1':
+    dependencies:
+      undici-types: 7.16.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@types/parse-json@4.0.2': {}
 
   '@types/resolve@1.20.6': {}
 
+<<<<<<< HEAD
+=======
+  '@types/tar-fs@2.0.4':
+    dependencies:
+      '@types/node': 24.10.1
+      '@types/tar-stream': 3.1.4
+
+  '@types/tar-stream@3.1.4':
+    dependencies:
+      '@types/node': 24.10.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)(typescript@5.8.2)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
@@ -3736,6 +5816,26 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.9.3))(eslint@9.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@eslint-community/regexpp': 4.12.1
+      '@typescript-eslint/parser': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      '@typescript-eslint/scope-manager': 8.26.1
+      '@typescript-eslint/type-utils': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.26.1
+      eslint: 9.22.0
+      graphemer: 1.4.0
+      ignore: 5.3.2
+      natural-compare: 1.4.0
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.26.1
@@ -3748,6 +5848,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@typescript-eslint/scope-manager': 8.26.1
+      '@typescript-eslint/types': 8.26.1
+      '@typescript-eslint/typescript-estree': 8.26.1(typescript@5.9.3)
+      '@typescript-eslint/visitor-keys': 8.26.1
+      debug: 4.4.0(supports-color@8.1.1)
+      eslint: 9.22.0
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/scope-manager@8.26.1':
     dependencies:
       '@typescript-eslint/types': 8.26.1
@@ -3764,6 +5879,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/type-utils@8.26.1(eslint@9.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@typescript-eslint/typescript-estree': 8.26.1(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      debug: 4.4.0(supports-color@8.1.1)
+      eslint: 9.22.0
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/types@8.26.1': {}
 
   '@typescript-eslint/typescript-estree@8.26.1(typescript@5.8.2)':
@@ -3780,6 +5909,23 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/typescript-estree@8.26.1(typescript@5.9.3)':
+    dependencies:
+      '@typescript-eslint/types': 8.26.1
+      '@typescript-eslint/visitor-keys': 8.26.1
+      debug: 4.4.0(supports-color@8.1.1)
+      fast-glob: 3.3.3
+      is-glob: 4.0.3
+      minimatch: 9.0.5
+      semver: 7.7.1
+      ts-api-utils: 2.0.1(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/utils@8.26.1(eslint@9.22.0)(typescript@5.8.2)':
     dependencies:
       '@eslint-community/eslint-utils': 4.5.1(eslint@9.22.0)
@@ -3791,6 +5937,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/utils@8.26.1(eslint@9.22.0)(typescript@5.9.3)':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.5.1(eslint@9.22.0)
+      '@typescript-eslint/scope-manager': 8.26.1
+      '@typescript-eslint/types': 8.26.1
+      '@typescript-eslint/typescript-estree': 8.26.1(typescript@5.9.3)
+      eslint: 9.22.0
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@typescript-eslint/visitor-keys@8.26.1':
     dependencies:
       '@typescript-eslint/types': 8.26.1
@@ -3807,6 +5967,27 @@ snapshots:
       treeify: 1.1.0
       yargs: 16.2.0
 
+<<<<<<< HEAD
+=======
+  '@veraswap/esbuild-config@0.1.2(@esbuild-plugins/node-resolve@0.2.2(esbuild@0.25.1))(esbuild@0.25.1)(glob@11.0.1)':
+    dependencies:
+      '@esbuild-plugins/node-resolve': 0.2.2(esbuild@0.25.1)
+      esbuild: 0.25.1
+      glob: 11.0.1
+
+  '@veraswap/eslint-config@0.1.4(@eslint/js@9.22.0)(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint-plugin-prettier@5.5.4(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint@9.22.0)(prettier@2.8.8))(eslint@9.22.0)(globals@16.0.0)(prettier@2.8.8)(typescript-eslint@8.26.1(eslint@9.22.0)(typescript@5.8.2))':
+    dependencies:
+      '@eslint/js': 9.22.0
+      eslint: 9.22.0
+      eslint-config-prettier: 10.1.8(eslint@9.22.0)
+      eslint-plugin-prettier: 5.5.4(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint@9.22.0)(prettier@2.8.8)
+      globals: 16.0.0
+      prettier: 2.8.8
+      typescript-eslint: 8.26.1(eslint@9.22.0)(typescript@5.8.2)
+
+  '@veraswap/tsconfig@0.1.1': {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   '@vitest/expect@3.0.9':
     dependencies:
       '@vitest/spy': 3.0.9
@@ -3814,13 +5995,21 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
+<<<<<<< HEAD
   '@vitest/mocker@3.0.9(vite@6.2.2(@types/node@22.13.10)(yaml@2.7.0))':
+=======
+  '@vitest/mocker@3.0.9(vite@6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0))':
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       '@vitest/spy': 3.0.9
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
+<<<<<<< HEAD
       vite: 6.2.2(@types/node@22.13.10)(yaml@2.7.0)
+=======
+      vite: 6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   '@vitest/pretty-format@3.0.9':
     dependencies:
@@ -3889,6 +6078,11 @@ snapshots:
 
   acorn@8.14.1: {}
 
+<<<<<<< HEAD
+=======
+  agent-base@7.1.4: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -3896,6 +6090,15 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
+<<<<<<< HEAD
+=======
+  amp-message@0.1.2:
+    dependencies:
+      amp: 0.3.1
+
+  amp@0.3.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ansi-colors@4.1.3: {}
 
   ansi-escapes@4.3.2:
@@ -3918,8 +6121,20 @@ snapshots:
 
   ansicolors@0.3.2: {}
 
+<<<<<<< HEAD
   any-promise@1.3.0: {}
 
+=======
+  ansis@4.0.0-node10: {}
+
+  any-promise@1.3.0: {}
+
+  anymatch@3.1.3:
+    dependencies:
+      normalize-path: 3.0.0
+      picomatch: 2.3.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   app-module-path@2.2.0: {}
 
   arg@4.1.3: {}
@@ -3955,42 +6170,128 @@ snapshots:
 
   ast-module-types@6.0.1: {}
 
+<<<<<<< HEAD
+=======
+  ast-types@0.13.4:
+    dependencies:
+      tslib: 2.8.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   astral-regex@2.0.0: {}
 
   async-function@1.0.0: {}
 
+<<<<<<< HEAD
+=======
+  async@2.6.4:
+    dependencies:
+      lodash: 4.17.21
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   async@3.2.6: {}
 
   asynckit@0.4.0: {}
 
   at-least-node@1.0.0: {}
 
+<<<<<<< HEAD
+=======
+  atomic-sleep@1.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
 
+<<<<<<< HEAD
   axios@1.8.3:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.2
+=======
+  axios@1.13.2:
+    dependencies:
+      follow-redirects: 1.15.9(debug@4.3.7)
+      form-data: 4.0.4
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
+<<<<<<< HEAD
   balanced-match@1.0.2: {}
 
   base64-js@1.5.1: {}
 
+=======
+  b4a@1.7.3: {}
+
+  balanced-match@1.0.2: {}
+
+  bare-events@2.8.2: {}
+
+  bare-fs@4.5.1:
+    dependencies:
+      bare-events: 2.8.2
+      bare-path: 3.0.0
+      bare-stream: 2.7.0(bare-events@2.8.2)
+      bare-url: 2.3.2
+      fast-fifo: 1.3.2
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - react-native-b4a
+    optional: true
+
+  bare-os@3.6.2:
+    optional: true
+
+  bare-path@3.0.0:
+    dependencies:
+      bare-os: 3.6.2
+    optional: true
+
+  bare-stream@2.7.0(bare-events@2.8.2):
+    dependencies:
+      streamx: 2.23.0
+    optionalDependencies:
+      bare-events: 2.8.2
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - react-native-b4a
+    optional: true
+
+  bare-url@2.3.2:
+    dependencies:
+      bare-path: 3.0.0
+    optional: true
+
+  base64-js@1.5.1: {}
+
+  basic-ftp@5.0.5: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   better-path-resolve@1.0.0:
     dependencies:
       is-windows: 1.0.2
 
+<<<<<<< HEAD
+=======
+  bignumber.js@9.3.1: {}
+
+  binary-extensions@2.3.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   bl@4.1.0:
     dependencies:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+<<<<<<< HEAD
+=======
+  bodec@0.1.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   brace-expansion@1.1.11:
     dependencies:
       balanced-match: 1.0.2
@@ -4004,6 +6305,11 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
+<<<<<<< HEAD
+=======
+  buffer-from@1.1.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   buffer@5.7.1:
     dependencies:
       base64-js: 1.5.1
@@ -4034,8 +6340,22 @@ snapshots:
 
   callsites@3.1.0: {}
 
+<<<<<<< HEAD
   camelcase@6.3.0: {}
 
+=======
+  camelcase-keys@9.1.3:
+    dependencies:
+      camelcase: 8.0.0
+      map-obj: 5.0.0
+      quick-lru: 6.1.2
+      type-fest: 4.41.0
+
+  camelcase@6.3.0: {}
+
+  camelcase@8.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cardinal@2.1.1:
     dependencies:
       ansicolors: 0.3.2
@@ -4059,6 +6379,14 @@ snapshots:
       escape-string-regexp: 1.0.5
       supports-color: 5.5.0
 
+<<<<<<< HEAD
+=======
+  chalk@3.0.0:
+    dependencies:
+      ansi-styles: 4.3.0
+      supports-color: 7.2.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   chalk@4.1.2:
     dependencies:
       ansi-styles: 4.3.0
@@ -4066,10 +6394,35 @@ snapshots:
 
   chalk@5.4.1: {}
 
+<<<<<<< HEAD
   chardet@0.7.0: {}
 
   check-error@2.1.1: {}
 
+=======
+  change-case@5.4.4: {}
+
+  chardet@0.7.0: {}
+
+  chardet@2.1.1: {}
+
+  charm@0.1.2: {}
+
+  check-error@2.1.1: {}
+
+  chokidar@3.6.0:
+    dependencies:
+      anymatch: 3.1.3
+      braces: 3.0.3
+      glob-parent: 5.1.2
+      is-binary-path: 2.1.0
+      is-glob: 4.0.3
+      normalize-path: 3.0.0
+      readdirp: 3.6.0
+    optionalDependencies:
+      fsevents: 2.3.3
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   chownr@1.1.4: {}
 
   ci-info@3.9.0: {}
@@ -4092,14 +6445,34 @@ snapshots:
 
   cli-spinners@2.9.2: {}
 
+<<<<<<< HEAD
   cli-width@3.0.0: {}
 
+=======
+  cli-tableau@2.0.1:
+    dependencies:
+      chalk: 3.0.0
+
+  cli-width@3.0.0: {}
+
+  cli-width@4.1.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cliui@7.0.4:
     dependencies:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
 
+<<<<<<< HEAD
+=======
+  cliui@8.0.1:
+    dependencies:
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 7.0.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   clone@1.0.4: {}
 
   color-convert@1.9.3:
@@ -4114,6 +6487,13 @@ snapshots:
 
   color-name@1.1.4: {}
 
+<<<<<<< HEAD
+=======
+  colorette@1.4.0: {}
+
+  colors@1.4.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
@@ -4122,6 +6502,13 @@ snapshots:
 
   commander@13.1.0: {}
 
+<<<<<<< HEAD
+=======
+  commander@14.0.2: {}
+
+  commander@2.15.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   commander@7.2.0: {}
 
   commondir@1.0.1: {}
@@ -4138,17 +6525,32 @@ snapshots:
       path-type: 4.0.0
       yaml: 1.10.2
 
+<<<<<<< HEAD
   cosmiconfig@9.0.0(typescript@5.8.2):
+=======
+  cosmiconfig@9.0.0(typescript@5.9.3):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
       js-yaml: 4.1.0
       parse-json: 5.2.0
     optionalDependencies:
+<<<<<<< HEAD
       typescript: 5.8.2
 
   create-require@1.1.1: {}
 
+=======
+      typescript: 5.9.3
+
+  crc-32@1.2.2: {}
+
+  create-require@1.1.1: {}
+
+  croner@4.1.97: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   cross-spawn@6.0.6:
     dependencies:
       nice-try: 1.0.5
@@ -4163,6 +6565,13 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
+<<<<<<< HEAD
+=======
+  culvert@0.1.2: {}
+
+  data-uri-to-buffer@6.0.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   data-view-buffer@1.0.2:
     dependencies:
       call-bound: 1.0.4
@@ -4181,12 +6590,42 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
+<<<<<<< HEAD
+=======
+  dayjs@1.11.15: {}
+
+  dayjs@1.11.19: {}
+
+  dayjs@1.8.36: {}
+
+  debug@3.2.7:
+    dependencies:
+      ms: 2.1.3
+
+  debug@4.3.7:
+    dependencies:
+      ms: 2.1.3
+
+  debug@4.4.0(supports-color@10.2.2):
+    dependencies:
+      ms: 2.1.3
+    optionalDependencies:
+      supports-color: 10.2.2
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   debug@4.4.0(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 8.1.1
 
+<<<<<<< HEAD
+=======
+  debug@4.4.3:
+    dependencies:
+      ms: 2.1.3
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   deep-eql@5.0.2: {}
 
   deep-extend@0.6.0: {}
@@ -4209,6 +6648,15 @@ snapshots:
       has-property-descriptors: 1.0.2
       object-keys: 1.1.1
 
+<<<<<<< HEAD
+=======
+  degenerator@5.0.1:
+    dependencies:
+      ast-types: 0.13.4
+      escodegen: 2.1.0
+      esprima: 4.0.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   delayed-stream@1.0.0: {}
 
   depcheck@1.4.7:
@@ -4244,7 +6692,11 @@ snapshots:
       commander: 12.1.0
       filing-cabinet: 5.0.3
       precinct: 12.2.0
+<<<<<<< HEAD
       typescript: 5.8.2
+=======
+      typescript: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     transitivePeerDependencies:
       - supports-color
 
@@ -4288,6 +6740,7 @@ snapshots:
 
   detective-stylus@5.0.1: {}
 
+<<<<<<< HEAD
   detective-typescript@14.0.0(typescript@5.8.2):
     dependencies:
       '@typescript-eslint/typescript-estree': 8.26.1(typescript@5.8.2)
@@ -4298,6 +6751,18 @@ snapshots:
       - supports-color
 
   detective-vue2@2.2.0(typescript@5.8.2):
+=======
+  detective-typescript@14.0.0(typescript@5.9.3):
+    dependencies:
+      '@typescript-eslint/typescript-estree': 8.26.1(typescript@5.9.3)
+      ast-module-types: 6.0.1
+      node-source-walk: 7.0.1
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+  detective-vue2@2.2.0(typescript@5.9.3):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       '@dependents/detective-less': 5.0.1
       '@vue/compiler-sfc': 3.5.13
@@ -4305,17 +6770,28 @@ snapshots:
       detective-sass: 6.0.1
       detective-scss: 5.0.1
       detective-stylus: 5.0.1
+<<<<<<< HEAD
       detective-typescript: 14.0.0(typescript@5.8.2)
       typescript: 5.8.2
+=======
+      detective-typescript: 14.0.0(typescript@5.9.3)
+      typescript: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     transitivePeerDependencies:
       - supports-color
 
   diff@4.0.2: {}
 
+<<<<<<< HEAD
+=======
+  diff@8.0.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   dir-glob@3.0.1:
     dependencies:
       path-type: 4.0.0
 
+<<<<<<< HEAD
   dotenv-vault@1.26.2(@types/node@22.13.10)(typescript@5.8.2):
     dependencies:
       '@oclif/core': 1.26.2
@@ -4324,6 +6800,16 @@ snapshots:
       '@oclif/plugin-update': 3.2.4(@types/node@22.13.10)(typescript@5.8.2)
       '@oclif/plugin-warn-if-update-available': 2.1.1(@types/node@22.13.10)(typescript@5.8.2)
       axios: 1.8.3
+=======
+  dotenv-vault@1.26.2(@types/node@24.10.1)(typescript@5.9.3):
+    dependencies:
+      '@oclif/core': 1.26.2
+      '@oclif/plugin-help': 5.2.20(@types/node@24.10.1)(typescript@5.9.3)
+      '@oclif/plugin-not-found': 2.4.3(@types/node@24.10.1)(typescript@5.9.3)
+      '@oclif/plugin-update': 3.2.4(@types/node@24.10.1)(typescript@5.9.3)
+      '@oclif/plugin-warn-if-update-available': 2.1.1(@types/node@24.10.1)(typescript@5.9.3)
+      axios: 1.13.2
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       chalk: 4.1.2
       dotenv: 16.4.7
     transitivePeerDependencies:
@@ -4368,6 +6854,13 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.2.1
 
+<<<<<<< HEAD
+=======
+  enquirer@2.3.6:
+    dependencies:
+      ansi-colors: 4.1.3
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   enquirer@2.4.1:
     dependencies:
       ansi-colors: 4.1.3
@@ -4500,6 +6993,22 @@ snapshots:
     optionalDependencies:
       source-map: 0.6.1
 
+<<<<<<< HEAD
+=======
+  eslint-config-prettier@10.1.8(eslint@9.22.0):
+    dependencies:
+      eslint: 9.22.0
+
+  eslint-plugin-prettier@5.5.4(eslint-config-prettier@10.1.8(eslint@9.22.0))(eslint@9.22.0)(prettier@2.8.8):
+    dependencies:
+      eslint: 9.22.0
+      prettier: 2.8.8
+      prettier-linter-helpers: 1.0.0
+      synckit: 0.11.11
+    optionalDependencies:
+      eslint-config-prettier: 10.1.8(eslint@9.22.0)
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   eslint-scope@8.3.0:
     dependencies:
       esrecurse: 4.3.0
@@ -4575,6 +7084,26 @@ snapshots:
 
   esutils@2.0.3: {}
 
+<<<<<<< HEAD
+=======
+  ethereum-cryptography@2.2.1:
+    dependencies:
+      '@noble/curves': 1.4.2
+      '@noble/hashes': 1.4.0
+      '@scure/bip32': 1.4.0
+      '@scure/bip39': 1.3.0
+
+  eventemitter2@5.0.1: {}
+
+  eventemitter2@6.4.9: {}
+
+  events-universal@1.0.1:
+    dependencies:
+      bare-events: 2.8.2
+    transitivePeerDependencies:
+      - bare-abort-controller
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   exit@0.1.2: {}
 
   expand-tilde@2.0.2:
@@ -4591,12 +7120,28 @@ snapshots:
       iconv-lite: 0.4.24
       tmp: 0.0.33
 
+<<<<<<< HEAD
+=======
+  extrareqp2@1.0.0(debug@4.3.7):
+    dependencies:
+      follow-redirects: 1.15.9(debug@4.3.7)
+    transitivePeerDependencies:
+      - debug
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-check@3.23.2:
     dependencies:
       pure-rand: 6.1.0
 
   fast-deep-equal@3.1.3: {}
 
+<<<<<<< HEAD
+=======
+  fast-diff@1.3.0: {}
+
+  fast-fifo@1.3.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-glob@3.3.3:
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -4605,6 +7150,11 @@ snapshots:
       merge2: 1.4.1
       micromatch: 4.0.8
 
+<<<<<<< HEAD
+=======
+  fast-json-patch@3.1.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
@@ -4613,12 +7163,24 @@ snapshots:
     dependencies:
       fastest-levenshtein: 1.0.16
 
+<<<<<<< HEAD
+=======
+  fast-safe-stringify@2.1.1: {}
+
+  fast-uri@3.1.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fastest-levenshtein@1.0.16: {}
 
   fastq@1.19.1:
     dependencies:
       reusify: 1.1.0
 
+<<<<<<< HEAD
+=======
+  fclone@1.0.11: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   figures@3.2.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -4645,7 +7207,11 @@ snapshots:
       sass-lookup: 6.1.0
       stylus-lookup: 6.1.0
       tsconfig-paths: 4.2.0
+<<<<<<< HEAD
       typescript: 5.8.2
+=======
+      typescript: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   fill-range@7.1.1:
     dependencies:
@@ -4675,7 +7241,13 @@ snapshots:
 
   flatted@3.3.3: {}
 
+<<<<<<< HEAD
   follow-redirects@1.15.9: {}
+=======
+  follow-redirects@1.15.9(debug@4.3.7):
+    optionalDependencies:
+      debug: 4.3.7
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   for-each@0.3.5:
     dependencies:
@@ -4686,15 +7258,32 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
+<<<<<<< HEAD
   form-data@4.0.2:
+=======
+  form-data@4.0.4:
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
+<<<<<<< HEAD
+=======
+      hasown: 2.0.2
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       mime-types: 2.1.35
 
   fs-constants@1.0.0: {}
 
+<<<<<<< HEAD
+=======
+  fs-extra@11.3.2:
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   fs-extra@7.0.1:
     dependencies:
       graceful-fs: 4.2.11
@@ -4769,6 +7358,27 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
 
+<<<<<<< HEAD
+=======
+  get-tsconfig@4.13.0:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+
+  get-uri@6.0.5:
+    dependencies:
+      basic-ftp: 5.0.5
+      data-uri-to-buffer: 6.0.2
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  git-node-fs@1.0.0(js-git@0.7.8):
+    optionalDependencies:
+      js-git: 0.7.8
+
+  git-sha1@0.1.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   glob-parent@5.1.2:
     dependencies:
       is-glob: 4.0.3
@@ -4893,6 +7503,30 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
+=======
+  http-proxy-agent@7.0.2:
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  https-proxy-agent@7.0.6:
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.0(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  https-proxy-agent@7.0.6(supports-color@10.2.2):
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.0(supports-color@10.2.2)
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   human-id@4.1.1: {}
 
   hyperlinker@1.0.0: {}
@@ -4901,6 +7535,13 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
+<<<<<<< HEAD
+=======
+  iconv-lite@0.7.0:
+    dependencies:
+      safer-buffer: 2.1.2
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
@@ -4916,6 +7557,11 @@ snapshots:
 
   indent-string@4.0.0: {}
 
+<<<<<<< HEAD
+=======
+  index-to-position@1.2.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   inflight@1.0.6:
     dependencies:
       once: 1.4.0
@@ -4949,6 +7595,11 @@ snapshots:
       hasown: 2.0.2
       side-channel: 1.1.0
 
+<<<<<<< HEAD
+=======
+  ip-address@10.1.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   is-array-buffer@3.0.5:
     dependencies:
       call-bind: 1.0.8
@@ -4969,6 +7620,13 @@ snapshots:
     dependencies:
       has-bigints: 1.1.0
 
+<<<<<<< HEAD
+=======
+  is-binary-path@2.1.0:
+    dependencies:
+      binary-extensions: 2.3.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   is-boolean-object@1.2.2:
     dependencies:
       call-bound: 1.0.4
@@ -5107,6 +7765,20 @@ snapshots:
       filelist: 1.0.4
       minimatch: 3.1.2
 
+<<<<<<< HEAD
+=======
+  jose@5.10.0: {}
+
+  js-git@0.7.8:
+    dependencies:
+      bodec: 0.1.0
+      culvert: 0.1.2
+      git-sha1: 0.1.2
+      pako: 0.2.9
+
+  js-levenshtein@1.1.6: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   js-tokens@4.0.0: {}
 
   js-yaml@3.14.1:
@@ -5128,8 +7800,18 @@ snapshots:
 
   json-schema-traverse@0.4.1: {}
 
+<<<<<<< HEAD
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+=======
+  json-schema-traverse@1.0.0: {}
+
+  json-stable-stringify-without-jsonify@1.0.1: {}
+
+  json-stringify-safe@5.0.1:
+    optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
@@ -5181,6 +7863,11 @@ snapshots:
 
   lodash._reinterpolate@3.0.0: {}
 
+<<<<<<< HEAD
+=======
+  lodash.camelcase@4.3.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   lodash.merge@4.6.2: {}
 
   lodash.startcase@4.4.0: {}
@@ -5212,12 +7899,26 @@ snapshots:
       chalk: 5.4.1
       is-unicode-supported: 1.3.0
 
+<<<<<<< HEAD
+=======
+  long@5.3.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   loupe@3.1.3: {}
 
   lru-cache@10.4.3: {}
 
   lru-cache@11.0.2: {}
 
+<<<<<<< HEAD
+=======
+  lru-cache@6.0.0:
+    dependencies:
+      yallist: 4.0.0
+
+  lru-cache@7.18.3: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   madge@8.0.0(typescript@5.8.2):
     dependencies:
       chalk: 4.1.2
@@ -5243,12 +7944,22 @@ snapshots:
 
   make-error@1.3.6: {}
 
+<<<<<<< HEAD
+=======
+  map-obj@5.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   math-intrinsics@1.1.0: {}
 
   memorystream@0.3.1: {}
 
   merge2@1.4.1: {}
 
+<<<<<<< HEAD
+=======
+  micro-ftch@0.3.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
@@ -5290,11 +8001,21 @@ snapshots:
 
   mkdirp-classic@0.5.3: {}
 
+<<<<<<< HEAD
+=======
+  mkdirp@1.0.4: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   module-definition@6.0.1:
     dependencies:
       ast-module-types: 6.0.1
       node-source-walk: 7.0.1
 
+<<<<<<< HEAD
+=======
+  module-details-from-path@1.0.4: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   module-lookup-amd@9.0.4:
     dependencies:
       commander: 12.1.0
@@ -5316,12 +8037,30 @@ snapshots:
 
   mute-stream@0.0.8: {}
 
+<<<<<<< HEAD
+=======
+  mute-stream@3.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   nanoid@3.3.10: {}
 
   natural-compare@1.4.0: {}
 
   natural-orderby@2.0.3: {}
 
+<<<<<<< HEAD
+=======
+  needle@2.4.0:
+    dependencies:
+      debug: 3.2.7
+      iconv-lite: 0.4.24
+      sax: 1.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  netmask@2.0.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   nice-try@1.0.5: {}
 
   node-source-walk@7.0.1:
@@ -5335,6 +8074,11 @@ snapshots:
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
 
+<<<<<<< HEAD
+=======
+  normalize-path@3.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   npm-package-arg@12.0.2:
     dependencies:
       hosted-git-info: 8.0.2
@@ -5369,6 +8113,11 @@ snapshots:
       has-symbols: 1.1.0
       object-keys: 1.1.1
 
+<<<<<<< HEAD
+=======
+  on-exit-leak-free@2.1.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
@@ -5381,6 +8130,38 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
+<<<<<<< HEAD
+=======
+  openapi-fetch@0.14.1:
+    dependencies:
+      openapi-typescript-helpers: 0.0.15
+
+  openapi-fetch@0.15.0:
+    dependencies:
+      openapi-typescript-helpers: 0.0.15
+
+  openapi-typescript-helpers@0.0.15: {}
+
+  openapi-typescript@6.7.6:
+    dependencies:
+      ansi-colors: 4.1.3
+      fast-glob: 3.3.3
+      js-yaml: 4.1.0
+      supports-color: 9.4.0
+      undici: 5.29.0
+      yargs-parser: 21.1.1
+
+  openapi-typescript@7.10.1(typescript@5.8.2):
+    dependencies:
+      '@redocly/openapi-core': 1.34.5(supports-color@10.2.2)
+      ansi-colors: 4.1.3
+      change-case: 5.4.4
+      parse-json: 8.3.0
+      supports-color: 10.2.2
+      typescript: 5.8.2
+      yargs-parser: 21.1.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -5448,12 +8229,38 @@ snapshots:
 
   p-try@2.2.0: {}
 
+<<<<<<< HEAD
+=======
+  pac-proxy-agent@7.2.0:
+    dependencies:
+      '@tootallnate/quickjs-emscripten': 0.23.0
+      agent-base: 7.1.4
+      debug: 4.4.3
+      get-uri: 6.0.5
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
+      pac-resolver: 7.0.1
+      socks-proxy-agent: 8.0.5
+    transitivePeerDependencies:
+      - supports-color
+
+  pac-resolver@7.0.1:
+    dependencies:
+      degenerator: 5.0.1
+      netmask: 2.0.2
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   package-json-from-dist@1.0.1: {}
 
   package-manager-detector@0.2.11:
     dependencies:
       quansync: 0.2.8
 
+<<<<<<< HEAD
+=======
+  pako@0.2.9: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -5470,6 +8277,15 @@ snapshots:
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
 
+<<<<<<< HEAD
+=======
+  parse-json@8.3.0:
+    dependencies:
+      '@babel/code-frame': 7.26.2
+      index-to-position: 1.2.0
+      type-fest: 4.41.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   parse-ms@2.1.0: {}
 
   parse-passwd@1.0.0: {}
@@ -5514,16 +8330,129 @@ snapshots:
 
   pidtree@0.3.1: {}
 
+<<<<<<< HEAD
+=======
+  pidusage@2.0.21:
+    dependencies:
+      safe-buffer: 5.2.1
+    optional: true
+
+  pidusage@3.0.2:
+    dependencies:
+      safe-buffer: 5.2.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   pify@3.0.0: {}
 
   pify@4.0.1: {}
 
+<<<<<<< HEAD
+=======
+  pino-abstract-transport@2.0.0:
+    dependencies:
+      split2: 4.2.0
+
+  pino-std-serializers@7.0.0: {}
+
+  pino@10.1.0:
+    dependencies:
+      '@pinojs/redact': 0.4.0
+      atomic-sleep: 1.0.0
+      on-exit-leak-free: 2.1.2
+      pino-abstract-transport: 2.0.0
+      pino-std-serializers: 7.0.0
+      process-warning: 5.0.0
+      quick-format-unescaped: 4.0.4
+      real-require: 0.2.0
+      safe-stable-stringify: 2.5.0
+      sonic-boom: 4.2.0
+      thread-stream: 3.1.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   please-upgrade-node@3.2.0:
     dependencies:
       semver-compare: 1.0.0
 
   pluralize@8.0.0: {}
 
+<<<<<<< HEAD
+=======
+  pm2-axon-rpc@0.7.1:
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  pm2-axon@4.0.1:
+    dependencies:
+      amp: 0.3.1
+      amp-message: 0.1.2
+      debug: 4.4.3
+      escape-string-regexp: 4.0.0
+    transitivePeerDependencies:
+      - supports-color
+
+  pm2-deploy@1.0.2:
+    dependencies:
+      run-series: 1.1.9
+      tv4: 1.3.0
+
+  pm2-multimeter@0.1.2:
+    dependencies:
+      charm: 0.1.2
+
+  pm2-sysmonit@1.2.8:
+    dependencies:
+      async: 3.2.6
+      debug: 4.4.3
+      pidusage: 2.0.21
+      systeminformation: 5.27.11
+      tx2: 1.0.5
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
+  pm2@6.0.13:
+    dependencies:
+      '@pm2/agent': 2.1.1
+      '@pm2/blessed': 0.1.81
+      '@pm2/io': 6.1.0
+      '@pm2/js-api': 0.8.0
+      '@pm2/pm2-version-check': 1.0.4
+      ansis: 4.0.0-node10
+      async: 3.2.6
+      chokidar: 3.6.0
+      cli-tableau: 2.0.1
+      commander: 2.15.1
+      croner: 4.1.97
+      dayjs: 1.11.15
+      debug: 4.4.3
+      enquirer: 2.3.6
+      eventemitter2: 5.0.1
+      fclone: 1.0.11
+      js-yaml: 4.1.0
+      mkdirp: 1.0.4
+      needle: 2.4.0
+      pidusage: 3.0.2
+      pm2-axon: 4.0.1
+      pm2-axon-rpc: 0.7.1
+      pm2-deploy: 1.0.2
+      pm2-multimeter: 0.1.2
+      promptly: 2.2.0
+      semver: 7.7.2
+      source-map-support: 0.5.21
+      sprintf-js: 1.1.2
+      vizion: 2.2.1
+    optionalDependencies:
+      pm2-sysmonit: 1.2.8
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  pony-cause@2.1.11: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   possible-typed-array-names@1.1.0: {}
 
   postcss-values-parser@6.0.2(postcss@8.5.3):
@@ -5550,17 +8479,33 @@ snapshots:
       detective-sass: 6.0.1
       detective-scss: 5.0.1
       detective-stylus: 5.0.1
+<<<<<<< HEAD
       detective-typescript: 14.0.0(typescript@5.8.2)
       detective-vue2: 2.2.0(typescript@5.8.2)
       module-definition: 6.0.1
       node-source-walk: 7.0.1
       postcss: 8.5.3
       typescript: 5.8.2
+=======
+      detective-typescript: 14.0.0(typescript@5.9.3)
+      detective-vue2: 2.2.0(typescript@5.9.3)
+      module-definition: 6.0.1
+      node-source-walk: 7.0.1
+      postcss: 8.5.3
+      typescript: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     transitivePeerDependencies:
       - supports-color
 
   prelude-ls@1.2.1: {}
 
+<<<<<<< HEAD
+=======
+  prettier-linter-helpers@1.0.0:
+    dependencies:
+      fast-diff: 1.3.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   prettier@2.8.8: {}
 
   pretty-ms@7.0.1:
@@ -5569,11 +8514,51 @@ snapshots:
 
   proc-log@5.0.0: {}
 
+<<<<<<< HEAD
+=======
+  process-warning@5.0.0: {}
+
+  promptly@2.2.0:
+    dependencies:
+      read: 1.0.7
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   prompts@2.4.2:
     dependencies:
       kleur: 3.0.3
       sisteransi: 1.0.5
 
+<<<<<<< HEAD
+=======
+  protobufjs@7.5.4:
+    dependencies:
+      '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/base64': 1.1.2
+      '@protobufjs/codegen': 2.0.4
+      '@protobufjs/eventemitter': 1.1.0
+      '@protobufjs/fetch': 1.1.0
+      '@protobufjs/float': 1.0.2
+      '@protobufjs/inquire': 1.1.0
+      '@protobufjs/path': 1.1.2
+      '@protobufjs/pool': 1.1.0
+      '@protobufjs/utf8': 1.1.0
+      '@types/node': 22.19.1
+      long: 5.3.2
+
+  proxy-agent@6.4.0:
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.3
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
+      lru-cache: 7.18.3
+      pac-proxy-agent: 7.2.0
+      proxy-from-env: 1.1.0
+      socks-proxy-agent: 8.0.5
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   proxy-from-env@1.1.0: {}
 
   pump@3.0.2:
@@ -5589,6 +8574,13 @@ snapshots:
 
   queue-microtask@1.2.3: {}
 
+<<<<<<< HEAD
+=======
+  quick-format-unescaped@4.0.4: {}
+
+  quick-lru@6.1.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   quote-unquote@1.0.0: {}
 
   rc@1.2.8:
@@ -5616,6 +8608,13 @@ snapshots:
       js-yaml: 4.1.0
       strip-bom: 4.0.0
 
+<<<<<<< HEAD
+=======
+  read@1.0.7:
+    dependencies:
+      mute-stream: 0.0.8
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   readable-stream@3.6.2:
     dependencies:
       inherits: 2.0.4
@@ -5626,6 +8625,11 @@ snapshots:
     dependencies:
       picomatch: 2.3.1
 
+<<<<<<< HEAD
+=======
+  real-require@0.2.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   redeyed@2.1.1:
     dependencies:
       esprima: 4.0.1
@@ -5654,6 +8658,19 @@ snapshots:
 
   require-directory@2.1.1: {}
 
+<<<<<<< HEAD
+=======
+  require-from-string@2.0.2: {}
+
+  require-in-the-middle@5.2.0:
+    dependencies:
+      debug: 4.4.3
+      module-details-from-path: 1.0.4
+      resolve: 1.22.10
+    transitivePeerDependencies:
+      - supports-color
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   require-package-name@2.0.1: {}
 
   requirejs-config-file@4.0.0:
@@ -5674,6 +8691,11 @@ snapshots:
 
   resolve-from@5.0.0: {}
 
+<<<<<<< HEAD
+=======
+  resolve-pkg-maps@1.0.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   resolve@1.22.10:
     dependencies:
       is-core-module: 2.16.1
@@ -5728,6 +8750,11 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
+<<<<<<< HEAD
+=======
+  run-series@1.1.9: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
@@ -5753,6 +8780,11 @@ snapshots:
       es-errors: 1.3.0
       is-regex: 1.2.1
 
+<<<<<<< HEAD
+=======
+  safe-stable-stringify@2.5.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   safer-buffer@2.1.2: {}
 
   sass-lookup@6.1.0:
@@ -5760,12 +8792,28 @@ snapshots:
       commander: 12.1.0
       enhanced-resolve: 5.18.1
 
+<<<<<<< HEAD
+=======
+  sax@1.4.3: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   semver-compare@1.0.0: {}
 
   semver@5.7.2: {}
 
+<<<<<<< HEAD
   semver@7.7.1: {}
 
+=======
+  semver@7.5.4:
+    dependencies:
+      lru-cache: 6.0.0
+
+  semver@7.7.1: {}
+
+  semver@7.7.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   set-function-length@1.2.2:
     dependencies:
       define-data-property: 1.1.4
@@ -5802,6 +8850,11 @@ snapshots:
 
   shell-quote@1.8.2: {}
 
+<<<<<<< HEAD
+=======
+  shimmer@1.2.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   side-channel-list@1.0.0:
     dependencies:
       es-errors: 1.3.0
@@ -5848,10 +8901,40 @@ snapshots:
       astral-regex: 2.0.0
       is-fullwidth-code-point: 3.0.0
 
+<<<<<<< HEAD
   source-map-js@1.2.1: {}
 
   source-map@0.6.1:
     optional: true
+=======
+  smart-buffer@4.2.0: {}
+
+  socks-proxy-agent@8.0.5:
+    dependencies:
+      agent-base: 7.1.4
+      debug: 4.4.3
+      socks: 2.8.7
+    transitivePeerDependencies:
+      - supports-color
+
+  socks@2.8.7:
+    dependencies:
+      ip-address: 10.1.0
+      smart-buffer: 4.2.0
+
+  sonic-boom@4.2.0:
+    dependencies:
+      atomic-sleep: 1.0.0
+
+  source-map-js@1.2.1: {}
+
+  source-map-support@0.5.21:
+    dependencies:
+      buffer-from: 1.1.2
+      source-map: 0.6.1
+
+  source-map@0.6.1: {}
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
 
   spawndamnit@3.0.1:
     dependencies:
@@ -5876,8 +8959,17 @@ snapshots:
     dependencies:
       readable-stream: 3.6.2
 
+<<<<<<< HEAD
   sprintf-js@1.0.3: {}
 
+=======
+  split2@4.2.0: {}
+
+  sprintf-js@1.0.3: {}
+
+  sprintf-js@1.1.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   stackback@0.0.2: {}
 
   std-env@3.8.1: {}
@@ -5888,6 +8980,18 @@ snapshots:
     dependencies:
       any-promise: 1.3.0
 
+<<<<<<< HEAD
+=======
+  streamx@2.23.0:
+    dependencies:
+      events-universal: 1.0.1
+      fast-fifo: 1.3.2
+      text-decoder: 1.2.3
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - react-native-b4a
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   string-width@4.2.3:
     dependencies:
       emoji-regex: 8.0.0
@@ -5966,6 +9070,11 @@ snapshots:
     dependencies:
       commander: 12.1.0
 
+<<<<<<< HEAD
+=======
+  supports-color@10.2.2: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   supports-color@5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -5978,6 +9087,11 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
+<<<<<<< HEAD
+=======
+  supports-color@9.4.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   supports-hyperlinks@2.3.0:
     dependencies:
       has-flag: 4.0.0
@@ -5985,13 +9099,25 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+<<<<<<< HEAD
   syncpack@13.0.3(typescript@5.8.2):
+=======
+  synckit@0.11.11:
+    dependencies:
+      '@pkgr/core': 0.2.9
+
+  syncpack@13.0.3(typescript@5.9.3):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       '@effect/schema': 0.75.5(effect@3.13.11)
       chalk: 5.4.1
       chalk-template: 1.1.0
       commander: 13.1.0
+<<<<<<< HEAD
       cosmiconfig: 9.0.0(typescript@5.8.2)
+=======
+      cosmiconfig: 9.0.0(typescript@5.9.3)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       effect: 3.13.11
       enquirer: 2.4.1
       fast-check: 3.23.2
@@ -6008,6 +9134,12 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+<<<<<<< HEAD
+=======
+  systeminformation@5.27.11:
+    optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tapable@2.2.1: {}
 
   tar-fs@2.1.2:
@@ -6017,6 +9149,21 @@ snapshots:
       pump: 3.0.2
       tar-stream: 2.2.0
 
+<<<<<<< HEAD
+=======
+  tar-fs@3.1.1:
+    dependencies:
+      pump: 3.0.2
+      tar-stream: 3.1.7
+    optionalDependencies:
+      bare-fs: 4.5.1
+      bare-path: 3.0.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - bare-buffer
+      - react-native-b4a
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tar-stream@2.2.0:
     dependencies:
       bl: 4.1.0
@@ -6025,8 +9172,32 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+<<<<<<< HEAD
   term-size@2.2.1: {}
 
+=======
+  tar-stream@3.1.7:
+    dependencies:
+      b4a: 1.7.3
+      fast-fifo: 1.3.2
+      streamx: 2.23.0
+    transitivePeerDependencies:
+      - bare-abort-controller
+      - react-native-b4a
+
+  term-size@2.2.1: {}
+
+  text-decoder@1.2.3:
+    dependencies:
+      b4a: 1.7.3
+    transitivePeerDependencies:
+      - react-native-b4a
+
+  thread-stream@3.1.0:
+    dependencies:
+      real-require: 0.2.0
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   through2@4.0.2:
     dependencies:
       readable-stream: 3.6.2
@@ -6059,6 +9230,13 @@ snapshots:
     dependencies:
       typescript: 5.8.2
 
+<<<<<<< HEAD
+=======
+  ts-api-utils@2.0.1(typescript@5.9.3):
+    dependencies:
+      typescript: 5.9.3
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   ts-graphviz@2.1.6:
     dependencies:
       '@ts-graphviz/adapter': 2.0.6
@@ -6066,21 +9244,33 @@ snapshots:
       '@ts-graphviz/common': 2.1.5
       '@ts-graphviz/core': 2.0.7
 
+<<<<<<< HEAD
   ts-node@10.9.2(@types/node@22.13.10)(typescript@5.8.2):
+=======
+  ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
+<<<<<<< HEAD
       '@types/node': 22.13.10
+=======
+      '@types/node': 24.10.1
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       acorn: 8.14.1
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
+<<<<<<< HEAD
       typescript: 5.8.2
+=======
+      typescript: 5.9.3
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -6092,8 +9282,22 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
+<<<<<<< HEAD
   tslib@2.8.1: {}
 
+=======
+  tslib@1.9.3: {}
+
+  tslib@2.8.1: {}
+
+  tsx@4.20.6:
+    dependencies:
+      esbuild: 0.25.1
+      get-tsconfig: 4.13.0
+    optionalDependencies:
+      fsevents: 2.3.3
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   tunnel-agent@0.6.0:
     dependencies:
       safe-buffer: 5.2.1
@@ -6125,12 +9329,31 @@ snapshots:
       turbo-windows-64: 2.4.4
       turbo-windows-arm64: 2.4.4
 
+<<<<<<< HEAD
+=======
+  tv4@1.3.0: {}
+
+  tweetnacl-util@0.15.1: {}
+
+  tweetnacl@1.0.3: {}
+
+  tx2@1.0.5:
+    dependencies:
+      json-stringify-safe: 5.0.1
+    optional: true
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
 
   type-fest@0.21.3: {}
 
+<<<<<<< HEAD
+=======
+  type-fest@4.41.0: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   typed-array-buffer@1.0.3:
     dependencies:
       call-bound: 1.0.4
@@ -6174,8 +9397,27 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   typescript@5.8.2: {}
 
+=======
+  typescript-eslint@8.26.1(eslint@9.22.0)(typescript@5.9.3):
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.9.3))(eslint@9.22.0)(typescript@5.9.3)
+      '@typescript-eslint/parser': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0)(typescript@5.9.3)
+      eslint: 9.22.0
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - supports-color
+
+  typescript-lru-cache@2.0.0: {}
+
+  typescript@5.8.2: {}
+
+  typescript@5.9.3: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   unbox-primitive@1.1.0:
     dependencies:
       call-bound: 1.0.4
@@ -6185,6 +9427,17 @@ snapshots:
 
   undici-types@6.20.0: {}
 
+<<<<<<< HEAD
+=======
+  undici-types@6.21.0: {}
+
+  undici-types@7.16.0: {}
+
+  undici@5.29.0:
+    dependencies:
+      '@fastify/busboy': 2.1.1
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   unicorn-magic@0.3.0: {}
 
   universalify@0.1.2: {}
@@ -6197,6 +9450,15 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
+<<<<<<< HEAD
+=======
+  uuid@11.1.0: {}
+
+  uuid@13.0.0: {}
+
+  uuid@9.0.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   v8-compile-cache-lib@3.0.1: {}
 
   validate-npm-package-license@3.0.4:
@@ -6206,13 +9468,21 @@ snapshots:
 
   validate-npm-package-name@6.0.0: {}
 
+<<<<<<< HEAD
   vite-node@3.0.9(@types/node@22.13.10)(yaml@2.7.0):
+=======
+  vite-node@3.0.9(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       cac: 6.7.14
       debug: 4.4.0(supports-color@8.1.1)
       es-module-lexer: 1.6.0
       pathe: 2.0.3
+<<<<<<< HEAD
       vite: 6.2.2(@types/node@22.13.10)(yaml@2.7.0)
+=======
+      vite: 6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -6227,7 +9497,11 @@ snapshots:
       - tsx
       - yaml
 
+<<<<<<< HEAD
   vite@6.2.2(@types/node@22.13.10)(yaml@2.7.0):
+=======
+  vite@6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0):
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
     dependencies:
       esbuild: 0.25.1
       postcss: 8.5.3
@@ -6235,12 +9509,22 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.13.10
       fsevents: 2.3.3
+<<<<<<< HEAD
       yaml: 2.7.0
 
   vitest@3.0.9(@types/node@22.13.10)(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 3.0.9
       '@vitest/mocker': 3.0.9(vite@6.2.2(@types/node@22.13.10)(yaml@2.7.0))
+=======
+      tsx: 4.20.6
+      yaml: 2.7.0
+
+  vitest@3.0.9(@types/debug@4.1.12)(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0):
+    dependencies:
+      '@vitest/expect': 3.0.9
+      '@vitest/mocker': 3.0.9(vite@6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0))
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       '@vitest/pretty-format': 3.0.9
       '@vitest/runner': 3.0.9
       '@vitest/snapshot': 3.0.9
@@ -6256,10 +9540,18 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.0.2
       tinyrainbow: 2.0.0
+<<<<<<< HEAD
       vite: 6.2.2(@types/node@22.13.10)(yaml@2.7.0)
       vite-node: 3.0.9(@types/node@22.13.10)(yaml@2.7.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
+=======
+      vite: 6.2.2(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+      vite-node: 3.0.9(@types/node@22.13.10)(tsx@4.20.6)(yaml@2.7.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/debug': 4.1.12
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
       '@types/node': 22.13.10
     transitivePeerDependencies:
       - jiti
@@ -6275,6 +9567,16 @@ snapshots:
       - tsx
       - yaml
 
+<<<<<<< HEAD
+=======
+  vizion@2.2.1:
+    dependencies:
+      async: 2.6.4
+      git-node-fs: 1.0.0(js-git@0.7.8)
+      ini: 1.3.8
+      js-git: 0.7.8
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   walkdir@0.4.1: {}
 
   wcwidth@1.0.1:
@@ -6363,8 +9665,19 @@ snapshots:
 
   wrappy@1.0.2: {}
 
+<<<<<<< HEAD
   y18n@5.0.8: {}
 
+=======
+  ws@7.5.10: {}
+
+  y18n@5.0.8: {}
+
+  yallist@4.0.0: {}
+
+  yaml-ast-parser@0.0.43: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   yaml@1.10.2: {}
 
   yaml@2.7.0:
@@ -6372,6 +9685,11 @@ snapshots:
 
   yargs-parser@20.2.9: {}
 
+<<<<<<< HEAD
+=======
+  yargs-parser@21.1.1: {}
+
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)
   yargs@16.2.0:
     dependencies:
       cliui: 7.0.4
@@ -6382,6 +9700,28 @@ snapshots:
       y18n: 5.0.8
       yargs-parser: 20.2.9
 
+<<<<<<< HEAD
   yn@3.1.1: {}
 
   yocto-queue@0.1.0: {}
+=======
+  yargs@17.7.2:
+    dependencies:
+      cliui: 8.0.1
+      escalade: 3.2.0
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.1.1
+
+  yn@3.1.1: {}
+
+  yocto-queue@0.1.0: {}
+
+  yoctocolors-cjs@2.1.3: {}
+
+  yoctocolors@2.1.2: {}
+
+  zod@3.25.76: {}
+>>>>>>> 47fa8e4 ([WIP] start a typescript integration with localnet)

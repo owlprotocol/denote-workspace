@@ -13,6 +13,9 @@
   "scripts": {
     "build": "turbo run build",
     "build:force": "turbo run build --force",
+    "start:localnet": "tsx ./scripts/src/start-localnet.ts start",
+    "stop:localnet": "tsx ./scripts/src/start-localnet.ts stop",
+    "script:fetch:localnet": "tsx ./scripts/src/fetch-localnet.ts",
     "dev": "turbo run dev",
     "start": "turbo run start",
     "clean": "turbo run clean",

@@ -1,0 +1,90 @@
+module MyTransferFactory where
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1()
+import MyToken()
+import MyToken.TwoStepTransfer as TST
+import MyTokenRules
+import MyTokenTransferInstruction
+
+template MyTransferFactory
+  with
+    registry : Party  -- The party representing the registry/admin
+    rulesCid : ContractId MyTokenRules
+  where
+    signatory registry
+
+    interface instance TI.TransferFactory for MyTransferFactory where
+      view = TI.TransferFactoryView with
+        admin = registry
+        meta = MD.emptyMetadata
+
+      -- Implement transfer factory logic
+      transferFactory_transferImpl _self arg =
+        myTransferFactory_transferImpl this arg
+
+      -- Fetch the factory view
+      transferFactory_publicFetchImpl _self arg = do
+        -- Validate expected admin matches
+        assertMsg "expectedAdmin must match factory admin" (arg.expectedAdmin == registry)
+        pure (view $ toInterface @TI.TransferFactory this)
+
+
+-- | Main implementation of the transfer factory.
+-- Validates the transfer specification.
+-- Note: Cannot auto-lock tokens because MyToken requires both issuer and owner signatures.
+-- Caller must manually lock tokens before calling this factory.
+myTransferFactory_transferImpl
+  : MyTransferFactory
+  -> TI.TransferFactory_Transfer
+  -> Update TI.TransferInstructionResult
+myTransferFactory_transferImpl factory arg = do
+  let TI.TransferFactory_Transfer {expectedAdmin, transfer, extraArgs} = arg
+  
+  -- Validate expected admin matches factory admin
+  require "expectedAdmin mismatch" (expectedAdmin == factory.registry)
+  
+  -- Validate transfer specification (matches Amulet pattern)
+  require "Amount must be positive" (transfer.amount > 0.0)
+  require "At least one holding must be provided" (not $ Prelude.null transfer.inputHoldingCids)
+  assertDeadlineExceeded "Transfer.requestedAt" transfer.requestedAt
+  assertWithinDeadlineHelper "Transfer.executeBefore" transfer.executeBefore
+
+  -- Auto-lock via rules
+  let twoStep = TST.TwoStepTransfer with
+        issuer = transfer.instrumentId.admin
+        sender = transfer.sender
+        receiver = transfer.receiver
+        amount = transfer.amount
+        executeBefore = transfer.executeBefore
+
+  (lockedCid, senderChangeCids, meta) <- TST.prepareTwoStepTransfer twoStep transfer.requestedAt transfer.inputHoldingCids factory.rulesCid
+
+  -- Create transfer instruction pending receiver acceptance
+  instrCid <- create MyTransferInstruction with
+    lockedMyToken = lockedCid
+    transfer = transfer
+
+  pure TI.TransferInstructionResult with
+    senderChangeCids = senderChangeCids
+    output = TI.TransferInstructionResult_Pending with
+      transferInstructionCid = toInterfaceContractId @TI.TransferInstruction instrCid
+    meta = meta
+
+
+-- Helper functions
+
+assertWithinDeadlineHelper : Text -> Time -> Update ()
+assertWithinDeadlineHelper name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has passed") (now <= deadline)
+
+assertDeadlineExceeded : Text -> Time -> Update ()
+assertDeadlineExceeded name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has not passed") (now > deadline)
+
+require : CanAssert m => Text -> Bool -> m ()
+require msg condition = assertMsg msg condition
+

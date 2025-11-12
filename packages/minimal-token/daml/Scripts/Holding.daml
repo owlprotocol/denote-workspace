@@ -1,0 +1,93 @@
+module Scripts.Holding where
+
+import Daml.Script
+
+setupHolding: Script HoldingState
+setupHolding = script do
+  alice <- allocatePartyByHint (PartyIdHint "Alice")
+  bank  <- allocatePartyByHint (PartyIdHint "Bank")
+  bob   <- allocatePartyByHint (PartyIdHint "Bob")
+
+  {- -- TODO: Adapt accordingly
+  aliceRequestCid <- submit alice do
+  createCmd CreateAccount.Request with
+    owner = alice
+    custodian = bank
+  
+  -- TODO: equivalent is maybe WalletClient
+  aliceAccount <- submit bank do
+    exerciseCmd aliceRequestCid CreateAccount.Accept with
+      label = "Alice@Bank"
+      description = "Account of Alice at Bank"
+      accountFactoryCid -- This is equivalent to writing accountFactoryCid = accountFactoryCid
+      holdingFactory
+      observers = []
+  -- SETUP_ALICE_ACCOUNT_END
+
+  -- Bob sets up an account at the Bank
+  bobRequestCid <- submit bob do createCmd CreateAccount.Request with owner = bob; custodian = bank
+  bobAccount <- submit bank do
+    exerciseCmd bobRequestCid CreateAccount.Accept with
+      label = "Bob@Bank"
+      description = "Account of Bob at Bank"
+      accountFactoryCid
+      holdingFactory
+      observers = [alice]
+
+  -- Bank creates the cash instrument
+  -- ISSUE_CASH_INSTRUMENT_BEGIN
+  --let
+  --  instrumentId = Id "USD"
+  --  instrumentVersion = "0"
+  --  instrumentKey = InstrumentKey with
+  --    issuer = bank
+  --    depository = bank
+  --    id = instrumentId
+  --    version = instrumentVersion
+  --    holdingStandard = TransferableFungible
+  now <- getTime
+
+  --submit bank do
+  --  exerciseCmd tokenFactoryCid TokenFactory.Create with
+  --    token = Token with
+  --      instrument = instrumentKey
+  --      description = "Instrument representing units of a generic token"
+  --      validAsOf = now
+  --    observers = mempty
+  -- ISSUE_CASH_INSTRUMENT_END
+
+  -- Alice deposits cash at the bank
+  -- CREATE_ALICE_HOLDING_BEGIN
+  aliceRequestCid <- submit alice do
+    createCmd CreditAccount.Request with
+      account = aliceAccount
+      instrument = instrumentKey
+      -- oscar: Mint more cash to Alice
+      -- amount = 1000.0
+      amount = 1500.0
+
+  aliceCashHoldingCid <- submit bank do exerciseCmd aliceRequestCid CreditAccount.Accept
+  -- CREATE_ALICE_HOLDING_END
+
+  -}
+
+
+  pure HoldingState
+    with
+      alice = alice
+      bank = bank
+      bob = bob
+
+-- | Helper container used to transfer state to the next script.
+data HoldingState = HoldingState
+  with
+    alice : Party
+    bank : Party
+    bob: Party
+    --aliceAccount : AccountKey
+    --bobAccount : AccountKey
+    --myToken0InstrumentId : InstrumentKey
+    --tokenFactoryCid : ContractId TokenFactory.I
+    --aliceCashHoldingCid : ContractId Holding.I
+
+

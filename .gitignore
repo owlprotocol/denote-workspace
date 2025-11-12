@@ -56,3 +56,4 @@ temp.*
 # local
 *.local
 
+tools/localnet
