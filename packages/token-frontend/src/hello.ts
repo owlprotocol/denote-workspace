@@ -30,9 +30,10 @@ await sdk.connect();
 
 logger.info("Connecting to topology");
 // await sdk.connectTopology(localNetStaticConfig.LOCALNET_SCAN_PROXY_API_URL);
-await sdk.connectTopology(
-    new URL("http://wallet.localhost:2000/api/validator")
+const LOCALNET_SCAN_PROXY_API_URL = new URL(
+    "http://localhost:2000/api/validator"
 );
+await sdk.connectTopology(LOCALNET_SCAN_PROXY_API_URL);
 
 const keyPair = createKeyPair();
 
