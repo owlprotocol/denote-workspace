@@ -1,0 +1,4 @@
+### Temporary workspace until contracts are refactored (see workspace.backup)
+packages:
+  - "packages/*"
+  - "configs/*"

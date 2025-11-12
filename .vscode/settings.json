@@ -1,0 +1,67 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "editor.formatOnPaste": false, // required
+  "editor.formatOnType": false, // required
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.fontSize": 18,
+  "editor.detectIndentation": true,
+  "files.watcherExclude": {
+    "**/_cjs/**": true,
+    "**/_esm/**": true,
+    "**/_types/**": true,
+    "**/dist/**": true,
+    "**/dist-ssr/**": true,
+    "**/build/**": true,
+    "**/lib/**": true,
+    "**/node_modules/**": true,
+    "**/coverage/**": true,
+    ".turbo": true,
+  },
+  "search.exclude": {
+    "**/_cjs/**": true,
+    "**/_esm/**": true,
+    "**/_types/**": true,
+    "**/dist/**": true,
+    "**/dist-ssr/**": true,
+    "**/build/**": true,
+    "**/lib/**": true,
+    "**/node_modules/**": true,
+    "**/coverage/**": true,
+    ".turbo": true,
+  },
+  "search.followSymlinks": false,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "[handlebars]": {
+    "editor.formatOnSave": false
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "solidity.remappings": [],
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "git.ignoreLimitWarning": true
+}

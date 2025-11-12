@@ -1,0 +1,52 @@
+{
+  "name": "@veraswap/starter-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Veraswap Starter Monorepo",
+  "keywords": [
+    "pnpm",
+    "workspace"
+  ],
+  "license": "MIT",
+  "author": "Leo Vigna",
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "build:force": "turbo run build --force",
+    "dev": "turbo run dev",
+    "start": "turbo run start",
+    "clean": "turbo run clean",
+    "clean:node_modules": "rimraf node_modules ./**/node_modules",
+    "test": "turbo run test",
+    "test:force": "turbo run test --force",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "depcheck": "depcheck && turbo run depcheck",
+    "madge": "turbo run madge",
+    "syncpack": "syncpack list-mismatches",
+    "syncpack:fix": "syncpack fix-mismatches",
+    "dotenv:login": "dotenv-vault login",
+    "dotenv:pull": "dotenv-vault pull",
+    "dotenv:push": "dotenv-vault push",
+    "turbo:login": "turbo login",
+    "turbo:link": "turbo link",
+    "changeset:add": "changeset add",
+    "ci:version": "changeset version",
+    "ci:publish": "pnpm publish -r"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.28.1",
+    "depcheck": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "dotenv-vault": "1.26.2",
+    "rimraf": "^6.0.1",
+    "syncpack": "^13.0.3",
+    "turbo": "^2.4.4"
+  },
+  "packageManager": "pnpm@9.12.2",
+  "engines": {
+    "npm": ">=v10.5.0",
+    "pnpm": ">=9.12.2",
+    "node": "^18.0.0"
+  }
+}

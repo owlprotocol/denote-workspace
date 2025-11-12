@@ -1,0 +1,76 @@
+{
+  "name": "@veraswap/starter-typescript",
+  "version": "0.1.0",
+  "keywords": [],
+  "private": true,
+  "type": "module",
+  "homepage": "https://github.com/veraswap-io/workspace-public",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veraswap-io/workspace-public.git"
+  },
+  "copyright": "Copyright 2024 Veraswap",
+  "license": "MIT",
+  "author": {
+    "name": "Leo Vigna",
+    "email": "leo@veraswap.io",
+    "url": "https://github.com/leovigna"
+  },
+  "files": [
+    "_cjs/*",
+    "_esm/*",
+    "_types/*",
+    "src/*",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "./_cjs/lib/index.cjs",
+  "module": "./_esm/lib/index.mjs",
+  "types": "./_types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./_types/index.d.ts",
+      "require": "./_cjs/lib/index.js",
+      "import": "./_esm/lib/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npm-run-all -p tsc esbuild",
+    "build:watch": "npm-run-all -p tsc:watch esbuild:watch",
+    "clean": "rimraf _cjs _esm _types .turbo",
+    "depcheck": "depcheck",
+    "esbuild": "node esbuild.config.mjs",
+    "esbuild:watch": "ESBUILD_WATCH=true node esbuild.config.mjs",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "madge": "madge src/index.ts -c",
+    "test": "pnpm run test:ci",
+    "test:ci": "vitest --run",
+    "test:watch": "vitest",
+    "tsc": "tsc",
+    "tsc:trace": "tsc --generateTrace lib/trace && analyze-trace lib/trace",
+    "tsc:watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@veraswap/esbuild-config": "latest",
+    "@veraswap/eslint-config": "latest",
+    "@veraswap/tsconfig": "latest",
+    "@types/node": "^22.13.10",
+    "@typescript/analyze-trace": "^0.10.1",
+    "depcheck": "^1.4.7",
+    "madge": "^8.0.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^6.0.1",
+    "typescript": "5.8.2",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.8"
+  },
+  "bugs": {
+    "url": "https://github.com/veraswap-io/workspace-public/issues",
+    "email": "leo@veraswap.io"
+  },
+  "funding": "https://veraswap.io",
+  "engines": {
+    "node": "^18.0.0"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@veraswap/esbuild-config",
+  "version": "0.1.0",
+  "keywords": [
+    "esbuild"
+  ],
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veraswap-io/workspace-public.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Leo Vigna",
+    "email": "leo@veraswap.io",
+    "url": "https://github.com/leovigna"
+  },
+  "files": [
+    "index.mjs",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "require": "./index.mjs",
+      "import": "./index.mjs"
+    }
+  },
+  "scripts": {
+    "depcheck": "depcheck",
+    "lint": "eslint index.mjs",
+    "lint:fix": "eslint index.mjs --fix"
+  },
+  "peerDependencies": {
+    "@esbuild-plugins/node-resolve": "^0.2.2",
+    "@veraswap/eslint-config": "workspace:*",
+    "esbuild": "^0.25.1",
+    "glob": "11.0.1"
+  },
+  "devDependencies": {
+    "depcheck": "^1.4.7"
+  },
+  "bugs": {
+    "url": "https://github.com/veraswap-io/workspace-public/issues",
+    "email": "leo@veraswap.io"
+  },
+  "funding": "https://veraswap.io",
+  "engines": {
+    "node": "^18.0.0"
+  }
+}

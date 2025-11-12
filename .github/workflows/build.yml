@@ -1,0 +1,117 @@
+name: All
+
+on:
+  # Run on all changes to these branches
+  push:
+    branches:
+      - main
+      - develop
+  # Run only if PR exists
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  PNPM_VERSION: 9.12.2
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      ### Build ###
+      # Git Checkout
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      # Node Setup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.19"
+      # PNPM Setup
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: ${{env.PNPM_VERSION}}
+          run_install: false
+      # Get pnpm store directory
+      - name: Set pnpm store directory
+        if: ${{ !env.ACT }}
+        id: pnpm-cache
+        run: |
+          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+      # Setup pnpm cache
+      - uses: actions/cache@v3
+        if: ${{ !env.ACT }}
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-${{env.PNPM_VERSION}}-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{env.PNPM_VERSION}}-store-
+      # Install
+      - run: pnpm i
+        name: Install dependencies
+      # Dependencies
+      - run: pnpm run depcheck
+        name: Dependency Check
+      - run: pnpm run syncpack
+        name: Dependency Synced Versioning Check
+      - run: pnpm run madge
+        name: Circular dependency check
+      # Build
+      - run: pnpm run build
+        name: Build All
+      ### Testing ###
+      ## Foundry Setup (anvil)
+      #- name: Install Foundry
+      #  uses: foundry-rs/foundry-toolchain@v1
+      #  with:
+      #    version: "1.0.1"
+      ## Java Setup (firebase)
+      #- uses: actions/setup-java@v4
+      #  with:
+      #    distribution: "oracle"
+      #    java-version: "17"
+      ## Firebase Binary Cache
+      #- name: Get Firebase Library Versions For Binary Caching
+      #  if: ${{ !env.ACT }}
+      #  id: cache-settings
+      #  run: |
+      #    echo "::set-output name=firebase-tools::$(pnpm list -s --depth=0 | grep firebase-tools | tail -n 1 | sed 's/ /-/g')"
+      #- name: Cache Firebase Emulator Binaries
+      #  if: ${{ !env.ACT }}
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: ~/.cache/firebase/emulators
+      #    key: ${{ runner.os }}-${{ steps.cache-settings.outputs.firebase-tools }}
+      # Test
+      - run: pnpm run test
+        name: Test All
+      ### Final Checks ###
+      # Lint
+      - run: pnpm run lint
+        name: Lint All
+      ### Release ###
+      #- if: ${{ github.ref == 'refs/heads/main' }}
+      #  name: Set publishing config
+      #  run: pnpm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
+      #  env:
+      #    NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      ## Create Release PR
+      #- if: ${{ github.ref == 'refs/heads/main' }}
+      #  name: Create and publish versions
+      #  uses: changesets/action@v1
+      #  with:
+      #    version: pnpm ci:version
+      #    commit: "chore: update versions"
+      #    title: "chore: update versions"
+      #    publish: pnpm ci:publish
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

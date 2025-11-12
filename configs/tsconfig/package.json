@@ -1,0 +1,36 @@
+{
+  "name": "@veraswap/tsconfig",
+  "version": "0.1.0",
+  "keywords": [
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veraswap-io/workspace-public.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Leo Vigna",
+    "email": "leo@veraswap.io",
+    "url": "https://github.com/leovigna"
+  },
+  "files": [
+    "tsconfig.json"
+  ],
+  "main": "./tsconfig.json",
+  "module": "./tsconfig.json",
+  "scripts": {
+    "depcheck": "depcheck"
+  },
+  "devDependencies": {
+    "depcheck": "^1.4.7"
+  },
+  "bugs": {
+    "url": "https://github.com/veraswap-io/workspace-public/issues",
+    "email": "leo@veraswap.io"
+  },
+  "funding": "https://veraswap.io",
+  "engines": {
+    "node": "^18.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    "editorconfig.editorconfig", //editorconfig
+    "dotenv.dotenv-vscode", //dotenv
+    "eamodio.gitlens", //Git Lens
+    "ecmel.vscode-html-css", //HTML/CSS
+    "jock.svg", //SVG Support
+    "shd101wyy.markdown-preview-enhanced", //Markdown Preview
+    "ms-vsliveshare.vsliveshare", //Liveshare
+    "JuanBlanco.solidity", //Solidity
+    "wayou.vscode-todo-highlight", //Highlight TODOs
+    "vscodevim.vim", //Vim Emulation
+    "dbaeumer.vscode-eslint", //ESLint support
+    "redhat.vscode-yaml", //Yaml support
+    "ChFlick.firecode", //Firestore security rules
+    "bradlc.vscode-tailwindcss", //Tailwind syntax
+    "stivo.tailwind-fold", //Tailwind fold
+    "tamasfe.even-better-toml" //TOML syntax
+  ]
+}
