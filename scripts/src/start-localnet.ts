@@ -49,7 +49,12 @@ if (command === "start") {
         stdio: "inherit",
         env,
     });
+} else if (command === "stop-no-cleanup") {
+    execFileSync(composeBase[0], [...composeBase.slice(1), "stop"], {
+        stdio: "inherit",
+        env,
+    });
 } else {
-    console.error("Usage: start-localnet.ts <start|stop>");
+    console.error("Usage: start-localnet.ts <start|stop|stop-no-cleanup>");
     process.exit(1);
 }
