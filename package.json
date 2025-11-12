@@ -1,14 +1,14 @@
 {
-  "name": "@veraswap/starter-monorepo",
+  "name": "@owlprotocol/denote-workspace",
   "version": "0.1.0",
   "private": true,
-  "description": "Veraswap Starter Monorepo",
+  "description": "Denote Monorepo",
   "keywords": [
     "pnpm",
     "workspace"
   ],
-  "license": "MIT",
-  "author": "Leo Vigna",
+  "license": "BSL-1.0",
+  "author": "Oscar Baracos",
   "type": "module",
   "scripts": {
     "build": "turbo run build",
@@ -47,6 +47,6 @@
   "engines": {
     "npm": ">=v10.5.0",
     "pnpm": ">=9.12.2",
-    "node": "^18.0.0"
+    "node": "^22.0.0"
   }
 }
