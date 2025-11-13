@@ -25,13 +25,8 @@ const sdk = new WalletSDKImpl().configure({
 // console.log({ parties });
 
 await sdk.connect();
-
-logger.info("Connecting to topology");
-// await sdk.connectTopology(localNetStaticConfig.LOCALNET_SCAN_PROXY_API_URL);
-const LOCALNET_SCAN_PROXY_API_URL = new URL(
-    "http://localhost:2000/api/validator"
-);
-await sdk.connectTopology(LOCALNET_SCAN_PROXY_API_URL);
+await sdk.connectAdmin();
+await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
 
 const MINIMAL_TOKEN_PACKAGE_ID =
     "2d5f60afc9d560477b3c73016703e0ecedfcea5d6402586fbb572944e3d3a6db";
@@ -48,21 +43,11 @@ const minimalTokenDarPath = path.join(
     "minimal-token-0.1.0.dar"
 );
 
-logger.info({ isDarUploaded }, "Status of minimal-token dar upload");
-
-if (!isDarUploaded) {
-    try {
-        const darBytes = await fs.readFile(minimalTokenDarPath);
-        const response = await sdk.adminLedger?.uploadDar(darBytes);
-        console.log({ response });
-        logger.info(
-            "minimal-token DAR ensured on participant (uploaded or already present)"
-        );
-    } catch (e) {
-        logger.error(
-            { e, minimalTokenDarPath },
-            "Failed to ensure minimal-token DAR uploaded"
-        );
-        throw e;
-    }
+if (isDarUploaded) {
+    logger.info("minimal-token DAR already uploaded");
+} else {
+    logger.info("Uploading DAR file...");
+    const darBytes = await fs.readFile(minimalTokenDarPath);
+    await sdk.adminLedger!.uploadDar(darBytes);
+    logger.info("DAR uploaded successfully");
 }
