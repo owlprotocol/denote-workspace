@@ -11,6 +11,10 @@ interface TokenFactoryParams {
     instrumentId: string;
 }
 
+export const tokenFactoryTemplateId =
+    "#minimal-token:MyTokenFactory:MyTokenFactory";
+export const tokenTemplateId = "#minimal-token:MyToken:MyToken";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ContractEntry<ContractParams = Record<string, any>> {
     JsActiveContract: {
@@ -41,11 +45,9 @@ const instrumentIdToString = (instrumentId: InstrumentId) =>
     `${instrumentId.admin}:${instrumentId.id}`;
 
 const getCreateTokenFactoryCommand = ({
-    tokenFactoryTemplateId,
     instrumentId,
     issuer,
 }: {
-    tokenFactoryTemplateId: string;
     instrumentId: string;
     issuer: string;
 }): WrappedCommand => ({
@@ -62,16 +64,10 @@ const getCreateTokenFactoryCommand = ({
 export async function createTokenFactory(
     userLedger: LedgerController,
     userKeyPair: { publicKey: string; privateKey: string },
-    params: {
-        tokenFactoryTemplateId: string;
-        instrumentId: string;
-    }
+    instrumentId: string
 ) {
-    const { tokenFactoryTemplateId, instrumentId } = params;
-
     const issuer = userLedger.getPartyId();
     const createTokenFactoryCommand = getCreateTokenFactoryCommand({
-        tokenFactoryTemplateId,
         instrumentId,
         issuer,
     });
@@ -119,12 +115,8 @@ export async function createTokenFactory(
 // Assumes owner is also the party
 export async function getLatestTokenFactory(
     userLedger: LedgerController,
-    params: {
-        tokenFactoryTemplateId: string;
-        instrumentId: string;
-    }
+    instrumentId: string
 ) {
-    const { tokenFactoryTemplateId, instrumentId } = params;
     const issuer = userLedger.getPartyId();
     const end = await userLedger.ledgerEnd();
     const activeContracts = await userLedger.activeContracts({
@@ -159,25 +151,20 @@ export async function getLatestTokenFactory(
 export async function getOrCreateTokenFactory(
     userLedger: LedgerController,
     userKeyPair: { publicKey: string; privateKey: string },
-    params: {
-        tokenFactoryTemplateId: string;
-        instrumentId: string;
-    }
+    instrumentId: string
 ) {
-    const contractId = await getLatestTokenFactory(userLedger, params);
+    const contractId = await getLatestTokenFactory(userLedger, instrumentId);
     if (contractId) return contractId;
 
-    await createTokenFactory(userLedger, userKeyPair, params);
-    return await getLatestTokenFactory(userLedger, params);
+    await createTokenFactory(userLedger, userKeyPair, instrumentId);
+    return await getLatestTokenFactory(userLedger, instrumentId);
 }
 
 export const getMintTokenCommand = ({
-    tokenFactoryTemplateId,
     tokenFactoryContractId,
     receiver,
     amount,
 }: {
-    tokenFactoryTemplateId: string;
     tokenFactoryContractId: string;
     receiver: string;
     amount: number;
@@ -197,7 +184,6 @@ export async function mintToken(
     userLedger: LedgerController,
     userKeyPair: { publicKey: string; privateKey: string },
     params: {
-        tokenFactoryTemplateId: string;
         tokenFactoryContractId: string;
         receiver: string;
         amount: number;
@@ -281,12 +267,10 @@ export async function getBalanceByInstrumentId(
 }
 
 export const getTransferTokenCommand = ({
-    tokenTemplateId,
     tokenContractId,
     newOwner,
     amount,
 }: {
-    tokenTemplateId: string;
     tokenContractId: string;
     newOwner: string;
     amount: number;
@@ -306,7 +290,6 @@ export async function transferToken(
     userLedger: LedgerController,
     userKeyPair: { publicKey: string; privateKey: string },
     params: {
-        tokenTemplateId: string;
         tokenContractId: string;
         newOwner: string;
         amount: number;

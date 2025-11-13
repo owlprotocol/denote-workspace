@@ -8,9 +8,7 @@ import {
 } from "@canton-network/wallet-sdk";
 import { pino } from "pino";
 import {
-    formatHoldingUtxo,
     getBalanceByInstrumentId,
-    getBalances,
     getOrCreateTokenFactory,
     mintToken,
     transferToken,
@@ -26,9 +24,6 @@ const sdk = new WalletSDKImpl().configure({
     ledgerFactory: localNetLedgerDefault,
     tokenStandardFactory: localNetTokenStandardDefault,
 });
-
-const tokenFactoryTemplateId = "#minimal-token:MyTokenFactory:MyTokenFactory";
-const tokenTemplateId = "#minimal-token:MyToken:MyToken";
 
 // const client = createClient<paths>({
 //     baseUrl: "http://localhost:7575/",
@@ -103,7 +98,7 @@ const instrumentId = aliceAllocatedParty!.partyId + "#MyToken";
 const tokenFactoryContractId = await getOrCreateTokenFactory(
     sdk.userLedger!,
     aliceKeyPair,
-    { instrumentId, tokenFactoryTemplateId }
+    instrumentId
 );
 
 if (!tokenFactoryContractId) {
@@ -111,7 +106,6 @@ if (!tokenFactoryContractId) {
 }
 
 await mintToken(sdk.userLedger!, aliceKeyPair, {
-    tokenFactoryTemplateId,
     tokenFactoryContractId,
     amount: 1000,
     receiver: aliceAllocatedParty!.partyId,
@@ -126,7 +120,7 @@ const tokenBalance = await getBalanceByInstrumentId(sdk, {
 // Assume there is only one UTXO for simplicity
 const tokenContractId = tokenBalance.utxos[0].contractId;
 
-console.log({ tokenBalance });
+console.log({ tokenBalance, tokenContractId });
 logger.info("Preparing to transfer 500 tokens from Alice to Bob");
 
 // TODO: FIXME fails with:
