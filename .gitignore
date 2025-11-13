@@ -56,4 +56,7 @@ temp.*
 # local
 *.local
 
+# script exceptions
+!scripts/src/lib/
+
 tools/localnet
