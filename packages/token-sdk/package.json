@@ -1,13 +1,13 @@
 {
-  "name": "@owlprotocol/token-frontend",
+  "name": "@owlprotocol/token-sdk",
   "version": "0.1.0",
   "keywords": [],
   "private": true,
   "type": "module",
-  "homepage": "https://github.com/owlprotocol/token-frontend",
+  "homepage": "https://github.com/owlprotocol/token-sdk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/owlprotocol/token-frontend.git"
+    "url": "https://github.com/owlprotocol/token-sdk.git"
   },
   "copyright": "Copyright 2025 Denote Capital",
   "license": "BSL-1.1",
