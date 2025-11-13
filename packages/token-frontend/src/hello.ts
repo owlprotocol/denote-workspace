@@ -1,11 +1,12 @@
+import { PrettyContract, Holding } from "@canton-network/core-ledger-client";
 import {
     createKeyPair,
     localNetAuthDefault,
     localNetLedgerDefault,
-    localNetStaticConfig,
     localNetTokenStandardDefault,
     signTransactionHash,
     WalletSDKImpl,
+    WrappedCommand,
 } from "@canton-network/wallet-sdk";
 import { pino } from "pino";
 import { v4 } from "uuid";
@@ -27,6 +28,7 @@ const sdk = new WalletSDKImpl().configure({
 // console.log({ parties });
 
 await sdk.connect();
+await sdk.connectAdmin();
 
 logger.info("Connecting to topology");
 // await sdk.connectTopology(localNetStaticConfig.LOCALNET_SCAN_PROXY_API_URL);
@@ -60,31 +62,109 @@ const allocatedParty = await sdk.userLedger?.allocateExternalParty(
 logger.info({ partyId: allocatedParty!.partyId }, "Allocated party");
 await sdk.setPartyId(allocatedParty!.partyId);
 
-logger.info(allocatedParty, "Create ping command for party");
+// TODO: only create the token factory if it doesn't already exist
 
-const createPingCommand = sdk.userLedger?.createPingCommand(
-    allocatedParty!.partyId
+const tokenFactoryTemplateId = "#minimal-token:MyTokenFactory:MyTokenFactory";
+const createTokenFactoryCommand: WrappedCommand = {
+    CreateCommand: {
+        templateId: tokenFactoryTemplateId,
+        createArguments: {
+            issuer: allocatedParty!.partyId,
+            instrumentId: "allocatedParty#MyToken",
+        },
+    },
+};
+
+const prepareTokenFactoryResponse = await sdk.userLedger?.prepareSubmission(
+    createTokenFactoryCommand
 );
+logger.info("Prepared Token Factory Command");
 
-logger.info("Prepare command submission for ping create command");
-const prepareResponse = await sdk.userLedger?.prepareSubmission(
-    createPingCommand
-);
-
-logger.info("Sign transaction hash");
-
-const signedCommandHash = signTransactionHash(
-    prepareResponse!.preparedTransactionHash,
+const signedTokenFactoryCommandHash = signTransactionHash(
+    prepareTokenFactoryResponse!.preparedTransactionHash,
     keyPair.privateKey
 );
 
-logger.info("Submit command");
-
-const response = await sdk.userLedger?.executeSubmissionAndWaitFor(
-    prepareResponse!,
-    signedCommandHash,
+await sdk.userLedger?.executeSubmissionAndWaitFor(
+    prepareTokenFactoryResponse!,
+    signedTokenFactoryCommandHash,
     keyPair.publicKey,
     v4()
 );
 
-logger.info(response, "Executed command submission succeeded");
+logger.info("Created Token Factory");
+
+const end = await sdk.userLedger?.ledgerEnd();
+const activeContracts = await sdk.userLedger?.activeContracts({
+    offset: end!.offset,
+    filterByParty: true,
+    parties: [generatedParty.partyId],
+    templateIds: [tokenFactoryTemplateId],
+});
+
+// Assume latest contract is the one we created
+if (!activeContracts || activeContracts.length === 0) {
+    throw new Error("No active contracts found for Token Factory");
+}
+
+interface ContractEntry {
+    JsActiveContract: {
+        createdEvent: {
+            contractId: string;
+            templateId: string;
+        };
+    };
+}
+const contractEntry = activeContracts[activeContracts.length - 1]
+    .contractEntry as ContractEntry;
+const tokenFactoryContractId =
+    contractEntry.JsActiveContract.createdEvent.contractId;
+console.log({ tokenFactoryContractId });
+
+const mintTokenCommand: WrappedCommand = {
+    ExerciseCommand: {
+        templateId: tokenFactoryTemplateId,
+        contractId: tokenFactoryContractId,
+        choice: "Mint",
+        choiceArgument: {
+            receiver: allocatedParty!.partyId,
+            amount: 1000,
+        },
+    },
+};
+
+const prepareMintTokenResponse = await sdk.userLedger?.prepareSubmission(
+    mintTokenCommand
+);
+logger.info("Prepared Mint Token Command");
+
+const signedMintTokenCommandHash = signTransactionHash(
+    prepareMintTokenResponse!.preparedTransactionHash,
+    keyPair.privateKey
+);
+
+await sdk.userLedger?.executeSubmissionAndWaitFor(
+    prepareMintTokenResponse!,
+    signedMintTokenCommandHash,
+    keyPair.publicKey,
+    v4()
+);
+
+logger.info("Minted Token");
+
+// Holding transactions of allocatedParty
+const holdingTransactions = await sdk.tokenStandard?.listHoldingTransactions();
+console.log({ holdingTransactions: holdingTransactions?.transactions });
+
+const utxos = await sdk.tokenStandard?.listHoldingUtxos(false);
+
+const formatHoldingUtxo = (utxo: PrettyContract<Holding>) => {
+    const view = utxo.interfaceViewValue;
+    const { amount, owner } = view;
+    return {
+        amount,
+        owner,
+        instrumentId: view.instrumentId.id,
+    };
+};
+console.log({ utxos: utxos!.map(formatHoldingUtxo) });
