@@ -28,8 +28,10 @@ await sdk.connect();
 await sdk.connectAdmin();
 await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
 
+// Obtained from runnning:
+// `daml damlc inspect ../minimal-token/.daml/dist/minimal-token-0.1.0.dar | head -1 | awk '{print $2}'`
 const MINIMAL_TOKEN_PACKAGE_ID =
-    "2d5f60afc9d560477b3c73016703e0ecedfcea5d6402586fbb572944e3d3a6db";
+    "1b2a6d23ef6ddeac7a15b3c0f09e8bee8983edcc0291ee670b81a5584790eb4e";
 
 const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
     MINIMAL_TOKEN_PACKAGE_ID

@@ -46,6 +46,18 @@ template MyToken
           expiresAt
           lockContext
 
+    -- TODO: remove this after testing
+    choice Transfer: ContractId MyToken
+      with
+        newOwner: Party
+      controller owner
+      do
+        create MyToken with
+            issuer
+            owner = newOwner
+            instrumentId
+            amount
+
 myTokenMetadata : MyToken -> Api.Token.MetadataV1.Metadata
 myTokenMetadata MyToken{..} =
   Api.Token.MetadataV1.Metadata with
