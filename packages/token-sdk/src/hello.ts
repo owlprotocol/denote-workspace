@@ -116,6 +116,7 @@ await mintToken(sdk.userLedger!, aliceKeyPair, {
     amount: 1000,
     receiver: aliceAllocatedParty!.partyId,
 });
+logger.info("Minted 1000 tokens to Alice");
 
 const tokenBalance = await getBalanceByInstrumentId(sdk, {
     owner: aliceAllocatedParty!.partyId,
@@ -130,13 +131,16 @@ logger.info("Preparing to transfer 500 tokens from Alice to Bob");
 
 // TODO: FIXME fails with:
 // cause: 'Interpretation error: Error: node NodeId(2) (425048c2fd2ee20ce31d06a09ba465a5223832b40bdd248f8397f9c911b14dca:MyToken:MyToken) requires authorizers b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806,f25ef0eb-6606-493f-9285-c09ba60d3e84::1220582708cdbebb247806670d66bb6a62a5732bb012415a44a7f6f509e44d58b38f, but only b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806 were given',
-await transferToken(sdk.userLedger!, aliceKeyPair, {
-    amount: 500,
-    newOwner: bobAllocatedParty!.partyId,
-    tokenTemplateId,
-    tokenContractId,
-});
-logger.info("Transferred 500 tokens from Alice to Bob");
-
-const utxosAfter = await sdk.tokenStandard?.listHoldingUtxos(false);
-console.log({ balances: utxosAfter!.map(formatHoldingUtxo) });
+// await transferToken(sdk.userLedger!, aliceKeyPair, {
+//     amount: 500,
+//     newOwner: bobAllocatedParty!.partyId,
+//     tokenTemplateId,
+//     tokenContractId,
+// });
+// logger.info("Transferred 500 tokens from Alice to Bob");
+//
+// const tokenBalanceAfter = await getBalanceByInstrumentId(sdk, {
+//     owner: aliceAllocatedParty!.partyId,
+//     instrumentId: { admin: aliceAllocatedParty!.partyId, id: instrumentId },
+// });
+// console.log({ tokenBalanceAfter });
