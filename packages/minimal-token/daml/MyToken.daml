@@ -61,11 +61,8 @@ template MyToken
         assertMsg "Transfer amount must be less than or equal to current amount" (amount <= this.amount)
         if amount == this.amount then do
           -- Full transfer
-          resultCid <- create MyToken with
-            issuer
+          resultCid <- create this with
             owner = newOwner
-            instrumentId
-            amount
 
           return TransferResult with
             transferredCid = resultCid
@@ -73,10 +70,7 @@ template MyToken
         else do
           -- Partial transfer: create change back to current owner
           let remainderAmount = this.amount - amount
-          remainderCid <- create MyToken with
-            issuer
-            owner = owner
-            instrumentId
+          remainderCid <- create this with
             amount = remainderAmount
 
           transferredCid <- create MyToken with

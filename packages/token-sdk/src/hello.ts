@@ -1,16 +1,22 @@
 import { PrettyContract, Holding } from "@canton-network/core-ledger-client";
 import {
-    createKeyPair,
     localNetAuthDefault,
     localNetLedgerDefault,
     localNetTokenStandardDefault,
     signTransactionHash,
     WalletSDKImpl,
-    WrappedCommand,
 } from "@canton-network/wallet-sdk";
 import { pino } from "pino";
-import { v4 } from "uuid";
-import { getOrCreateTokenFactory } from "./helpers.js";
+import {
+    formatHoldingUtxo,
+    getBalanceByInstrumentId,
+    getBalances,
+    getOrCreateTokenFactory,
+    mintToken,
+    transferToken,
+} from "./helpers.js";
+import nacl from "tweetnacl";
+import naclUtil from "tweetnacl-util";
 
 const logger = pino({ name: "token-frontend", level: "info" });
 
@@ -20,6 +26,9 @@ const sdk = new WalletSDKImpl().configure({
     ledgerFactory: localNetLedgerDefault,
     tokenStandardFactory: localNetTokenStandardDefault,
 });
+
+const tokenFactoryTemplateId = "#minimal-token:MyTokenFactory:MyTokenFactory";
+const tokenTemplateId = "#minimal-token:MyToken:MyToken";
 
 // const client = createClient<paths>({
 //     baseUrl: "http://localhost:7575/",
@@ -38,38 +47,62 @@ const LOCALNET_SCAN_PROXY_API_URL = new URL(
 );
 await sdk.connectTopology(LOCALNET_SCAN_PROXY_API_URL);
 
-const keyPair = createKeyPair();
+const keyPairFromSeed = (seed: string) => {
+    const pair = nacl.sign.keyPair.fromSeed(Buffer.from(seed.padEnd(32, "0")));
+    return {
+        publicKey: naclUtil.encodeBase64(pair.publicKey),
+        privateKey: naclUtil.encodeBase64(pair.secretKey),
+    };
+};
 
-logger.info("Generating external party");
-const generatedParty = await sdk.userLedger?.generateExternalParty(
-    keyPair.publicKey
+// NOTE: this is of course for testing
+const aliceKeyPair = keyPairFromSeed("alice");
+const bobKeyPair = keyPairFromSeed("bob");
+
+const aliceParty = await sdk.userLedger?.generateExternalParty(
+    aliceKeyPair.publicKey
 );
 
-if (!generatedParty) {
-    throw new Error("Error creating prepared party");
+if (!aliceParty) {
+    throw new Error("Error creating Alice party");
 }
 
-logger.info("Signing the hash");
-const signedHash = signTransactionHash(
-    generatedParty.multiHash,
-    keyPair.privateKey
+const aliceSignedHash = signTransactionHash(
+    aliceParty.multiHash,
+    aliceKeyPair.privateKey
 );
 
-const allocatedParty = await sdk.userLedger?.allocateExternalParty(
-    signedHash,
-    generatedParty
+const aliceAllocatedParty = await sdk.userLedger?.allocateExternalParty(
+    aliceSignedHash,
+    aliceParty
 );
 
-logger.info({ partyId: allocatedParty!.partyId }, "Allocated party");
-await sdk.setPartyId(allocatedParty!.partyId);
+const bobParty = await sdk.userLedger?.generateExternalParty(
+    bobKeyPair.publicKey
+);
+
+if (!bobParty) {
+    throw new Error("Error creating Bob party");
+}
+
+const bobSignedHash = signTransactionHash(
+    bobParty.multiHash,
+    bobKeyPair.privateKey
+);
+
+const bobAllocatedParty = await sdk.userLedger?.allocateExternalParty(
+    bobSignedHash,
+    bobParty
+);
+
+await sdk.setPartyId(aliceAllocatedParty!.partyId);
 
 // TODO: only create the token factory if it doesn't already exist
 
-const tokenFactoryTemplateId = "#minimal-token:MyTokenFactory:MyTokenFactory";
-const instrumentId = allocatedParty!.partyId + "#MyToken";
+const instrumentId = aliceAllocatedParty!.partyId + "#MyToken";
 const tokenFactoryContractId = await getOrCreateTokenFactory(
     sdk.userLedger!,
-    keyPair,
+    aliceKeyPair,
     { instrumentId, tokenFactoryTemplateId }
 );
 
@@ -77,50 +110,33 @@ if (!tokenFactoryContractId) {
     throw new Error("Error creating or getting token factory");
 }
 
-const mintTokenCommand: WrappedCommand = {
-    ExerciseCommand: {
-        templateId: tokenFactoryTemplateId,
-        contractId: tokenFactoryContractId,
-        choice: "Mint",
-        choiceArgument: {
-            receiver: allocatedParty!.partyId,
-            amount: 1000,
-        },
-    },
-};
+await mintToken(sdk.userLedger!, aliceKeyPair, {
+    tokenFactoryTemplateId,
+    tokenFactoryContractId,
+    amount: 1000,
+    receiver: aliceAllocatedParty!.partyId,
+});
 
-const prepareMintTokenResponse = await sdk.userLedger?.prepareSubmission(
-    mintTokenCommand
-);
-logger.info("Prepared Mint Token Command");
+const tokenBalance = await getBalanceByInstrumentId(sdk, {
+    owner: aliceAllocatedParty!.partyId,
+    instrumentId: { admin: aliceAllocatedParty!.partyId, id: instrumentId },
+});
 
-const signedMintTokenCommandHash = signTransactionHash(
-    prepareMintTokenResponse!.preparedTransactionHash,
-    keyPair.privateKey
-);
+// Assume there is only one UTXO for simplicity
+const tokenContractId = tokenBalance.utxos[0].contractId;
 
-await sdk.userLedger?.executeSubmissionAndWaitFor(
-    prepareMintTokenResponse!,
-    signedMintTokenCommandHash,
-    keyPair.publicKey,
-    v4()
-);
+console.log({ tokenBalance });
+logger.info("Preparing to transfer 500 tokens from Alice to Bob");
 
-logger.info("Minted Token");
+// TODO: FIXME fails with:
+// cause: 'Interpretation error: Error: node NodeId(2) (425048c2fd2ee20ce31d06a09ba465a5223832b40bdd248f8397f9c911b14dca:MyToken:MyToken) requires authorizers b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806,f25ef0eb-6606-493f-9285-c09ba60d3e84::1220582708cdbebb247806670d66bb6a62a5732bb012415a44a7f6f509e44d58b38f, but only b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806 were given',
+await transferToken(sdk.userLedger!, aliceKeyPair, {
+    amount: 500,
+    newOwner: bobAllocatedParty!.partyId,
+    tokenTemplateId,
+    tokenContractId,
+});
+logger.info("Transferred 500 tokens from Alice to Bob");
 
-// Holding transactions of allocatedParty
-const holdingTransactions = await sdk.tokenStandard?.listHoldingTransactions();
-console.log({ holdingTransactions: holdingTransactions?.transactions });
-
-const utxos = await sdk.tokenStandard?.listHoldingUtxos(false);
-
-const formatHoldingUtxo = (utxo: PrettyContract<Holding>) => {
-    const view = utxo.interfaceViewValue;
-    const { amount, owner } = view;
-    return {
-        amount,
-        owner,
-        instrumentId: view.instrumentId.id,
-    };
-};
-console.log({ balances: utxos!.map(formatHoldingUtxo) });
+const utxosAfter = await sdk.tokenStandard?.listHoldingUtxos(false);
+console.log({ balances: utxosAfter!.map(formatHoldingUtxo) });
