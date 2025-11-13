@@ -5,6 +5,11 @@ import DA.TextMap as TextMap
 import Splice.Api.Token.HoldingV1 qualified as Api.Token.HoldingV1
 import Splice.Api.Token.MetadataV1 qualified as Api.Token.MetadataV1
 
+data TransferResult = TransferResult with
+    transferredCid : ContractId MyToken
+    remainderCid : Optional (ContractId MyToken)
+  deriving (Show, Eq)
+
 -- Placeholder token instrument that will implement CIP-0056 holdings view.
 data MyTokenKey = MyTokenKey
   with
@@ -47,16 +52,42 @@ template MyToken
           lockContext
 
     -- TODO: remove this after testing
-    choice Transfer: ContractId MyToken
+    choice Transfer: TransferResult
       with
         newOwner: Party
+        amount: Decimal
       controller owner
       do
-        create MyToken with
+        assertMsg "Transfer amount must be less than or equal to current amount" (amount <= this.amount)
+        if amount == this.amount then do
+          -- Full transfer
+          resultCid <- create MyToken with
             issuer
             owner = newOwner
             instrumentId
             amount
+
+          return TransferResult with
+            transferredCid = resultCid
+            remainderCid = None
+        else do
+          -- Partial transfer: create change back to current owner
+          let remainderAmount = this.amount - amount
+          remainderCid <- create MyToken with
+            issuer
+            owner = owner
+            instrumentId
+            amount = remainderAmount
+
+          transferredCid <- create MyToken with
+            issuer
+            owner = newOwner
+            instrumentId
+            amount
+
+          return TransferResult with
+            transferredCid
+            remainderCid = Some remainderCid
 
 myTokenMetadata : MyToken -> Api.Token.MetadataV1.Metadata
 myTokenMetadata MyToken{..} =

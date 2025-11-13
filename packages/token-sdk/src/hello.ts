@@ -10,6 +10,7 @@ import {
 } from "@canton-network/wallet-sdk";
 import { pino } from "pino";
 import { v4 } from "uuid";
+import { getOrCreateTokenFactory } from "./helpers.js";
 
 const logger = pino({ name: "token-frontend", level: "info" });
 
@@ -65,61 +66,16 @@ await sdk.setPartyId(allocatedParty!.partyId);
 // TODO: only create the token factory if it doesn't already exist
 
 const tokenFactoryTemplateId = "#minimal-token:MyTokenFactory:MyTokenFactory";
-const createTokenFactoryCommand: WrappedCommand = {
-    CreateCommand: {
-        templateId: tokenFactoryTemplateId,
-        createArguments: {
-            issuer: allocatedParty!.partyId,
-            instrumentId: "allocatedParty#MyToken",
-        },
-    },
-};
-
-const prepareTokenFactoryResponse = await sdk.userLedger?.prepareSubmission(
-    createTokenFactoryCommand
-);
-logger.info("Prepared Token Factory Command");
-
-const signedTokenFactoryCommandHash = signTransactionHash(
-    prepareTokenFactoryResponse!.preparedTransactionHash,
-    keyPair.privateKey
+const instrumentId = allocatedParty!.partyId + "#MyToken";
+const tokenFactoryContractId = await getOrCreateTokenFactory(
+    sdk.userLedger!,
+    keyPair,
+    { instrumentId, tokenFactoryTemplateId }
 );
 
-await sdk.userLedger?.executeSubmissionAndWaitFor(
-    prepareTokenFactoryResponse!,
-    signedTokenFactoryCommandHash,
-    keyPair.publicKey,
-    v4()
-);
-
-logger.info("Created Token Factory");
-
-const end = await sdk.userLedger?.ledgerEnd();
-const activeContracts = await sdk.userLedger?.activeContracts({
-    offset: end!.offset,
-    filterByParty: true,
-    parties: [generatedParty.partyId],
-    templateIds: [tokenFactoryTemplateId],
-});
-
-// Assume latest contract is the one we created
-if (!activeContracts || activeContracts.length === 0) {
-    throw new Error("No active contracts found for Token Factory");
+if (!tokenFactoryContractId) {
+    throw new Error("Error creating or getting token factory");
 }
-
-interface ContractEntry {
-    JsActiveContract: {
-        createdEvent: {
-            contractId: string;
-            templateId: string;
-        };
-    };
-}
-const contractEntry = activeContracts[activeContracts.length - 1]
-    .contractEntry as ContractEntry;
-const tokenFactoryContractId =
-    contractEntry.JsActiveContract.createdEvent.contractId;
-console.log({ tokenFactoryContractId });
 
 const mintTokenCommand: WrappedCommand = {
     ExerciseCommand: {
@@ -167,4 +123,4 @@ const formatHoldingUtxo = (utxo: PrettyContract<Holding>) => {
         instrumentId: view.instrumentId.id,
     };
 };
-console.log({ utxos: utxos!.map(formatHoldingUtxo) });
+console.log({ balances: utxos!.map(formatHoldingUtxo) });

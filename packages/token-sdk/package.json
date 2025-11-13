@@ -50,7 +50,9 @@
     "tsc": "tsc",
     "tsc:trace": "tsc --generateTrace lib/trace && analyze-trace lib/trace",
     "tsc:watch": "tsc -w",
-    "ledger-schema": "openapi-typescript http://localhost:7575/docs/openapi -o src/ledger/schema.d.ts"
+    "ledger-schema": "openapi-typescript http://localhost:7575/docs/openapi -o src/ledger/schema.d.ts",
+    "upload-dar": "tsx src/uploadDars.ts",
+    "get:minimal-token-id": "daml damlc inspect ../minimal-token/.daml/dist/minimal-token-0.1.0.dar | head -1 | awk '{print $2}'"
   },
   "devDependencies": {
     "@canton-network/core-ledger-client": "^0.17.0",
