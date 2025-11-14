@@ -8,7 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 import { pino } from "pino";
 
-const logger = pino({ name: "token-frontend", level: "info" });
+const logger = pino({ name: "token-sdk", level: "info" });
 
 const sdk = new WalletSDKImpl().configure({
     logger,
@@ -17,39 +17,44 @@ const sdk = new WalletSDKImpl().configure({
     tokenStandardFactory: localNetTokenStandardDefault,
 });
 
-// const client = createClient<paths>({
-//     baseUrl: "http://localhost:7575/",
-// });
-//
-// const parties = (await client.GET("/v2/parties")).data;
-// console.log({ parties });
+export async function uploadDars() {
+    await sdk.connect();
+    await sdk.connectAdmin();
+    await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
 
-await sdk.connect();
-await sdk.connectAdmin();
-await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
+    // Obtained from runnning:
+    // `pnpm get:minimal-token-id`
+    const MINIMAL_TOKEN_PACKAGE_ID =
+        "b0b308fa753904d794fc09ff61e8b2dd8a2398bb97fa98a604d294f75a13bc8b";
 
-// Obtained from runnning:
-// `daml damlc inspect ../minimal-token/.daml/dist/minimal-token-0.1.0.dar | head -1 | awk '{print $2}'`
-const MINIMAL_TOKEN_PACKAGE_ID =
-    "b0b308fa753904d794fc09ff61e8b2dd8a2398bb97fa98a604d294f75a13bc8b";
+    const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
+        MINIMAL_TOKEN_PACKAGE_ID
+    );
 
-const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
-    MINIMAL_TOKEN_PACKAGE_ID
-);
+    const minimalTokenDarPath = path.join(
+        path.dirname(process.cwd()),
+        "minimal-token",
+        ".daml",
+        "dist",
+        "minimal-token-0.1.0.dar"
+    );
 
-const minimalTokenDarPath = path.join(
-    path.dirname(process.cwd()),
-    "minimal-token",
-    ".daml",
-    "dist",
-    "minimal-token-0.1.0.dar"
-);
-
-if (isDarUploaded) {
-    logger.info("minimal-token DAR already uploaded");
-} else {
-    logger.info("Uploading DAR file...");
-    const darBytes = await fs.readFile(minimalTokenDarPath);
-    await sdk.adminLedger!.uploadDar(darBytes);
-    logger.info("DAR uploaded successfully");
+    if (isDarUploaded) {
+        logger.info("minimal-token DAR already uploaded");
+    } else {
+        logger.info("Uploading DAR file...");
+        const darBytes = await fs.readFile(minimalTokenDarPath);
+        await sdk.adminLedger!.uploadDar(darBytes);
+        logger.info("DAR uploaded successfully");
+    }
 }
+
+uploadDars()
+    .then(() => {
+        logger.info("Done");
+        process.exit(0);
+    })
+    .catch((error) => {
+        logger.error({ error }, "Error in uploadDars");
+        process.exit(1);
+    });
