@@ -4,7 +4,8 @@ import * as esbuild from "esbuild";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const filesCts = globSync("src/**/*.{ts,cts,tsx,json}");
+// TODO: check
+const filesCts = globSync("src/**/*.{cts,tsx,json}");
 const filesMts = globSync("src/**/*.{ts,mts,tsx,json}");
 
 const excludeNodeModulesPlugin = NodeResolvePlugin({
@@ -20,7 +21,8 @@ const excludeNodeModulesPlugin = NodeResolvePlugin({
     },
 });
 
-const ESBUILD_WATCH = process.env.ESBUILD_WATCH === "true" || process.env.ESBUILD_WATCH === "1";
+const ESBUILD_WATCH =
+    process.env.ESBUILD_WATCH === "true" || process.env.ESBUILD_WATCH === "1";
 
 const external = ["url", "events", "path"];
 const inject = []; // ['./react-shim.mjs']
@@ -28,7 +30,7 @@ const inject = []; // ['./react-shim.mjs']
 export const baseConfig = {
     sourcemap: "external",
     platform: "neutral",
-    target: ["es2020"],
+    target: ["es2022"],
     inject,
     plugins: [excludeNodeModulesPlugin],
 };
@@ -96,7 +98,12 @@ export const esmBundleMinConfig = {
 
 export const libConfigs = [cjsLibConfig, esmLibConfig];
 
-export const distConfigs = [cjsBundleConfig, cjsBundleMinConfig, esmBundleConfig, esmBundleMinConfig];
+export const distConfigs = [
+    cjsBundleConfig,
+    cjsBundleMinConfig,
+    esmBundleConfig,
+    esmBundleMinConfig,
+];
 
 export const configs = [...libConfigs, ...distConfigs];
 
@@ -117,8 +124,7 @@ export async function buildConfig(c) {
     if (!ESBUILD_WATCH) {
         // Static build
         await esbuild.build(c);
-    }
-    else {
+    } else {
         // Incremental build
         const ctx = await esbuild.context(c);
         await ctx.watch();
