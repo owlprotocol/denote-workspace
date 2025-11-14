@@ -1,0 +1,21 @@
+module MyTransferPreapprovalProposal where
+
+import MyTransferPreapproval
+
+template MyTransferPreapprovalProposal
+  with
+    issuer : Party
+    receiver : Party
+    instrumentId : Text
+  where
+    signatory issuer
+    observer receiver
+
+    choice MyTransferPreapprovalProposal_Accept : ContractId MyTransferPreapproval
+      controller receiver
+      do
+        create MyTransferPreapproval with
+          issuer
+          owner = receiver
+          instrumentId
+

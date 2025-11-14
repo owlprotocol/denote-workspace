@@ -1,0 +1,53 @@
+module MyTransferPreapproval where
+
+import MyToken
+
+template MyTransferPreapproval
+  with
+    issuer : Party
+    owner : Party
+    instrumentId : Text
+    -- TODO: Start by assuming unlimited preapproval time
+    -- validUntil : Time
+  where
+    signatory issuer, owner
+
+    choice TransferPreapproval_Send : TransferResult
+      with
+        newOwner: Party
+        amount: Decimal
+        tokenCid: ContractId MyToken
+      controller  owner
+      do
+        token <- fetch tokenCid
+        assertMsg "Transfer amount must be less than or equal to current amount" (amount <= token.amount)
+
+        pure TransferResult with
+          transferredCid = undefined
+          remainderCid = None
+
+        if amount == token.amount then do
+          -- Full transfer
+          resultCid <- create token with
+            owner = newOwner
+
+          return TransferResult with
+            transferredCid = resultCid
+            remainderCid = None
+        else do
+          -- Partial transfer: create change back to current owner
+          let remainderAmount = token.amount - amount
+          remainderCid <- create token with
+            amount = remainderAmount
+
+          transferredCid <- create MyToken with
+            issuer
+            owner = newOwner
+            instrumentId
+            amount
+
+          return TransferResult with
+            transferredCid
+            remainderCid = Some remainderCid
+
+    -- TODO: Add cancel

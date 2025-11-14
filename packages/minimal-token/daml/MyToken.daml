@@ -5,6 +5,8 @@ import DA.TextMap as TextMap
 import Splice.Api.Token.HoldingV1 qualified as Api.Token.HoldingV1
 import Splice.Api.Token.MetadataV1 qualified as Api.Token.MetadataV1
 
+-- import MyTransferProposal
+
 data TransferResult = TransferResult with
     transferredCid : ContractId MyToken
     remainderCid : Optional (ContractId MyToken)
@@ -51,37 +53,24 @@ template MyToken
           expiresAt
           lockContext
 
-    -- TODO: remove this after testing
-    choice Transfer: TransferResult
-      with
-        newOwner: Party
-        amount: Decimal
-      controller owner
-      do
-        assertMsg "Transfer amount must be less than or equal to current amount" (amount <= this.amount)
-        if amount == this.amount then do
-          -- Full transfer
-          resultCid <- create this with
-            owner = newOwner
+      -- Choice to initiate a token transfer
+      -- TODO: figure this out without circular imports
+    -- choice MyToken_ProposeTransfer : ContractId MyTransferProposal
+    --   with
+    --     newOwner : Party     -- The intended new owner
+    --     amount : Decimal   -- The amount to transfer
+    --   controller owner       -- Only the current owner can propose a transfer
+    --   do
+    --     assertMsg "Cannot transfer token to the current holder" (owner /= newOwner)
 
-          return TransferResult with
-            transferredCid = resultCid
-            remainderCid = None
-        else do
-          -- Partial transfer: create change back to current owner
-          let remainderAmount = this.amount - amount
-          remainderCid <- create this with
-            amount = remainderAmount
-
-          transferredCid <- create MyToken with
-            issuer
-            owner = newOwner
-            instrumentId
-            amount
-
-          return TransferResult with
-            transferredCid
-            remainderCid = Some remainderCid
+    --     -- Create a TransferProposal contract to manage the next step
+    --     create MyTransferProposal with
+    --       token = this
+    --       issuer
+    --       currentOwner = owner
+    --       newOwner
+    --       amount
+    --       instrumentId
 
 myTokenMetadata : MyToken -> Api.Token.MetadataV1.Metadata
 myTokenMetadata MyToken{..} =
