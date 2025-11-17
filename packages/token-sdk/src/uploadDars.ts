@@ -6,12 +6,9 @@ import {
 } from "@canton-network/wallet-sdk";
 import fs from "fs/promises";
 import path from "path";
-import { pino } from "pino";
-
-const logger = pino({ name: "token-sdk", level: "info" });
 
 const sdk = new WalletSDKImpl().configure({
-    logger,
+    logger: console,
     authFactory: localNetAuthDefault,
     ledgerFactory: localNetLedgerDefault,
     tokenStandardFactory: localNetTokenStandardDefault,
@@ -40,21 +37,21 @@ export async function uploadDars() {
     );
 
     if (isDarUploaded) {
-        logger.info("minimal-token DAR already uploaded");
+        console.info("minimal-token DAR already uploaded");
     } else {
-        logger.info("Uploading DAR file...");
+        console.info("Uploading DAR file...");
         const darBytes = await fs.readFile(minimalTokenDarPath);
         await sdk.adminLedger!.uploadDar(darBytes);
-        logger.info("DAR uploaded successfully");
+        console.info("DAR uploaded successfully");
     }
 }
 
 uploadDars()
     .then(() => {
-        logger.info("Done");
+        console.info("Done");
         process.exit(0);
     })
     .catch((error) => {
-        logger.error({ error }, "Error in uploadDars");
+        console.error("Error in uploadDars: ", error);
         process.exit(1);
     });

@@ -77,7 +77,6 @@
   "dependencies": {
     "@canton-network/wallet-sdk": "^0.16.0",
     "openapi-fetch": "^0.15.0",
-    "pino": "^10.1.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "uuid": "^13.0.0"

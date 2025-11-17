@@ -6,7 +6,6 @@ import {
     signTransactionHash,
     WalletSDKImpl,
 } from "@canton-network/wallet-sdk";
-import { pino } from "pino";
 import {
     getBalanceByInstrumentId,
     getOrCreateTokenFactory,
@@ -16,20 +15,18 @@ import {
 import nacl from "tweetnacl";
 import naclUtil from "tweetnacl-util";
 
-const logger = pino({ name: "token-frontend", level: "info" });
-
 const sdk = new WalletSDKImpl().configure({
-    logger,
+    logger: console,
     authFactory: localNetAuthDefault,
     ledgerFactory: localNetLedgerDefault,
     tokenStandardFactory: localNetTokenStandardDefault,
 });
 
-async function main() {
+async function hello() {
     await sdk.connect();
     await sdk.connectAdmin();
 
-    logger.info("Connecting to topology");
+    console.info("Connecting to topology");
     // await sdk.connectTopology(localNetStaticConfig.LOCALNET_SCAN_PROXY_API_URL);
     const LOCALNET_SCAN_PROXY_API_URL = new URL(
         "http://localhost:2000/api/validator"
@@ -106,7 +103,7 @@ async function main() {
         amount: 1000,
         receiver: aliceAllocatedParty!.partyId,
     });
-    logger.info("Minted 1000 tokens to Alice");
+    console.info("Minted 1000 tokens to Alice");
 
     const tokenBalance = await getBalanceByInstrumentId(sdk, {
         owner: aliceAllocatedParty!.partyId,
@@ -117,7 +114,7 @@ async function main() {
     const tokenContractId = tokenBalance.utxos[0].contractId;
 
     console.log({ tokenBalance, tokenContractId });
-    logger.info("Preparing to transfer 500 tokens from Alice to Bob");
+    console.info("Preparing to transfer 500 tokens from Alice to Bob");
 
     // TODO: FIXME fails with:
     // cause: 'Interpretation error: Error: node NodeId(2) (425048c2fd2ee20ce31d06a09ba465a5223832b40bdd248f8397f9c911b14dca:MyToken:MyToken) requires authorizers b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806,f25ef0eb-6606-493f-9285-c09ba60d3e84::1220582708cdbebb247806670d66bb6a62a5732bb012415a44a7f6f509e44d58b38f, but only b4495688-0536-426b-ae8e-454a2d67121d::12206f9345fbc89e421d1d4bb72a8b319b00259a875ae381a88baf039236c9d91806 were given',
@@ -127,7 +124,7 @@ async function main() {
     //     tokenTemplateId,
     //     tokenContractId,
     // });
-    // logger.info("Transferred 500 tokens from Alice to Bob");
+    // console.info("Transferred 500 tokens from Alice to Bob");
     //
     // const tokenBalanceAfter = await getBalanceByInstrumentId(sdk, {
     //     owner: aliceAllocatedParty!.partyId,
@@ -136,12 +133,12 @@ async function main() {
     // console.log({ tokenBalanceAfter });
 }
 
-main()
+hello()
     .then(() => {
-        logger.info("Done");
+        console.info("Done");
         process.exit(0);
     })
     .catch((error) => {
-        logger.error({ error }, "Error in main");
+        console.error("Error in main: ", error);
         process.exit(1);
     });
