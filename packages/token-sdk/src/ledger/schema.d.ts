@@ -783,26 +783,33 @@ export interface components {
          * Command
          * @description A command can either create a new contract or exercise a choice on an existing contract.
          */
-        Command: {
-            CreateAndExerciseCommand: components["schemas"]["CreateAndExerciseCommand"];
-        } | {
-            CreateCommand: components["schemas"]["CreateCommand"];
-        } | {
-            ExerciseByKeyCommand: components["schemas"]["ExerciseByKeyCommand"];
-        } | {
-            ExerciseCommand: components["schemas"]["ExerciseCommand"];
-        };
+        Command:
+            | {
+                  CreateAndExerciseCommand: components["schemas"]["CreateAndExerciseCommand"];
+              }
+            | {
+                  CreateCommand: components["schemas"]["CreateCommand"];
+              }
+            | {
+                  ExerciseByKeyCommand: components["schemas"]["ExerciseByKeyCommand"];
+              }
+            | {
+                  ExerciseCommand: components["schemas"]["ExerciseCommand"];
+              };
         /**
          * Command
          * @description A command can either create a new contract or exercise a choice on an existing contract.
          */
-        Command1: {
-            AssignCommand: components["schemas"]["AssignCommand"];
-        } | {
-            Empty: components["schemas"]["Empty2"];
-        } | {
-            UnassignCommand: components["schemas"]["UnassignCommand"];
-        };
+        Command1:
+            | {
+                  AssignCommand: components["schemas"]["AssignCommand"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty2"];
+              }
+            | {
+                  UnassignCommand: components["schemas"]["UnassignCommand"];
+              };
         /**
          * Completion
          * @description A completion represents the status of a submitted command on the ledger: it can be successful or failed.
@@ -886,13 +893,16 @@ export interface components {
             synchronizerTime?: components["schemas"]["SynchronizerTime"];
         };
         /** CompletionResponse */
-        CompletionResponse: {
-            Completion: components["schemas"]["Completion"];
-        } | {
-            Empty: components["schemas"]["Empty4"];
-        } | {
-            OffsetCheckpoint: components["schemas"]["OffsetCheckpoint"];
-        };
+        CompletionResponse:
+            | {
+                  Completion: components["schemas"]["Completion"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty4"];
+              }
+            | {
+                  OffsetCheckpoint: components["schemas"]["OffsetCheckpoint"];
+              };
         /** CompletionStreamRequest */
         CompletionStreamRequest: {
             /**
@@ -1164,37 +1174,46 @@ export interface components {
          * @description Specifies the deduplication period for the change ID.
          *     If omitted, the participant will assume the configured maximum deduplication time.
          */
-        DeduplicationPeriod: {
-            DeduplicationDuration: components["schemas"]["DeduplicationDuration"];
-        } | {
-            DeduplicationOffset: components["schemas"]["DeduplicationOffset"];
-        } | {
-            Empty: components["schemas"]["Empty"];
-        };
+        DeduplicationPeriod:
+            | {
+                  DeduplicationDuration: components["schemas"]["DeduplicationDuration"];
+              }
+            | {
+                  DeduplicationOffset: components["schemas"]["DeduplicationOffset"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty"];
+              };
         /**
          * DeduplicationPeriod
          * @description Specifies the deduplication period for the change ID.
          *     If omitted, the participant will assume the configured maximum deduplication time.
          */
-        DeduplicationPeriod1: {
-            DeduplicationDuration: components["schemas"]["DeduplicationDuration1"];
-        } | {
-            DeduplicationOffset: components["schemas"]["DeduplicationOffset1"];
-        } | {
-            Empty: components["schemas"]["Empty3"];
-        };
+        DeduplicationPeriod1:
+            | {
+                  DeduplicationDuration: components["schemas"]["DeduplicationDuration1"];
+              }
+            | {
+                  DeduplicationOffset: components["schemas"]["DeduplicationOffset1"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty3"];
+              };
         /**
          * DeduplicationPeriod
          * @description Specifies the deduplication period for the change ID.
          *     If omitted, the participant will assume the configured maximum deduplication time.
          */
-        DeduplicationPeriod2: {
-            DeduplicationDuration: components["schemas"]["DeduplicationDuration2"];
-        } | {
-            DeduplicationOffset: components["schemas"]["DeduplicationOffset2"];
-        } | {
-            Empty: components["schemas"]["Empty7"];
-        };
+        DeduplicationPeriod2:
+            | {
+                  DeduplicationDuration: components["schemas"]["DeduplicationDuration2"];
+              }
+            | {
+                  DeduplicationOffset: components["schemas"]["DeduplicationOffset2"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty7"];
+              };
         /**
          * DeleteIdentityProviderConfigResponse
          * @description Does not (yet) contain any data.
@@ -1268,13 +1287,16 @@ export interface components {
          *     indicates the subset of the requested parties that can see the event
          *     in question.
          */
-        Event: {
-            ArchivedEvent: components["schemas"]["ArchivedEvent"];
-        } | {
-            CreatedEvent: components["schemas"]["CreatedEvent"];
-        } | {
-            ExercisedEvent: components["schemas"]["ExercisedEvent"];
-        };
+        Event:
+            | {
+                  ArchivedEvent: components["schemas"]["ArchivedEvent"];
+              }
+            | {
+                  CreatedEvent: components["schemas"]["CreatedEvent"];
+              }
+            | {
+                  ExercisedEvent: components["schemas"]["ExercisedEvent"];
+              };
         /**
          * Event
          * @description Events in transactions can have two primary shapes:
@@ -1288,7 +1310,10 @@ export interface components {
          *     indicates the subset of the requested parties that can see the event
          *     in question.
          */
-        Event1: components["schemas"]["ParticipantAuthorizationAdded"] | components["schemas"]["ParticipantAuthorizationChanged"] | components["schemas"]["ParticipantAuthorizationRevoked"];
+        Event1:
+            | components["schemas"]["ParticipantAuthorizationAdded"]
+            | components["schemas"]["ParticipantAuthorizationChanged"]
+            | components["schemas"]["ParticipantAuthorizationRevoked"];
         /**
          * EventFormat
          * @description A format for events which defines both which events should be included
@@ -1901,15 +1926,19 @@ export interface components {
             entityName: string;
         };
         /** IdentifierFilter */
-        IdentifierFilter: {
-            Empty: components["schemas"]["Empty1"];
-        } | {
-            InterfaceFilter: components["schemas"]["InterfaceFilter"];
-        } | {
-            TemplateFilter: components["schemas"]["TemplateFilter"];
-        } | {
-            WildcardFilter: components["schemas"]["WildcardFilter"];
-        };
+        IdentifierFilter:
+            | {
+                  Empty: components["schemas"]["Empty1"];
+              }
+            | {
+                  InterfaceFilter: components["schemas"]["InterfaceFilter"];
+              }
+            | {
+                  TemplateFilter: components["schemas"]["TemplateFilter"];
+              }
+            | {
+                  WildcardFilter: components["schemas"]["WildcardFilter"];
+              };
         /** IdentityProviderAdmin */
         IdentityProviderAdmin: {
             value: components["schemas"]["IdentityProviderAdmin1"];
@@ -2203,15 +2232,19 @@ export interface components {
          *     that is hosted on the synchronizer at the time of the event and the party satisfies the
          *     ``TransactionFilter`` in the query.
          */
-        JsContractEntry: {
-            JsActiveContract: components["schemas"]["JsActiveContract"];
-        } | {
-            JsEmpty: components["schemas"]["JsEmpty"];
-        } | {
-            JsIncompleteAssigned: components["schemas"]["JsIncompleteAssigned"];
-        } | {
-            JsIncompleteUnassigned: components["schemas"]["JsIncompleteUnassigned"];
-        };
+        JsContractEntry:
+            | {
+                  JsActiveContract: components["schemas"]["JsActiveContract"];
+              }
+            | {
+                  JsEmpty: components["schemas"]["JsEmpty"];
+              }
+            | {
+                  JsIncompleteAssigned: components["schemas"]["JsIncompleteAssigned"];
+              }
+            | {
+                  JsIncompleteUnassigned: components["schemas"]["JsIncompleteUnassigned"];
+              };
         /** JsCreated */
         JsCreated: {
             /**
@@ -2506,7 +2539,9 @@ export interface components {
             recordTime: string;
         };
         /** JsReassignmentEvent */
-        JsReassignmentEvent: components["schemas"]["JsAssignmentEvent"] | components["schemas"]["JsUnassignedEvent"];
+        JsReassignmentEvent:
+            | components["schemas"]["JsAssignmentEvent"]
+            | components["schemas"]["JsUnassignedEvent"];
         /** JsStatus */
         JsStatus: {
             /** Format: int32 */
@@ -2748,19 +2783,25 @@ export interface components {
          * Kind
          * @description Required
          */
-        Kind: {
-            CanActAs: components["schemas"]["CanActAs"];
-        } | {
-            CanReadAs: components["schemas"]["CanReadAs"];
-        } | {
-            CanReadAsAnyParty: components["schemas"]["CanReadAsAnyParty"];
-        } | {
-            Empty: components["schemas"]["Empty5"];
-        } | {
-            IdentityProviderAdmin: components["schemas"]["IdentityProviderAdmin"];
-        } | {
-            ParticipantAdmin: components["schemas"]["ParticipantAdmin"];
-        };
+        Kind:
+            | {
+                  CanActAs: components["schemas"]["CanActAs"];
+              }
+            | {
+                  CanReadAs: components["schemas"]["CanReadAs"];
+              }
+            | {
+                  CanReadAsAnyParty: components["schemas"]["CanReadAsAnyParty"];
+              }
+            | {
+                  Empty: components["schemas"]["Empty5"];
+              }
+            | {
+                  IdentityProviderAdmin: components["schemas"]["IdentityProviderAdmin"];
+              }
+            | {
+                  ParticipantAdmin: components["schemas"]["ParticipantAdmin"];
+              };
         /** ListIdentityProviderConfigsResponse */
         ListIdentityProviderConfigsResponse: {
             identityProviderConfigs?: components["schemas"]["IdentityProviderConfig"][];
@@ -2803,17 +2844,11 @@ export interface components {
             nextPageToken: string;
         };
         /** Map_Filters */
-        Map_Filters: {
-            [key: string]: components["schemas"]["Filters"];
-        };
+        Map_Filters: Record<string, components["schemas"]["Filters"]>;
         /** Map_K_V */
-        Map_K_V: {
-            [key: string]: components["schemas"]["Filters"];
-        };
+        Map_K_V: Record<string, components["schemas"]["Filters"]>;
         /** Map_String */
-        Map_String: {
-            [key: string]: string;
-        };
+        Map_String: Record<string, string>;
         /** MinLedgerTime */
         MinLedgerTime: {
             time: components["schemas"]["Time"];
@@ -3255,13 +3290,16 @@ export interface components {
             includeCreatedEventBlob: boolean;
         };
         /** Time */
-        Time: {
-            Empty: components["schemas"]["Empty6"];
-        } | {
-            MinLedgerTimeAbs: components["schemas"]["MinLedgerTimeAbs"];
-        } | {
-            MinLedgerTimeRel: components["schemas"]["MinLedgerTimeRel"];
-        };
+        Time:
+            | {
+                  Empty: components["schemas"]["Empty6"];
+              }
+            | {
+                  MinLedgerTimeAbs: components["schemas"]["MinLedgerTimeAbs"];
+              }
+            | {
+                  MinLedgerTimeRel: components["schemas"]["MinLedgerTimeRel"];
+              };
         /**
          * TopologyFormat
          * @description A format specifying which topology transactions to include and how to render them.
@@ -3351,11 +3389,13 @@ export interface components {
          *     _no_ witness parties, which were included simply because they were
          *     children of events which have witnesses.
          */
-        TreeEvent: {
-            CreatedTreeEvent: components["schemas"]["CreatedTreeEvent"];
-        } | {
-            ExercisedTreeEvent: components["schemas"]["ExercisedTreeEvent"];
-        };
+        TreeEvent:
+            | {
+                  CreatedTreeEvent: components["schemas"]["CreatedTreeEvent"];
+              }
+            | {
+                  ExercisedTreeEvent: components["schemas"]["ExercisedTreeEvent"];
+              };
         /** Tuple2_String_String */
         Tuple2_String_String: string[];
         /**
@@ -3479,26 +3519,33 @@ export interface components {
          * Update
          * @description The update that matches the filter in the request.
          */
-        Update: {
-            OffsetCheckpoint: components["schemas"]["OffsetCheckpoint2"];
-        } | {
-            Reassignment: components["schemas"]["Reassignment"];
-        } | {
-            TopologyTransaction: components["schemas"]["TopologyTransaction"];
-        } | {
-            Transaction: components["schemas"]["Transaction"];
-        };
+        Update:
+            | {
+                  OffsetCheckpoint: components["schemas"]["OffsetCheckpoint2"];
+              }
+            | {
+                  Reassignment: components["schemas"]["Reassignment"];
+              }
+            | {
+                  TopologyTransaction: components["schemas"]["TopologyTransaction"];
+              }
+            | {
+                  Transaction: components["schemas"]["Transaction"];
+              };
         /**
          * Update
          * @description The update that matches the filter in the request.
          */
-        Update1: {
-            OffsetCheckpoint: components["schemas"]["OffsetCheckpoint3"];
-        } | {
-            Reassignment: components["schemas"]["Reassignment1"];
-        } | {
-            TransactionTree: components["schemas"]["TransactionTree"];
-        };
+        Update1:
+            | {
+                  OffsetCheckpoint: components["schemas"]["OffsetCheckpoint3"];
+              }
+            | {
+                  Reassignment: components["schemas"]["Reassignment1"];
+              }
+            | {
+                  TransactionTree: components["schemas"]["TransactionTree"];
+              };
         /**
          * UpdateFormat
          * @description A format specifying what updates to include and how to render them.
@@ -3755,26 +3802,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["SubmitAndWaitResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -3795,26 +3836,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsSubmitAndWaitForTransactionResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -3835,26 +3870,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsSubmitAndWaitForReassignmentResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -3875,26 +3904,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsSubmitAndWaitForTransactionTreeResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -3915,26 +3938,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["SubmitResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -3955,26 +3972,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["SubmitReassignmentResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4000,26 +4011,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["CompletionStreamResponse"][];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: query parameter limit, Invalid value for: query parameter stream_idle_timeout_ms, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4040,26 +4045,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetEventsByContractIdResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4076,26 +4075,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetLedgerApiVersionResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4112,26 +4105,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ListPackagesResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4152,26 +4139,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["UploadDarFileResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4200,17 +4181,13 @@ export interface operations {
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4229,26 +4206,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetPackageStatusResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4270,26 +4241,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ListKnownPartiesResponse"];
                 };
             };
             /** @description Invalid value for: query parameter pageSize, Invalid value for: query parameter pageToken, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4310,26 +4275,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["AllocatePartyResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4346,26 +4305,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetParticipantIdResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4387,26 +4340,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetPartiesResponse"];
                 };
             };
             /** @description Invalid value for: query parameter identity-provider-id, Invalid value for: query parameter parties, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4429,26 +4376,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["UpdatePartyDetailsResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4474,26 +4415,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetActiveContractsResponse"][];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: query parameter limit, Invalid value for: query parameter stream_idle_timeout_ms, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4513,26 +4448,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetConnectedSynchronizersResponse"];
                 };
             };
             /** @description Invalid value for: query parameter party, Invalid value for: query parameter participantId, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4549,26 +4478,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetLedgerEndResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4585,26 +4508,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetLatestPrunedOffsetsResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4630,26 +4547,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetUpdatesResponse"][];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: query parameter limit, Invalid value for: query parameter stream_idle_timeout_ms, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4675,26 +4586,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetUpdateTreesResponse"][];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: query parameter limit, Invalid value for: query parameter stream_idle_timeout_ms, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4715,26 +4620,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetTransactionTreeResponse"];
                 };
             };
             /** @description Invalid value for: path parameter offset, Invalid value for: query parameter parties, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4755,26 +4654,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetTransactionResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4795,26 +4688,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetUpdateResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4835,26 +4722,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetTransactionResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4875,26 +4756,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetUpdateResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4915,26 +4790,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsGetTransactionTreeResponse"];
                 };
             };
             /** @description Invalid value for: query parameter parties, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4956,26 +4825,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ListUsersResponse"];
                 };
             };
             /** @description Invalid value for: query parameter pageSize, Invalid value for: query parameter pageToken, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -4996,26 +4859,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["CreateUserResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5034,26 +4891,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetUserResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5072,26 +4923,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": Record<string, never>;
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5114,26 +4959,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["UpdateUserResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5152,26 +4991,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ListUserRightsResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5194,26 +5027,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GrantUserRightsResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5236,26 +5063,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["RevokeUserRightsResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5278,26 +5099,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["UpdateUserIdentityProviderIdResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5314,26 +5129,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ListIdentityProviderConfigsResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5354,26 +5163,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["CreateIdentityProviderConfigResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5392,26 +5195,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetIdentityProviderConfigResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5430,26 +5227,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["DeleteIdentityProviderConfigResponse"];
                 };
             };
             /** @description Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5472,26 +5263,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["UpdateIdentityProviderConfigResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5512,26 +5297,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsPrepareSubmissionResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5552,26 +5331,20 @@ export interface operations {
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["ExecuteSubmissionResponse"];
                 };
             };
             /** @description Invalid value for: body, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
@@ -5593,26 +5366,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["GetPreferredPackageVersionResponse"];
                 };
             };
             /** @description Invalid value for: query parameter parties, Invalid value for: query parameter package-name, Invalid value for: query parameter vetting_valid_at, Invalid value for: query parameter synchronizer-id, Invalid value for: headers */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "text/plain": string;
                 };
             };
             default: {
-                headers: {
-                    [name: string]: unknown;
-                };
+                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["JsCantonError"];
                 };
