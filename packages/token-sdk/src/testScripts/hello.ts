@@ -1,18 +1,18 @@
 import { signTransactionHash } from "@canton-network/wallet-sdk";
 import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
-import { getWrappedSdk } from "../wrappedSdk/wrappedSdk.js";
+import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
 
 async function hello() {
     const sdk = await getDefaultSdkAndConnect();
     await sdk.connectAdmin();
 
-    const wrappedSdk = getWrappedSdk(sdk);
-
-    const userLedger = sdk.userLedger!;
-
     // NOTE: this is of course for testing
     const aliceKeyPair = keyPairFromSeed("alice");
+
+    const wrappedSdk = getWrappedSdkWithKeyPair(sdk, aliceKeyPair);
+
+    const userLedger = sdk.userLedger!;
 
     const aliceParty = await userLedger.generateExternalParty(
         aliceKeyPair.publicKey
@@ -36,7 +36,6 @@ async function hello() {
 
     const instrumentId = aliceAllocatedParty.partyId + "#MyToken";
     const tokenFactoryContractId = await wrappedSdk.tokenFactory.getOrCreate(
-        aliceKeyPair,
         instrumentId
     );
 
@@ -44,7 +43,7 @@ async function hello() {
         throw new Error("Error creating or getting token factory");
     }
 
-    await wrappedSdk.tokenFactory.mintToken(aliceKeyPair, {
+    await wrappedSdk.tokenFactory.mintToken({
         tokenFactoryContractId,
         amount: 1000,
         receiver: aliceAllocatedParty.partyId,

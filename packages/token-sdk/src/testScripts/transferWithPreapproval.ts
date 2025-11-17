@@ -1,20 +1,21 @@
 import { signTransactionHash } from "@canton-network/wallet-sdk";
 import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
-import { getWrappedSdk } from "../wrappedSdk/wrappedSdk.js";
+import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
 
 async function transferPreapproval() {
     const aliceSdk = await getDefaultSdkAndConnect();
     const bobSdk = await getDefaultSdkAndConnect();
 
-    const aliceUserLedger = aliceSdk.userLedger!;
-    const bobUserLedger = bobSdk.userLedger!;
-    const aliceWrappedSdk = getWrappedSdk(aliceSdk);
-    const bobWrappedSdk = getWrappedSdk(bobSdk);
-
     // NOTE: this is of course for testing
     const aliceKeyPair = keyPairFromSeed("alice");
     const bobKeyPair = keyPairFromSeed("bob");
+
+    const aliceUserLedger = aliceSdk.userLedger!;
+    const bobUserLedger = bobSdk.userLedger!;
+
+    const aliceWrappedSdk = getWrappedSdkWithKeyPair(aliceSdk, aliceKeyPair);
+    const bobWrappedSdk = getWrappedSdkWithKeyPair(bobSdk, bobKeyPair);
 
     const aliceParty = await aliceUserLedger.generateExternalParty(
         aliceKeyPair.publicKey
@@ -57,16 +58,13 @@ async function transferPreapproval() {
 
     const instrumentId = aliceAllocatedParty.partyId + "#MyToken";
     const tokenFactoryContractId =
-        await aliceWrappedSdk.tokenFactory.getOrCreate(
-            aliceKeyPair,
-            instrumentId
-        );
+        await aliceWrappedSdk.tokenFactory.getOrCreate(instrumentId);
 
     if (!tokenFactoryContractId) {
         throw new Error("Error creating or getting token factory");
     }
 
-    await aliceWrappedSdk.tokenFactory.mintToken(aliceKeyPair, {
+    await aliceWrappedSdk.tokenFactory.mintToken({
         tokenFactoryContractId,
         amount: 1000,
         receiver: aliceAllocatedParty.partyId,
@@ -101,10 +99,10 @@ async function transferPreapproval() {
             "Creating transfer preapproval proposal if it does not already exist"
         );
         const transferPreapprovalProposalContractId =
-            await aliceWrappedSdk.transferPreapprovalProposal.getOrCreate(
-                aliceKeyPair,
-                { instrumentId, receiver: bobAllocatedParty.partyId }
-            );
+            await aliceWrappedSdk.transferPreapprovalProposal.getOrCreate({
+                instrumentId,
+                receiver: bobAllocatedParty.partyId,
+            });
 
         console.info(
             "Transfer preapproval proposal contract ID: ",
@@ -112,7 +110,7 @@ async function transferPreapproval() {
         );
 
         console.info("Having Bob accept the transfer preapproval");
-        await bobWrappedSdk.transferPreapprovalProposal.accept(bobKeyPair, {
+        await bobWrappedSdk.transferPreapprovalProposal.accept({
             transferPreapprovalProposalContractId,
         });
 
@@ -131,7 +129,7 @@ async function transferPreapproval() {
 
     console.info("Transferring 500 tokens from Alice to Bob with preapproval");
 
-    await aliceWrappedSdk.transferPreapproval.send(aliceKeyPair, {
+    await aliceWrappedSdk.transferPreapproval.send({
         tokenCid: tokenContractId,
         transferPreapprovalContractId: transferPreapprovalCid,
         sender: aliceAllocatedParty.partyId,
