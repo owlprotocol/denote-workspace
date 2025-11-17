@@ -5,31 +5,36 @@ import MyToken
 template MyTransferPreapproval
   with
     issuer : Party
-    owner : Party
+    receiver : Party
     instrumentId : Text
     -- TODO: Start by assuming unlimited preapproval time
     -- validUntil : Time
   where
-    signatory issuer, owner
+    signatory issuer, receiver
 
-    choice TransferPreapproval_Send : TransferResult
+    choice MyTransferPreapproval_Send : TransferResult
       with
-        newOwner: Party
+        sender: Party
         amount: Decimal
         tokenCid: ContractId MyToken
-      controller  owner
+      controller  sender
       do
         token <- fetch tokenCid
         assertMsg "Transfer amount must be less than or equal to current amount" (amount <= token.amount)
+        assertMsg "Token issuer must match preapproval issuer" (token.issuer == issuer)
+        assertMsg "Token instrumentId must match preapproval instrumentId" (token.instrumentId == instrumentId)
+        assertMsg "Token owner must match preapproval owner" (token.owner == sender)
 
-        pure TransferResult with
-          transferredCid = undefined
-          remainderCid = None
+        -- Archive the original token
+        archive tokenCid
 
         if amount == token.amount then do
           -- Full transfer
-          resultCid <- create token with
-            owner = newOwner
+          resultCid <- create MyToken with
+            issuer = token.issuer
+            owner = receiver
+            instrumentId = token.instrumentId
+            amount = token.amount
 
           return TransferResult with
             transferredCid = resultCid
@@ -37,17 +42,24 @@ template MyTransferPreapproval
         else do
           -- Partial transfer: create change back to current owner
           let remainderAmount = token.amount - amount
-          remainderCid <- create token with
+          remainderCid <- create MyToken with
+            issuer = token.issuer
+            owner = token.owner
+            instrumentId = token.instrumentId
             amount = remainderAmount
 
           transferredCid <- create MyToken with
-            issuer
-            owner = newOwner
-            instrumentId
-            amount
+            issuer = token.issuer
+            owner = receiver
+            instrumentId = token.instrumentId
+            amount = amount
 
           return TransferResult with
             transferredCid
             remainderCid = Some remainderCid
 
-    -- TODO: Add cancel
+
+    choice MyTransferPreapproval_Cancel : ()
+      controller receiver
+      do
+        pure ()

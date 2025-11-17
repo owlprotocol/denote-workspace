@@ -1,0 +1,54 @@
+module Test.TransferPreapproval where
+
+import Daml.Script
+import MyTransferPreapproval
+import MyTransferPreapprovalProposal
+import MyToken
+import MyTokenFactory
+
+testTransferPreapproval : Script ()
+testTransferPreapproval = script do
+  alice <- allocatePartyByHint (PartyIdHint "Alice")
+  bob   <- allocatePartyByHint (PartyIdHint "Bob")
+
+  let instrumentId = show alice <> "#MyToken"
+
+  tokenFactoryCid <- submit alice do
+    createCmd MyTokenFactory with
+      issuer = alice
+      instrumentId
+
+  transferPreapprovalProposalCid <- submit alice do
+    createCmd MyTransferPreapprovalProposal with
+      issuer = alice
+      receiver = bob
+      instrumentId
+
+  transferPreapprovalCid <- submit bob do
+    exerciseCmd transferPreapprovalProposalCid MyTransferPreapprovalProposal_Accept
+
+  tokenCid <- submit alice do
+    createCmd MyToken with
+      issuer = alice
+      owner = alice
+      instrumentId
+      amount = 100.0
+
+  -- NOTE: This is how we would get disclosure if needed
+  -- disclosure <- fromSome <$> queryDisclosure @MyToken alice tokenCid
+
+  submitMustFail bob  do
+    exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
+      sender = alice
+      amount = 40.0
+      tokenCid
+
+  -- No disclosure needed since Alice is the sender and has visibility to the token
+  submit alice  do
+    exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
+      sender = alice
+      amount = 40.0
+      tokenCid
+
+  pure ()
+

@@ -16,6 +16,6 @@ template MyTransferPreapprovalProposal
       do
         create MyTransferPreapproval with
           issuer
-          owner = receiver
+          receiver
           instrumentId
 

@@ -21,3 +21,14 @@ getTransferInstructionDisclosure issuer instrCid = do
     None -> fail $ "Disclosure not found for LockedMyToken: " <> show instr.lockedMyToken
     Some d -> pure d
 
+getMyTokenDisclosure
+  : Party  -- issuer/owner party who can see the MyToken
+  -> ContractId MyToken
+  -> Script Disclosure
+getMyTokenDisclosure party tokenCid = do
+  -- Get disclosure for MyToken from party (who has visibility)
+  optDisc <- queryDisclosure @MyToken party tokenCid
+  case optDisc of
+    None -> fail $ "Disclosure not found for MyToken: " <> show tokenCid
+    Some d -> pure d
+
