@@ -55,8 +55,6 @@ async function transferPreapproval() {
     await aliceSdk.setPartyId(aliceAllocatedParty.partyId);
     await bobSdk.setPartyId(bobAllocatedParty.partyId);
 
-    // TODO: only create the token factory if it doesn't already exist
-
     const instrumentId = aliceAllocatedParty.partyId + "#MyToken";
     const tokenFactoryContractId =
         await aliceWrappedSdk.tokenFactory.getOrCreate(
