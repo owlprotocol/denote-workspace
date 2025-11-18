@@ -53,24 +53,39 @@ template MyToken
           expiresAt
           lockContext
 
-      -- Choice to initiate a token transfer
-      -- TODO: figure this out without circular imports
-    -- choice MyToken_ProposeTransfer : ContractId MyTransferProposal
-    --   with
-    --     newOwner : Party     -- The intended new owner
-    --     amount : Decimal   -- The amount to transfer
-    --   controller owner       -- Only the current owner can propose a transfer
-    --   do
-    --     assertMsg "Cannot transfer token to the current holder" (owner /= newOwner)
+    choice MyToken_Transfer : TransferResult
+      with
+        receiver : Party
+        amount: Decimal
+      controller owner, receiver
+      do
+        assertMsg "Transfer amount must be less than or equal to current amount" (amount <= this.amount)
+        assertMsg "Transfer amount must be greater than 0" (amount > 0.0)
 
-    --     -- Create a TransferProposal contract to manage the next step
-    --     create MyTransferProposal with
-    --       token = this
-    --       issuer
-    --       currentOwner = owner
-    --       newOwner
-    --       amount
-    --       instrumentId
+        if amount == this.amount then do
+          -- Full transfer
+          resultCid <- create this with
+            owner = receiver
+
+          return TransferResult with
+            transferredCid = resultCid
+            remainderCid = None
+        else do
+          -- Partial transfer: create change back to current owner
+          let remainderAmount = this.amount - amount
+          remainderCid <- create this with
+            amount = remainderAmount
+
+          transferredCid <- create MyToken with
+            issuer = this.issuer
+            owner = receiver
+            instrumentId = this.instrumentId
+            amount
+
+          return TransferResult with
+            transferredCid
+            remainderCid = Some remainderCid
+
 
 myTokenMetadata : MyToken -> Api.Token.MetadataV1.Metadata
 myTokenMetadata MyToken{..} =

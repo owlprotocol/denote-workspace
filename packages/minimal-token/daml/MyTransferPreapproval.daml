@@ -20,43 +20,14 @@ template MyTransferPreapproval
       controller  sender
       do
         token <- fetch tokenCid
-        assertMsg "Transfer amount must be less than or equal to current amount" (amount <= token.amount)
+
         assertMsg "Token issuer must match preapproval issuer" (token.issuer == issuer)
         assertMsg "Token instrumentId must match preapproval instrumentId" (token.instrumentId == instrumentId)
         assertMsg "Token owner must match preapproval owner" (token.owner == sender)
 
-        -- Archive the original token
-        archive tokenCid
-
-        if amount == token.amount then do
-          -- Full transfer
-          resultCid <- create MyToken with
-            issuer = token.issuer
-            owner = receiver
-            instrumentId = token.instrumentId
-            amount = token.amount
-
-          return TransferResult with
-            transferredCid = resultCid
-            remainderCid = None
-        else do
-          -- Partial transfer: create change back to current owner
-          let remainderAmount = token.amount - amount
-          remainderCid <- create MyToken with
-            issuer = token.issuer
-            owner = token.owner
-            instrumentId = token.instrumentId
-            amount = remainderAmount
-
-          transferredCid <- create MyToken with
-            issuer = token.issuer
-            owner = receiver
-            instrumentId = token.instrumentId
-            amount = amount
-
-          return TransferResult with
-            transferredCid
-            remainderCid = Some remainderCid
+        exercise tokenCid MyToken_Transfer with
+          receiver = receiver
+          amount = amount
 
 
     choice MyTransferPreapproval_Cancel : ()

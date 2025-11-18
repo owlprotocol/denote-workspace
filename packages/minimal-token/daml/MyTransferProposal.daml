@@ -1,32 +1,39 @@
-module MyTransferProposal
-where
---
--- FIXME: circular import
--- import MyToken
---
--- template MyTransferProposal
---   with
---     token: ContractId MyToken
---     issuer : Party
---     currentOwner : Party
---     newOwner : Party
---     amount : Decimal
---     instrumentId : Text
---   where
---     signatory issuer, currentOwner
---     observer newOwner
---
---     choice MyTransferProposal_Accept : ()
---       controller newOwner
---       do
---         pure ()
---
---     choice MyTransferProposal_Reject : ()
---       controller newOwner
---       do
---         pure ()
---
---     choice MyTransferProposal_Cancel : ()
---       controller currentOwner
---       do
---         pure ()
+module MyTransferProposal where
+
+import MyToken
+
+template MyTransferProposal
+  with
+    tokenCid : ContractId MyToken
+    issuer : Party
+    currentOwner : Party
+    receiver : Party
+    amount : Decimal
+    instrumentId : Text
+  where
+    signatory issuer, currentOwner
+    observer receiver
+    ensure amount > 0.0
+
+    choice MyTransferProposal_Accept : TransferResult
+      controller receiver
+      do
+        token <- fetch tokenCid
+
+        assertMsg "Token issuer must match proposal issuer" (token.issuer == issuer)
+        assertMsg "Token instrumentId must match proposal instrumentId" (token.instrumentId == instrumentId)
+        assertMsg "Token owner must match proposal current owner" (token.owner == currentOwner)
+
+        exercise tokenCid MyToken_Transfer with
+          receiver
+          amount
+
+    choice MyTransferProposal_Reject : ()
+      controller receiver
+      do
+        pure ()
+
+    choice MyTransferProposal_Cancel : ()
+      controller currentOwner
+      do
+        pure ()
