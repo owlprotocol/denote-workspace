@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSDK } from "@/lib/wallet/sdk-instance";
-import { keyPairFromSeed } from "@/lib/wallet/keypair";
+import { keyPairFromSeed } from "@owlprotocol/token-sdk";
 import { signTransactionHash } from "@canton-network/wallet-sdk";
 import { logger } from "@/lib/wallet/sdk";
 
