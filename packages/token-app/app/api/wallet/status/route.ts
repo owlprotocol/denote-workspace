@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import { getSDK } from "@/lib/wallet/sdk-instance";
-import { logger } from "@/lib/wallet/sdk";
+import { getDefaultSdkAndConnect } from "@owlprotocol/token-sdk";
 
 export async function GET() {
     try {
-        const sdk = await getSDK();
+        const sdk = await getDefaultSdkAndConnect();
 
-        const isConnected = !!(
-            sdk.userLedger &&
-            sdk.adminLedger &&
-            sdk.topology
-        );
+        const isConnected = !!(sdk.userLedger && sdk.topology);
 
         return NextResponse.json({
             connected: isConnected,
@@ -19,7 +14,7 @@ export async function GET() {
             hasTopology: !!sdk.topology,
         });
     } catch (error) {
-        logger.error({ err: error }, "Error checking connection status");
+        console.error("Error checking connection status:", error);
         return NextResponse.json(
             {
                 connected: false,

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSDK } from "@/lib/wallet/sdk-instance";
-import { keyPairFromSeed } from "@owlprotocol/token-sdk";
+import {
+    keyPairFromSeed,
+    getDefaultSdkAndConnect,
+} from "@owlprotocol/token-sdk";
 import { signTransactionHash } from "@canton-network/wallet-sdk";
-import { logger } from "@/lib/wallet/sdk";
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,15 +16,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const sdk = await getSDK();
+        const keyPair = keyPairFromSeed(name);
+        const sdk = await getDefaultSdkAndConnect();
         if (!sdk.userLedger) {
             return NextResponse.json(
                 { error: "SDK not connected" },
                 { status: 500 }
             );
         }
-
-        const keyPair = keyPairFromSeed(name);
 
         const generatedParty = await sdk.userLedger.generateExternalParty(
             keyPair.publicKey,
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
             throw error;
         }
     } catch (error) {
-        logger.error({ err: error }, "Error creating party");
+        console.error("Error creating party:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSDK } from "@/lib/wallet/sdk-instance";
-import { keyPairFromSeed, mintToken } from "@owlprotocol/token-sdk";
-import { logger } from "@/lib/wallet/sdk";
+import {
+    keyPairFromSeed,
+    getDefaultSdkAndConnect,
+    getWrappedSdkWithKeyPair,
+} from "@owlprotocol/token-sdk";
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,18 +17,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const sdk = await getSDK();
-        if (!sdk.userLedger) {
-            return NextResponse.json(
-                { error: "SDK not connected" },
-                { status: 500 }
-            );
-        }
-
-        await sdk.setPartyId(receiver);
-
         const keyPair = keyPairFromSeed(seed);
-        await mintToken(sdk.userLedger, keyPair, {
+        const sdk = await getDefaultSdkAndConnect();
+        await sdk.setPartyId(receiver);
+        const wrappedSdk = getWrappedSdkWithKeyPair(sdk, keyPair);
+
+        await wrappedSdk.tokenFactory.mintToken({
             tokenFactoryContractId,
             receiver,
             amount,
@@ -34,7 +30,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        logger.error({ err: error }, "Error minting token");
+        console.error("Error minting token:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
