@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSDK } from "@/lib/wallet/sdk-instance";
 import {
     keyPairFromSeed,
-    getOrCreateTokenFactory,
+    getDefaultSdkAndConnect,
+    getWrappedSdkWithKeyPair,
 } from "@owlprotocol/token-sdk";
-import { logger } from "@/lib/wallet/sdk";
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,14 +13,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: "Missing instrumentId or seed" },
                 { status: 400 }
-            );
-        }
-
-        const sdk = await getSDK();
-        if (!sdk.userLedger) {
-            return NextResponse.json(
-                { error: "SDK not connected" },
-                { status: 500 }
             );
         }
 
@@ -35,18 +26,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        await sdk.setPartyId(partyId);
-
         const keyPair = keyPairFromSeed(seed);
-        const tokenFactoryContractId = await getOrCreateTokenFactory(
-            sdk.userLedger,
-            keyPair,
-            instrumentId
-        );
+        const sdk = await getDefaultSdkAndConnect();
+        await sdk.setPartyId(partyId);
+        const wrappedSdk = getWrappedSdkWithKeyPair(sdk, keyPair);
+
+        const tokenFactoryContractId =
+            await wrappedSdk.tokenFactory.getOrCreate(instrumentId);
 
         return NextResponse.json({ tokenFactoryContractId });
     } catch (error) {
-        logger.error({ err: error }, "Error getting/creating token factory");
+        console.error("Error getting/creating token factory:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
