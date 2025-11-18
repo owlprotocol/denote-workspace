@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSDK } from "@/lib/wallet/sdk-instance";
-import { keyPairFromSeed } from "@/lib/wallet/keypair";
-import { getOrCreateTokenFactory } from "@owlprotocol/token-sdk";
+import {
+    keyPairFromSeed,
+    getOrCreateTokenFactory,
+} from "@owlprotocol/token-sdk";
 import { logger } from "@/lib/wallet/sdk";
 
 export async function POST(request: NextRequest) {
