@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDefaultSdkAndConnect, getWrappedSdk } from "@owlprotocol/token-sdk";
+import { getWrappedSdkForParty } from "@owlprotocol/token-sdk";
 
 export async function GET(request: NextRequest) {
     try {
@@ -15,9 +15,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const sdk = await getDefaultSdkAndConnect();
-        await sdk.setPartyId(owner);
-        const wrappedSdk = getWrappedSdk(sdk);
+        const wrappedSdk = await getWrappedSdkForParty(owner);
 
         if (admin && id) {
             const balance = await wrappedSdk.balances.getByInstrumentId({
