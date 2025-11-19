@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
     keyPairFromSeed,
-    getDefaultSdkAndConnect,
-    getWrappedSdkWithKeyPair,
+    getWrappedSdkWithKeyPairForParty,
 } from "@owlprotocol/token-sdk";
 
 export async function POST(request: NextRequest) {
@@ -20,9 +19,10 @@ export async function POST(request: NextRequest) {
         }
 
         const keyPair = keyPairFromSeed(seed);
-        const sdk = await getDefaultSdkAndConnect();
-        await sdk.setPartyId(receiver);
-        const wrappedSdk = getWrappedSdkWithKeyPair(sdk, keyPair);
+        const wrappedSdk = await getWrappedSdkWithKeyPairForParty(
+            receiver,
+            keyPair
+        );
 
         await wrappedSdk.transferPreapprovalProposal.accept({
             transferPreapprovalProposalContractId,

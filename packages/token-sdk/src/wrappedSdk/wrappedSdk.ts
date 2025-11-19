@@ -1,5 +1,6 @@
 import { WalletSDK } from "@canton-network/wallet-sdk";
 import { UserKeyPair } from "../types/UserKeyPair.js";
+import { getSdkForParty } from "../sdkHelpers.js";
 import {
     createTokenFactory,
     getLatestTokenFactory,
@@ -305,4 +306,17 @@ export const getWrappedSdkWithKeyPair = (
                 ),
         },
     };
+};
+
+export const getWrappedSdkForParty = async (partyId: string) => {
+    const sdk = await getSdkForParty(partyId);
+    return getWrappedSdk(sdk);
+};
+
+export const getWrappedSdkWithKeyPairForParty = async (
+    partyId: string,
+    userKeyPair: UserKeyPair
+) => {
+    const sdk = await getSdkForParty(partyId);
+    return getWrappedSdkWithKeyPair(sdk, userKeyPair);
 };

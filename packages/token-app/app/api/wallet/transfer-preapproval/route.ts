@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
     keyPairFromSeed,
-    getDefaultSdkAndConnect,
-    getWrappedSdkWithKeyPair,
-    getWrappedSdk,
+    getWrappedSdkWithKeyPairForParty,
+    getWrappedSdkForParty,
 } from "@owlprotocol/token-sdk";
 
 export async function GET(request: NextRequest) {
@@ -20,9 +19,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const sdk = await getDefaultSdkAndConnect();
-        await sdk.setPartyId(issuer);
-        const wrappedSdk = getWrappedSdk(sdk);
+        const wrappedSdk = await getWrappedSdkForParty(issuer);
 
         const contractId = await wrappedSdk.transferPreapproval.getLatest({
             issuer,
@@ -68,9 +65,10 @@ export async function POST(request: NextRequest) {
         }
 
         const keyPair = keyPairFromSeed(seed);
-        const sdk = await getDefaultSdkAndConnect();
-        await sdk.setPartyId(sender);
-        const wrappedSdk = getWrappedSdkWithKeyPair(sdk, keyPair);
+        const wrappedSdk = await getWrappedSdkWithKeyPairForParty(
+            sender,
+            keyPair
+        );
 
         await wrappedSdk.transferPreapproval.send({
             transferPreapprovalContractId,
