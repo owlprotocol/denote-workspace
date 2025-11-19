@@ -1,6 +1,7 @@
 module Test.TransferPreapproval where
 
 import Daml.Script
+import DA.Optional (fromSome, isSome)
 import MyTransferPreapproval
 import MyTransferPreapprovalProposal
 import MyToken
@@ -40,15 +41,25 @@ testTransferPreapproval = script do
   submitMustFail bob  do
     exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
       sender = alice
-      amount = 40.0
+      amount = 10.0
       tokenCid
 
   -- No disclosure needed since Alice is the sender and has visibility to the token
+  transferResult <- submit alice  do
+    exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
+      sender = alice
+      amount = 10.0
+      tokenCid
+
+  assert (isSome transferResult.remainderCid )
+  let remainderCid = fromSome transferResult.remainderCid
+
+  -- Unless canceled, preapproval can be used multiple times
   submit alice  do
     exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
       sender = alice
-      amount = 40.0
-      tokenCid
+      amount = 10.0
+      tokenCid = remainderCid
 
   pure ()
 

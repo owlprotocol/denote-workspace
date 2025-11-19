@@ -12,7 +12,7 @@ template MyTransferPreapproval
   where
     signatory issuer, receiver
 
-    choice MyTransferPreapproval_Send : TransferResult
+    nonconsuming choice MyTransferPreapproval_Send : TransferResult
       with
         sender: Party
         amount: Decimal
