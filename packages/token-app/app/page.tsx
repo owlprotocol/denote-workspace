@@ -2,39 +2,66 @@
 
 import { useState } from "react";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
-import { PartyManager } from "@/components/PartyManager";
-import { TokenOperations } from "@/components/TokenOperations";
+import { PartyView } from "@/components/PartyView";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const PARTIES = ["alice", "bob"] as const;
 
 export default function Home() {
-    const [activePartyId, setActivePartyId] = useState<string | null>(null);
-    const [activePartyName, setActivePartyName] = useState<string | null>(null);
+    const [selectedParty, setSelectedParty] = useState<string>("alice");
+    const [partyIds, setPartyIds] = useState<Record<string, string | null>>({
+        alice: null,
+        bob: null,
+    });
 
-    const handlePartySelected = (partyId: string, partyName: string) => {
-        setActivePartyId(partyId);
-        setActivePartyName(partyName);
+    const handlePartyCreated = (partyId: string, partyName: string) => {
+        setPartyIds((prev) => ({
+            ...prev,
+            [partyName]: partyId,
+        }));
     };
 
     return (
         <div className="min-h-screen bg-background">
-            <main className="container mx-auto max-w-6xl px-4 py-8 space-y-8">
-                <div className="space-y-2">
-                    <h1 className="text-4xl font-bold tracking-tight">
-                        Token Management
-                    </h1>
-                </div>
+            <main className="container mx-auto max-w-4xl px-4 py-8 space-y-8">
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-4xl font-bold tracking-tight">
+                            Token Management
+                        </h1>
+                        <ConnectionStatus />
+                    </div>
 
-                <ConnectionStatus />
+                    <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+                        {PARTIES.map((party) => (
+                            <Button
+                                key={party}
+                                variant={
+                                    selectedParty === party
+                                        ? "default"
+                                        : "ghost"
+                                }
+                                onClick={() => setSelectedParty(party)}
+                                className={cn(
+                                    "capitalize",
+                                    selectedParty === party && "shadow-sm"
+                                )}
+                            >
+                                {party}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
 
                 <Separator />
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                    <PartyManager onPartySelected={handlePartySelected} />
-                    <TokenOperations
-                        activePartyId={activePartyId}
-                        activePartyName={activePartyName}
-                    />
-                </div>
+                <PartyView
+                    partyName={selectedParty}
+                    partyId={partyIds[selectedParty]}
+                    onPartyCreated={handlePartyCreated}
+                />
             </main>
         </div>
     );
