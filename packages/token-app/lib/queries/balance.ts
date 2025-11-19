@@ -1,21 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 
 export function useBalance(
-    owner: string,
-    instrumentId: { admin: string; id: string } | null
+    owner: string | null,
+    instrumentId?: { admin: string; id: string } | null
 ) {
     return useQuery({
-        queryKey: ["tokenBalance", owner, instrumentId],
+        queryKey: ["balances", owner, instrumentId],
         queryFn: async () => {
-            if (!instrumentId) throw new Error("Instrument ID required");
+            if (!owner) throw new Error("Owner required");
 
-            const params = new URLSearchParams({
-                owner,
-                admin: instrumentId.admin,
-                id: instrumentId.id,
-            });
+            const params = new URLSearchParams({ owner });
 
-            const response = await fetch(`/api/wallet/balance?${params}`);
+            if (instrumentId?.admin && instrumentId?.id) {
+                params.append("admin", instrumentId.admin);
+                params.append("id", instrumentId.id);
+            }
+
+            const response = await fetch(`/api/wallet/balances?${params}`);
 
             if (!response.ok) {
                 const error = await response.json();
@@ -24,7 +25,7 @@ export function useBalance(
 
             return response.json();
         },
-        enabled: !!owner && !!instrumentId?.admin && !!instrumentId?.id,
+        enabled: !!owner,
         refetchInterval: 5000,
     });
 }
