@@ -45,7 +45,7 @@ testTransferPreapproval = script do
       tokenCid
 
   -- No disclosure needed since Alice is the sender and has visibility to the token
-  transferResult <- submit alice  do
+  transferResult <- submit alice do
     exerciseCmd transferPreapprovalCid MyTransferPreapproval_Send with
       sender = alice
       amount = 10.0
