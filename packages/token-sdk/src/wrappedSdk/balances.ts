@@ -5,9 +5,10 @@ import {
 } from "@canton-network/core-ledger-client";
 import { WalletSDK, LedgerController } from "@canton-network/wallet-sdk";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
+import { ContractId, Party } from "../types/daml.js";
 
 export interface InstrumentId {
-    admin: string;
+    admin: Party;
     id: string;
 }
 
@@ -24,13 +25,13 @@ const instrumentIdToString = (instrumentId: InstrumentId) =>
     `${instrumentId.admin}:${instrumentId.id}`;
 export interface TokenBalance {
     total: number;
-    utxos: { amount: number; contractId: string }[];
+    utxos: { amount: number; contractId: ContractId }[];
 }
 
 export async function getBalances(
     sdk: WalletSDK,
-    owner: string
-): Promise<Record<string, TokenBalance>> {
+    owner: Party
+): Promise<Record<ContractId, TokenBalance>> {
     if (!sdk.tokenStandard) {
         throw new Error("Token standard SDK not initialized");
     }
@@ -41,10 +42,10 @@ export async function getBalances(
         .map(formatHoldingUtxo);
 
     const balances: Record<
-        string,
+        ContractId,
         {
             total: number;
-            utxos: { amount: number; contractId: string }[];
+            utxos: { amount: number; contractId: ContractId }[];
         }
     > = {};
 
@@ -67,8 +68,8 @@ export async function getBalances(
 }
 
 export interface GetBalanceByInstrumentIdParams {
-    owner: string;
-    instrumentId: { admin: string; id: string };
+    owner: Party;
+    instrumentId: { admin: Party; id: string };
 }
 
 export async function getBalanceByInstrumentId(
@@ -82,7 +83,7 @@ export async function getBalanceByInstrumentId(
 
 export async function getContractDisclosure(
     userLedger: LedgerController,
-    { templateId, contractId }: { templateId: string; contractId: string }
+    { templateId, contractId }: { templateId: string; contractId: ContractId }
 ): Promise<Types["DisclosedContract"]> {
     const end = await userLedger.ledgerEnd();
     const user = userLedger.getPartyId();

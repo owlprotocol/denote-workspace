@@ -4,9 +4,10 @@ import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { TokenFactoryParams } from "./tokenFactory.js";
 import { transferPreapprovalTemplateId } from "../constants/templateIds.js";
+import { ContractId, Party } from "../types/daml.js";
 
 export type TransferPreapprovalParams = TokenFactoryParams & {
-    receiver: string;
+    receiver: Party;
 };
 
 export async function getLatestTransferPreapproval(
@@ -15,7 +16,7 @@ export async function getLatestTransferPreapproval(
         issuer,
         receiver,
         instrumentId,
-    }: { issuer: string; receiver: string; instrumentId: string }
+    }: { issuer: Party; receiver: Party; instrumentId: string }
 ) {
     const end = await userLedger.ledgerEnd();
     const activeContracts = (await userLedger.activeContracts({
@@ -54,10 +55,10 @@ export const getTransferPreapprovalSendCommand = ({
     amount,
     tokenCid,
 }: {
-    transferPreapprovalContractId: string;
-    sender: string;
+    transferPreapprovalContractId: ContractId;
+    sender: Party;
     amount: number;
-    tokenCid: string;
+    tokenCid: ContractId;
 }): WrappedCommand => ({
     ExerciseCommand: {
         templateId: transferPreapprovalTemplateId,
@@ -72,9 +73,9 @@ export const getTransferPreapprovalSendCommand = ({
 });
 
 export interface TransferPreapprovalSendParams {
-    transferPreapprovalContractId: string;
-    sender: string;
-    tokenCid: string;
+    transferPreapprovalContractId: ContractId;
+    sender: Party;
+    tokenCid: ContractId;
     amount: number;
 }
 

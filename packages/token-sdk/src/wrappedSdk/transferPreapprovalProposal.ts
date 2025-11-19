@@ -4,9 +4,10 @@ import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { TokenFactoryParams } from "./tokenFactory.js";
 import { transferPreapprovalProposalTemplateId } from "../constants/templateIds.js";
+import { ContractId, Party } from "../types/daml.js";
 
 export type TransferPreapprovalProposalParams = TokenFactoryParams & {
-    receiver: string;
+    receiver: Party;
 };
 
 export const getCreateTransferPreapprovalProposalCommand = ({
@@ -14,8 +15,8 @@ export const getCreateTransferPreapprovalProposalCommand = ({
     receiver,
     instrumentId,
 }: {
-    issuer: string;
-    receiver: string;
+    issuer: Party;
+    receiver: Party;
     instrumentId: string;
 }): WrappedCommand => ({
     CreateCommand: {
@@ -29,14 +30,14 @@ export const getCreateTransferPreapprovalProposalCommand = ({
 });
 
 export interface CreateTransferPreapprovalProposalParams {
-    receiver: string;
+    receiver: Party;
     instrumentId: string;
 }
 export async function createTransferPreapprovalProposal(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
     params: {
-        receiver: string;
+        receiver: Party;
         instrumentId: string;
     }
 ) {
@@ -89,7 +90,7 @@ export async function getLatestTransferPreapprovalProposal(
 export async function getOrCreateTransferPreapprovalProposal(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    params: { instrumentId: string; receiver: string }
+    params: { instrumentId: string; receiver: Party }
 ) {
     const issuer = userLedger.getPartyId();
     const contractId = await getLatestTransferPreapprovalProposal(userLedger, {
@@ -109,7 +110,7 @@ export async function getOrCreateTransferPreapprovalProposal(
 export const getTransferPreapprovalProposalAcceptCommand = ({
     transferPreapprovalProposalContractId,
 }: {
-    transferPreapprovalProposalContractId: string;
+    transferPreapprovalProposalContractId: ContractId;
 }): WrappedCommand => ({
     ExerciseCommand: {
         templateId: transferPreapprovalProposalTemplateId,
@@ -120,13 +121,13 @@ export const getTransferPreapprovalProposalAcceptCommand = ({
 });
 
 export interface TransferPreapprovalProposalAcceptParams {
-    transferPreapprovalProposalContractId: string;
+    transferPreapprovalProposalContractId: ContractId;
 }
 export async function transferPreapprovalProposalAccept(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
     params: {
-        transferPreapprovalProposalContractId: string;
+        transferPreapprovalProposalContractId: ContractId;
     }
 ) {
     const transferPreapprovalProposalAcceptCommand =

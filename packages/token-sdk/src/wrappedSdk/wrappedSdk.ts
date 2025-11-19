@@ -27,6 +27,7 @@ import {
     transferPreapprovalSend,
     TransferPreapprovalSendParams,
 } from "./transferPreapproval.js";
+import { Party } from "../types/daml.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -47,7 +48,7 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 mintToken(userLedger, userKeyPair, params),
         },
         balances: {
-            get: (owner: string) => getBalances(sdk, owner),
+            get: (owner: Party) => getBalances(sdk, owner),
             getByInstrumentId: (params: GetBalanceByInstrumentIdParams) =>
                 getBalanceByInstrumentId(sdk, params),
         },
@@ -115,7 +116,7 @@ export const getWrappedSdkWithKeyPair = (
                 mintToken(userLedger, userKeyPair, params),
         },
         balances: {
-            get: (owner: string) => getBalances(sdk, owner),
+            get: (owner: Party) => getBalances(sdk, owner),
             getByInstrumentId: (params: GetBalanceByInstrumentIdParams) =>
                 getBalanceByInstrumentId(sdk, params),
         },

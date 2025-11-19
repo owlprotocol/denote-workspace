@@ -2,9 +2,10 @@ import { WrappedCommand, LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
+import { ContractId, Party } from "../types/daml.js";
 
 export interface TokenFactoryParams {
-    issuer: string;
+    issuer: Party;
     instrumentId: string;
 }
 
@@ -16,7 +17,7 @@ const getCreateTokenFactoryCommand = ({
     issuer,
 }: {
     instrumentId: string;
-    issuer: string;
+    issuer: Party;
 }): WrappedCommand => ({
     CreateCommand: {
         templateId: tokenFactoryTemplateId,
@@ -132,8 +133,8 @@ export const getMintTokenCommand = ({
     receiver,
     amount,
 }: {
-    tokenFactoryContractId: string;
-    receiver: string;
+    tokenFactoryContractId: ContractId;
+    receiver: Party;
     amount: number;
 }): WrappedCommand => ({
     ExerciseCommand: {
@@ -148,8 +149,8 @@ export const getMintTokenCommand = ({
 });
 
 export interface MintTokenParams {
-    tokenFactoryContractId: string;
-    receiver: string;
+    tokenFactoryContractId: ContractId;
+    receiver: Party;
     amount: number;
 }
 
