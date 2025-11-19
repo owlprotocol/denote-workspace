@@ -60,6 +60,7 @@ export default function Home() {
                 <PartyView
                     partyName={selectedParty}
                     partyId={partyIds[selectedParty]}
+                    allPartyIds={partyIds}
                     onPartyCreated={handlePartyCreated}
                 />
             </main>

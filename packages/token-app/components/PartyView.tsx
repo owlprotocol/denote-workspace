@@ -20,19 +20,30 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Coins, Loader2, Copy, User, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { ProposalManager } from "./ProposalManager";
+import { PendingProposals } from "./PendingProposals";
+import { SendTransfer } from "./SendTransfer";
+import { BalancesView } from "./BalancesView";
 
 interface PartyViewProps {
     partyName: string;
     partyId: string | null;
+    allPartyIds: Record<string, string | null>;
     onPartyCreated?: (partyId: string, partyName: string) => void;
 }
 
 export function PartyView({
     partyName,
     partyId,
+    allPartyIds,
     onPartyCreated,
 }: PartyViewProps) {
-    const [mintAmount, setMintAmount] = useState("1000");
+    const [mintAmount, setMintAmount] = useState(100);
+
+    const otherPartyIds = Object.entries(allPartyIds)
+        .filter(([name]) => name !== partyName)
+        .map(([, id]) => id)
+        .filter((id): id is string => id !== null);
 
     const createPartyMutation = useMutation({
         mutationFn: async (name: string) => {
@@ -130,7 +141,7 @@ export function PartyView({
             await mintMutation.mutateAsync({
                 tokenFactoryContractId,
                 receiver: partyId,
-                amount: parseInt(mintAmount),
+                amount: mintAmount,
                 seed: partyName,
             });
             toast.success(`Successfully minted ${mintAmount} tokens!`);
@@ -172,7 +183,7 @@ export function PartyView({
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => copyToClipboard(partyId)}
+                                onClick={() => copyToClipboard(partyId!)}
                                 className="shrink-0"
                             >
                                 <Copy className="h-4 w-4" />
@@ -275,9 +286,10 @@ export function PartyView({
                                 id="mintAmount"
                                 type="number"
                                 value={mintAmount}
-                                onChange={(e) => setMintAmount(e.target.value)}
+                                onChange={(e) =>
+                                    setMintAmount(e.target.valueAsNumber || 0)
+                                }
                                 min="1"
-                                placeholder="Enter amount"
                             />
                         </div>
                         <Button
@@ -304,6 +316,28 @@ export function PartyView({
                     </div>
                 </CardContent>
             </Card>
+
+            {partyId && (
+                <>
+                    <ProposalManager
+                        partyId={partyId}
+                        partyName={partyName}
+                        instrumentId={instrumentId}
+                        availablePartyIds={otherPartyIds}
+                    />
+
+                    <PendingProposals partyId={partyId} partyName={partyName} />
+
+                    <SendTransfer
+                        partyId={partyId}
+                        partyName={partyName}
+                        instrumentId={instrumentId}
+                        availablePartyIds={otherPartyIds}
+                    />
+                </>
+            )}
+
+            <BalancesView partyId={partyId} />
         </div>
     );
 }
