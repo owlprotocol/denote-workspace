@@ -64,8 +64,7 @@ async function transferPreapproval() {
         throw new Error("Error creating or getting token factory");
     }
 
-    await aliceWrappedSdk.tokenFactory.mintToken({
-        tokenFactoryContractId,
+    await aliceWrappedSdk.tokenFactory.mintToken(tokenFactoryContractId, {
         amount: 1000,
         receiver: aliceAllocatedParty.partyId,
     });
@@ -129,9 +128,8 @@ async function transferPreapproval() {
 
     console.info("Transferring 500 tokens from Alice to Bob with preapproval");
 
-    await aliceWrappedSdk.transferPreapproval.send({
+    await aliceWrappedSdk.transferPreapproval.send(transferPreapprovalCid, {
         tokenCid: tokenContractId,
-        transferPreapprovalContractId: transferPreapprovalCid,
         sender: aliceAllocatedParty.partyId,
         amount: 500,
     });

@@ -27,7 +27,7 @@ import {
     transferPreapprovalSend,
     TransferPreapprovalSendParams,
 } from "./transferPreapproval.js";
-import { Party } from "../types/daml.js";
+import { ContractId, Party } from "../types/daml.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -44,8 +44,11 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 getLatestTokenFactory(userLedger, instrumentId),
             getOrCreate: (userKeyPair: UserKeyPair, instrumentId: string) =>
                 getOrCreateTokenFactory(userLedger, userKeyPair, instrumentId),
-            mintToken: (userKeyPair: UserKeyPair, params: MintTokenParams) =>
-                mintToken(userLedger, userKeyPair, params),
+            mintToken: (
+                userKeyPair: UserKeyPair,
+                contractId: ContractId,
+                params: MintTokenParams
+            ) => mintToken(userLedger, userKeyPair, contractId, params),
         },
         balances: {
             get: (owner: Party) => getBalances(sdk, owner),
@@ -88,8 +91,15 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 getLatestTransferPreapproval(userLedger, params),
             send: (
                 userKeyPair: UserKeyPair,
+                contractId: ContractId,
                 params: TransferPreapprovalSendParams
-            ) => transferPreapprovalSend(userLedger, userKeyPair, params),
+            ) =>
+                transferPreapprovalSend(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    params
+                ),
         },
     };
 };
@@ -112,8 +122,8 @@ export const getWrappedSdkWithKeyPair = (
                 getLatestTokenFactory(userLedger, instrumentId),
             getOrCreate: (instrumentId: string) =>
                 getOrCreateTokenFactory(userLedger, userKeyPair, instrumentId),
-            mintToken: (params: MintTokenParams) =>
-                mintToken(userLedger, userKeyPair, params),
+            mintToken: (contractId: ContractId, params: MintTokenParams) =>
+                mintToken(userLedger, userKeyPair, contractId, params),
         },
         balances: {
             get: (owner: Party) => getBalances(sdk, owner),
@@ -145,8 +155,16 @@ export const getWrappedSdkWithKeyPair = (
         transferPreapproval: {
             getLatest: (params: TransferPreapprovalParams) =>
                 getLatestTransferPreapproval(userLedger, params),
-            send: (params: TransferPreapprovalSendParams) =>
-                transferPreapprovalSend(userLedger, userKeyPair, params),
+            send: (
+                contractId: ContractId,
+                params: TransferPreapprovalSendParams
+            ) =>
+                transferPreapprovalSend(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    params
+                ),
         },
     };
 };

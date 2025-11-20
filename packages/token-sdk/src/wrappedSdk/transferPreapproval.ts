@@ -1,10 +1,11 @@
-import { WrappedCommand, LedgerController } from "@canton-network/wallet-sdk";
+import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { TokenFactoryParams } from "./tokenFactory.js";
 import { transferPreapprovalTemplateId } from "../constants/templateIds.js";
 import { ContractId, Party } from "../types/daml.js";
+import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
 
 export type TransferPreapprovalParams = TokenFactoryParams & {
     receiver: Party;
@@ -49,43 +50,36 @@ export async function getLatestTransferPreapproval(
     return contract.contractEntry.JsActiveContract!.createdEvent.contractId;
 }
 
-export const getTransferPreapprovalSendCommand = ({
-    transferPreapprovalContractId,
-    sender,
-    amount,
-    tokenCid,
-}: {
-    transferPreapprovalContractId: ContractId;
-    sender: Party;
-    amount: number;
-    tokenCid: ContractId;
-}): WrappedCommand => ({
-    ExerciseCommand: {
-        templateId: transferPreapprovalTemplateId,
-        choice: "MyTransferPreapproval_Send",
-        contractId: transferPreapprovalContractId,
-        choiceArgument: {
-            sender,
-            amount,
-            tokenCid,
-        },
-    },
-});
-
 export interface TransferPreapprovalSendParams {
-    transferPreapprovalContractId: ContractId;
     sender: Party;
     tokenCid: ContractId;
     amount: number;
 }
 
+export const getTransferPreapprovalSendCommand = ({
+    contractId,
+    params,
+}: {
+    contractId: ContractId;
+    params: TransferPreapprovalSendParams;
+}) =>
+    getExerciseCommand({
+        contractId,
+        params,
+        templateId: transferPreapprovalTemplateId,
+        choice: "MyTransferPreapproval_Send",
+    });
+
 export async function transferPreapprovalSend(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
+    contractId: ContractId,
     params: TransferPreapprovalSendParams
 ) {
-    const transferPreapprovalSendCommand =
-        getTransferPreapprovalSendCommand(params);
+    const transferPreapprovalSendCommand = getTransferPreapprovalSendCommand({
+        contractId,
+        params,
+    });
 
     return await userLedger.prepareSignExecuteAndWaitFor(
         [transferPreapprovalSendCommand],

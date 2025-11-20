@@ -1,8 +1,10 @@
-import { WrappedCommand, LedgerController } from "@canton-network/wallet-sdk";
+import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { ContractId, Party } from "../types/daml.js";
+import { getCreateCommand } from "../helpers/getCreateCommand.js";
+import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
 
 export interface TokenFactoryParams {
     issuer: Party;
@@ -12,21 +14,8 @@ export interface TokenFactoryParams {
 export const tokenFactoryTemplateId =
     "#minimal-token:MyTokenFactory:MyTokenFactory";
 
-const getCreateTokenFactoryCommand = ({
-    instrumentId,
-    issuer,
-}: {
-    instrumentId: string;
-    issuer: Party;
-}): WrappedCommand => ({
-    CreateCommand: {
-        templateId: tokenFactoryTemplateId,
-        createArguments: {
-            issuer,
-            instrumentId,
-        },
-    },
-});
+const getCreateTokenFactoryCommand = (params: TokenFactoryParams) =>
+    getCreateCommand({ templateId: tokenFactoryTemplateId, params });
 
 // TODO: do not pass userKeyPair here
 export async function createTokenFactory(
@@ -128,38 +117,32 @@ export async function getOrCreateTokenFactory(
     return (await getLatestTokenFactory(userLedger, instrumentId))!;
 }
 
-export const getMintTokenCommand = ({
-    tokenFactoryContractId,
-    receiver,
-    amount,
-}: {
-    tokenFactoryContractId: ContractId;
-    receiver: Party;
-    amount: number;
-}): WrappedCommand => ({
-    ExerciseCommand: {
-        templateId: tokenFactoryTemplateId,
-        contractId: tokenFactoryContractId,
-        choice: "Mint",
-        choiceArgument: {
-            receiver,
-            amount,
-        },
-    },
-});
-
 export interface MintTokenParams {
-    tokenFactoryContractId: ContractId;
     receiver: Party;
     amount: number;
 }
 
+export const getMintTokenCommand = ({
+    contractId,
+    params,
+}: {
+    contractId: ContractId;
+    params: MintTokenParams;
+}) =>
+    getExerciseCommand({
+        templateId: tokenFactoryTemplateId,
+        contractId,
+        choice: "Mint",
+        params,
+    });
+
 export async function mintToken(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
+    contractId: ContractId,
     params: MintTokenParams
 ) {
-    const mintTokenCommand = getMintTokenCommand(params);
+    const mintTokenCommand = getMintTokenCommand({ contractId, params });
 
     // TODO: can we get a contractId directly from here?
     await userLedger.prepareSignExecuteAndWaitFor(

@@ -1,9 +1,9 @@
 import { signTransactionHash } from "@canton-network/wallet-sdk";
-import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
+import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
 
-async function hello() {
+async function transferFactory() {
     const sdk = await getDefaultSdkAndConnect();
     await sdk.connectAdmin();
 
@@ -60,12 +60,12 @@ async function hello() {
     console.log({ tokenBalance, tokenContractId });
 }
 
-hello()
+transferFactory()
     .then(() => {
         console.info("Done");
         process.exit(0);
     })
     .catch((error) => {
-        console.error("Error in main: ", error);
+        console.error("Error in transferFactory: ", error);
         process.exit(1);
     });

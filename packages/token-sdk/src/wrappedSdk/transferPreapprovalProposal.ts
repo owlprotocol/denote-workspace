@@ -1,33 +1,24 @@
-import { WrappedCommand, LedgerController } from "@canton-network/wallet-sdk";
+import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { TokenFactoryParams } from "./tokenFactory.js";
 import { transferPreapprovalProposalTemplateId } from "../constants/templateIds.js";
 import { ContractId, Party } from "../types/daml.js";
+import { getCreateCommand } from "../helpers/getCreateCommand.js";
+import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
 
 export type TransferPreapprovalProposalParams = TokenFactoryParams & {
     receiver: Party;
 };
 
-export const getCreateTransferPreapprovalProposalCommand = ({
-    issuer,
-    receiver,
-    instrumentId,
-}: {
-    issuer: Party;
-    receiver: Party;
-    instrumentId: string;
-}): WrappedCommand => ({
-    CreateCommand: {
+export const getCreateTransferPreapprovalProposalCommand = (
+    params: TransferPreapprovalProposalParams
+) =>
+    getCreateCommand({
+        params,
         templateId: transferPreapprovalProposalTemplateId,
-        createArguments: {
-            issuer,
-            receiver,
-            instrumentId,
-        },
-    },
-});
+    });
 
 export interface CreateTransferPreapprovalProposalParams {
     receiver: Party;
@@ -107,18 +98,15 @@ export async function getOrCreateTransferPreapprovalProposal(
     }))!;
 }
 
-export const getTransferPreapprovalProposalAcceptCommand = ({
-    transferPreapprovalProposalContractId,
-}: {
-    transferPreapprovalProposalContractId: ContractId;
-}): WrappedCommand => ({
-    ExerciseCommand: {
+export const getTransferPreapprovalProposalAcceptCommand = (
+    contractId: ContractId
+) =>
+    getExerciseCommand({
+        params: {},
         templateId: transferPreapprovalProposalTemplateId,
+        contractId,
         choice: "MyTransferPreapprovalProposal_Accept",
-        contractId: transferPreapprovalProposalContractId,
-        choiceArgument: {},
-    },
-});
+    });
 
 export interface TransferPreapprovalProposalAcceptParams {
     transferPreapprovalProposalContractId: ContractId;
@@ -131,7 +119,9 @@ export async function transferPreapprovalProposalAccept(
     }
 ) {
     const transferPreapprovalProposalAcceptCommand =
-        getTransferPreapprovalProposalAcceptCommand(params);
+        getTransferPreapprovalProposalAcceptCommand(
+            params.transferPreapprovalProposalContractId
+        );
 
     await userLedger.prepareSignExecuteAndWaitFor(
         [transferPreapprovalProposalAcceptCommand],
