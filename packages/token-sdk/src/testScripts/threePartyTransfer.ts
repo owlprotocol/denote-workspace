@@ -3,15 +3,6 @@ import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
 import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
 import {
-    getOrCreateTokenRules,
-    getOrCreateTransferFactory,
-    getOrCreateTokenFactory,
-    createIssuerMintRequest,
-    getLatestIssuerMintRequest,
-    acceptIssuerMintRequest,
-    createTransferRequest,
-    acceptTransferRequest,
-    getLatestTransferRequest,
     buildTransfer,
     emptyExtraArgs,
     getTransferInstructionDisclosure,
@@ -55,7 +46,7 @@ async function threePartyTransfer() {
         charlieKeyPair
     );
     const aliceWrappedSdk = getWrappedSdkWithKeyPair(aliceSdk, aliceKeyPair);
-    const bobWrappedSdk = getWrappedSdkWithKeyPair(bobSdk, bobKeyPair);
+    // const bobWrappedSdk = getWrappedSdkWithKeyPair(bobSdk, bobKeyPair);
 
     // === PARTY ALLOCATION ===
     console.info("1. Allocating parties...");
@@ -121,21 +112,16 @@ async function threePartyTransfer() {
     const instrumentId = charlieAllocatedParty.partyId + "#MyToken";
 
     // Create MyTokenRules
-    const rulesCid = await getOrCreateTokenRules(charlieLedger, charlieKeyPair);
+    const rulesCid = await charlieWrappedSdk.tokenRules.getOrCreate();
     console.info(`✓ MyTokenRules created: ${rulesCid}`);
 
     // Create MyTransferFactory
-    const transferFactoryCid = await getOrCreateTransferFactory(
-        charlieLedger,
-        charlieKeyPair,
-        rulesCid
-    );
+    const transferFactoryCid =
+        await charlieWrappedSdk.transferFactory.getOrCreate(rulesCid);
     console.info(`✓ MyTransferFactory created: ${transferFactoryCid}`);
 
     // Create MyTokenFactory
-    const tokenFactoryCid = await getOrCreateTokenFactory(
-        charlieLedger,
-        charlieKeyPair,
+    const tokenFactoryCid = await charlieWrappedSdk.tokenFactory.getOrCreate(
         instrumentId
     );
     console.info(`✓ MyTokenFactory created: ${tokenFactoryCid}\n`);
@@ -144,7 +130,7 @@ async function threePartyTransfer() {
     console.info("3. Minting tokens to Alice (two-step pattern)...");
 
     // Step 1: Alice creates mint request
-    await createIssuerMintRequest(aliceLedger, aliceKeyPair, {
+    await aliceWrappedSdk.issuerMintRequest.create({
         tokenFactoryCid,
         issuer: charlieAllocatedParty.partyId,
         receiver: aliceAllocatedParty.partyId,
@@ -153,8 +139,7 @@ async function threePartyTransfer() {
     console.info("  ✓ Alice created mint request");
 
     // Step 2: Get the mint request contract ID
-    const mintRequestCid = await getLatestIssuerMintRequest(
-        aliceLedger,
+    const mintRequestCid = await aliceWrappedSdk.issuerMintRequest.getLatest(
         charlieAllocatedParty.partyId
     );
 
@@ -164,11 +149,7 @@ async function threePartyTransfer() {
     console.info(`  ✓ Mint request CID: ${mintRequestCid}`);
 
     // Step 3: Charlie accepts the request
-    await acceptIssuerMintRequest(
-        charlieLedger,
-        charlieKeyPair,
-        mintRequestCid
-    );
+    await charlieWrappedSdk.issuerMintRequest.accept(mintRequestCid);
     console.info("  ✓ Charlie accepted mint request");
 
     console.info("✓ Minted 100 tokens to Alice\n");
@@ -204,7 +185,7 @@ async function threePartyTransfer() {
         inputHoldingCids: [aliceTokenCid],
     });
 
-    await createTransferRequest(aliceLedger, aliceKeyPair, {
+    await aliceWrappedSdk.transferRequest.create({
         transferFactoryCid,
         expectedAdmin: charlieAllocatedParty.partyId,
         transfer,
@@ -216,8 +197,7 @@ async function threePartyTransfer() {
     // === APPROVAL PHASE ===
     console.info("5. Charlie approves transfer request (locks tokens)...");
 
-    const transferRequestCid = await getLatestTransferRequest(
-        aliceLedger,
+    const transferRequestCid = await aliceWrappedSdk.transferRequest.getLatest(
         charlieAllocatedParty.partyId
     );
 
@@ -225,11 +205,7 @@ async function threePartyTransfer() {
         throw new Error("Transfer request not found");
     }
 
-    await acceptTransferRequest(
-        charlieLedger,
-        charlieKeyPair,
-        transferRequestCid
-    );
+    await charlieWrappedSdk.transferRequest.accept(transferRequestCid);
 
     console.info("✓ Transfer request accepted by Charlie");
     console.info("✓ Tokens locked and MyTransferInstruction created\n");
