@@ -46,7 +46,7 @@ async function threePartyTransfer() {
         charlieKeyPair
     );
     const aliceWrappedSdk = getWrappedSdkWithKeyPair(aliceSdk, aliceKeyPair);
-    // const bobWrappedSdk = getWrappedSdkWithKeyPair(bobSdk, bobKeyPair);
+    const bobWrappedSdk = getWrappedSdkWithKeyPair(bobSdk, bobKeyPair);
 
     // === PARTY ALLOCATION ===
     console.info("1. Allocating parties...");
@@ -277,6 +277,10 @@ async function threePartyTransfer() {
     // 2. Include disclosedContracts: [disclosure.lockedTokenDisclosure]
     // 3. Collect signatures from all required parties
     // 4. Execute submission with party signatures
+    // TODO: OSCAR: Just need to add a transfer instruction accept the sdk
+    await bobWrappedSdk.transferInstruction.accept(transferInstructionCid, [
+        disclosure.lockedTokenDisclosure,
+    ]);
 
     console.info(
         "\n✓ Three-party transfer flow demonstrated (up to disclosure)"
