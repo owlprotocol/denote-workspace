@@ -1,0 +1,364 @@
+module Test.ThreePartyTransferTest where
+
+import Daml.Script
+import DA.Time
+import DA.List (head)
+
+import MyToken
+import MyTokenFactory
+import MyTokenRules
+import MyTransferFactory
+import MyTokenTransferInstruction()
+import MyToken.IssuerMintRequest as IssuerMintRequest
+import MyToken.TransferRequest as TransferRequest
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.MetadataV1 as MD
+
+import Test.RegistryApi as RegistryApi
+
+-- | Test demonstrating three-party authorization for token transfers:
+-- Charlie (issuer) -> Alice (sender) -> Bob (receiver)
+--
+-- This test follows the Splice Amulet pattern where:
+-- 1. Charlie issues tokens to Alice (requires: Charlie + Alice)
+-- 2. Alice creates a transfer request (requires: Alice)
+-- 3. Charlie approves the request, auto-locking tokens (requires: Charlie + Alice via rules)
+-- 4. Bob accepts the transfer with disclosure (requires: Charlie + Alice + Bob)
+--
+-- Key authorization points:
+-- - Minting: issuer + receiver
+-- - Transfer request: sender proposes
+-- - Request accept: issuer approves and locks tokens via MyTokenRules
+-- - Lock via rules: sender controls choice, issuer signs via MyTokenRules signatory
+-- - Transfer accept: receiver accepts, but requires sender + issuer for unlock & create
+testThreePartyTransfer : Script ()
+testThreePartyTransfer = script do
+  -- Allocate parties
+  charlie <- allocatePartyByHint (PartyIdHint "Charlie")  -- Issuer/Admin
+  alice   <- allocatePartyByHint (PartyIdHint "Alice")    -- Initial owner/sender
+  bob     <- allocatePartyByHint (PartyIdHint "Bob")      -- Receiver
+
+  now <- getTime
+  let instrumentId = show charlie <> "#MyToken"
+
+  -- =============================================================================
+  -- SETUP PHASE: Charlie creates infrastructure
+  -- =============================================================================
+
+  -- Charlie creates MyTokenRules (reusable contract for locking tokens)
+  rulesCid <- submit charlie do
+    createCmd MyTokenRules with issuer = charlie
+
+  -- Charlie creates MyTransferFactory (reusable contract for creating transfer instructions)
+  transferFactoryCid <- submit charlie do
+    createCmd MyTransferFactory with
+      registry = charlie
+      rulesCid = rulesCid
+
+  -- Charlie creates MyTokenFactory (for minting tokens)
+  tokenFactoryCid <- submit charlie do
+    createCmd MyTokenFactory with
+      issuer = charlie
+      instrumentId = instrumentId
+
+  -- =============================================================================
+  -- MINTING PHASE: Charlie issues 100 tokens to Alice
+  -- Authorization: Charlie (issuer) + Alice (receiver)
+  -- =============================================================================
+
+  -- Alice creates a mint request (proposes receiving tokens)
+  mintRequestCid <- submit alice do
+    createCmd IssuerMintRequest with
+      tokenFactoryCid = tokenFactoryCid
+      issuer = charlie
+      receiver = alice
+      amount = 100.0
+
+  -- Charlie accepts the mint request (issues tokens)
+  -- This requires both Charlie (issuer) and Alice (owner) to sign MyToken
+  mintResult <- submit charlie do
+    exerciseCmd mintRequestCid IssuerMintRequest.Accept
+
+  let aliceTokenCid = mintResult.tokenCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceTokenCid
+
+  -- =============================================================================
+  -- TRANSFER REQUEST PHASE: Alice proposes transfer to Bob
+  -- Authorization: Alice (sender)
+  -- =============================================================================
+
+  let requestedAtPast = addRelTime now (seconds (-1))
+  let executeBefore = addRelTime now (hours 1)
+
+  let transfer = TI.Transfer with
+        sender = alice
+        receiver = bob
+        amount = 50.0  -- Transfer half the tokens
+        instrumentId = H.InstrumentId with
+          admin = charlie
+          id = instrumentId
+        requestedAt = requestedAtPast
+        executeBefore = executeBefore
+        inputHoldingCids = [aliceHolding]
+        meta = MD.emptyMetadata
+
+  -- Alice creates a transfer request (proposes transfer to Bob)
+  transferRequestCid <- submit alice do
+    createCmd TransferRequest with
+      transferFactoryCid = transferFactoryCid
+      expectedAdmin = charlie
+      transfer = transfer
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- =============================================================================
+  -- APPROVAL PHASE: Charlie accepts the transfer request
+  -- Authorization: Charlie (admin) + Alice (sender via MyTokenRules controller)
+  -- =============================================================================
+
+  -- Charlie accepts the transfer request
+  -- This exercises TransferFactory_Transfer which:
+  -- 1. Calls MyTokenRules_LockForTransfer (controlled by Alice, signed by Charlie)
+  -- 2. Archives Alice's MyToken (requires Charlie + Alice)
+  -- 3. Creates LockedMyToken wrapping a MyToken value (requires Charlie + Alice via signatories)
+  -- 4. Creates MyTransferInstruction (Charlie + Alice signatories, Bob observer)
+  transferResult <- submit charlie do
+    exerciseCmd transferRequestCid TransferRequest.Accept
+
+  -- Extract the transfer instruction contract ID
+  TI.TransferInstructionResult_Pending { transferInstructionCid } <- pure transferResult.output
+
+  -- Verify that sender change was created (Alice should have 50 tokens remaining)
+  -- The change is returned as part of the lock operation
+  assertMsg "Sender should have change from split" (length transferResult.senderChangeCids == 1)
+
+  -- =============================================================================
+  -- ACCEPTANCE PHASE: Bob accepts the transfer with disclosure
+  -- Authorization: Bob (receiver) + Charlie & Alice (via disclosure for unlock)
+  -- =============================================================================
+
+  -- Charlie provides disclosure of the locked token to Bob
+  -- This is necessary because Bob is only an observer on MyTransferInstruction
+  -- but needs to see the LockedMyToken (where Charlie + Alice are signatories)
+  disclosure <- RegistryApi.getTransferInstructionDisclosure charlie transferInstructionCid
+
+  -- Bob accepts the transfer using the disclosure
+  -- This:
+  -- 1. Exercises Unlock on LockedMyToken (requires Charlie + Alice authorization from signatories)
+  -- 2. Archives the unlocked MyToken (requires Charlie + Alice)
+  -- 3. Creates new MyToken for Bob (requires Charlie + Bob)
+  acceptResult <- submitWithDisclosures bob [disclosure] do
+    exerciseCmd transferInstructionCid TI.TransferInstruction_Accept with
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Extract Bob's new holdings
+  TI.TransferInstructionResult_Completed { receiverHoldingCids } <- pure acceptResult.output
+
+  -- Verify Bob received the tokens
+  assertMsg "Bob should receive tokens" (length receiverHoldingCids == 1)
+
+  -- Fetch Bob's token and verify amount
+  let bobHoldingCid = head receiverHoldingCids
+  let bobTokenCid : ContractId MyToken = fromInterfaceContractId bobHoldingCid
+  bobToken <- queryContractId bob bobTokenCid
+  case bobToken of
+    Some token -> do
+      assertMsg "Bob should have 50 tokens" (token.amount == 50.0)
+      assertMsg "Bob should be the owner" (token.owner == bob)
+      assertMsg "Charlie should be the issuer" (token.issuer == charlie)
+    None -> error "Bob's token not found"
+
+  pure ()
+
+-- | Test demonstrating rejection flow: Alice proposes, Charlie approves, Bob rejects
+testThreePartyTransferReject : Script ()
+testThreePartyTransferReject = script do
+  charlie <- allocatePartyByHint (PartyIdHint "Charlie")
+  alice   <- allocatePartyByHint (PartyIdHint "Alice")
+  bob     <- allocatePartyByHint (PartyIdHint "Bob")
+
+  now <- getTime
+  let instrumentId = show charlie <> "#MyToken"
+
+  -- Setup infrastructure
+  rulesCid <- submit charlie do
+    createCmd MyTokenRules with issuer = charlie
+
+  transferFactoryCid <- submit charlie do
+    createCmd MyTransferFactory with
+      registry = charlie
+      rulesCid = rulesCid
+
+  tokenFactoryCid <- submit charlie do
+    createCmd MyTokenFactory with
+      issuer = charlie
+      instrumentId = instrumentId
+
+  -- Charlie mints 100 tokens to Alice
+  mintRequestCid <- submit alice do
+    createCmd IssuerMintRequest with
+      tokenFactoryCid = tokenFactoryCid
+      issuer = charlie
+      receiver = alice
+      amount = 100.0
+
+  mintResult <- submit charlie do
+    exerciseCmd mintRequestCid IssuerMintRequest.Accept
+
+  let aliceTokenCid = mintResult.tokenCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceTokenCid
+
+  -- Alice proposes transfer to Bob
+  let requestedAtPast = addRelTime now (seconds (-1))
+  let executeBefore = addRelTime now (hours 1)
+
+  let transfer = TI.Transfer with
+        sender = alice
+        receiver = bob
+        amount = 100.0
+        instrumentId = H.InstrumentId with
+          admin = charlie
+          id = instrumentId
+        requestedAt = requestedAtPast
+        executeBefore = executeBefore
+        inputHoldingCids = [aliceHolding]
+        meta = MD.emptyMetadata
+
+  transferRequestCid <- submit alice do
+    createCmd TransferRequest with
+      transferFactoryCid = transferFactoryCid
+      expectedAdmin = charlie
+      transfer = transfer
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Charlie accepts (locks tokens)
+  transferResult <- submit charlie do
+    exerciseCmd transferRequestCid TransferRequest.Accept
+
+  TI.TransferInstructionResult_Pending { transferInstructionCid } <- pure transferResult.output
+
+  -- =============================================================================
+  -- REJECTION: Bob rejects the transfer
+  -- Authorization: Bob (receiver) + Charlie & Alice (for unlock back to sender)
+  -- =============================================================================
+
+  -- Bob needs disclosure to see the LockedMyToken for rejection
+  disclosureForReject <- RegistryApi.getTransferInstructionDisclosure charlie transferInstructionCid
+
+  -- Bob rejects the transfer
+  -- This unlocks the LockedMyToken and returns it to Alice
+  rejectResult <- submitWithDisclosures bob [disclosureForReject] do
+    exerciseCmd transferInstructionCid TI.TransferInstruction_Reject with
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Verify Alice got her tokens back
+  TI.TransferInstructionResult_Failed <- pure rejectResult.output
+  assertMsg "Alice should get tokens back" (length rejectResult.senderChangeCids == 1)
+
+  -- Verify Alice's token is unlocked and has the full amount
+  let aliceReturnedHolding = head rejectResult.senderChangeCids
+  let aliceReturnedTokenCid : ContractId MyToken = fromInterfaceContractId aliceReturnedHolding
+  aliceReturnedToken <- queryContractId alice aliceReturnedTokenCid
+  case aliceReturnedToken of
+    Some token -> do
+      assertMsg "Alice should have 100 tokens back" (token.amount == 100.0)
+      assertMsg "Alice should be the owner" (token.owner == alice)
+    None -> error "Alice's returned token not found"
+
+  pure ()
+
+-- | Test demonstrating withdrawal flow: Alice proposes, Charlie approves, Alice withdraws
+testThreePartyTransferWithdraw : Script ()
+testThreePartyTransferWithdraw = script do
+  charlie <- allocatePartyByHint (PartyIdHint "Charlie")
+  alice   <- allocatePartyByHint (PartyIdHint "Alice")
+  bob     <- allocatePartyByHint (PartyIdHint "Bob")
+
+  now <- getTime
+  let instrumentId = show charlie <> "#MyToken"
+
+  -- Setup infrastructure
+  rulesCid <- submit charlie do
+    createCmd MyTokenRules with issuer = charlie
+
+  transferFactoryCid <- submit charlie do
+    createCmd MyTransferFactory with
+      registry = charlie
+      rulesCid = rulesCid
+
+  tokenFactoryCid <- submit charlie do
+    createCmd MyTokenFactory with
+      issuer = charlie
+      instrumentId = instrumentId
+
+  -- Charlie mints 100 tokens to Alice
+  mintRequestCid <- submit alice do
+    createCmd IssuerMintRequest with
+      tokenFactoryCid = tokenFactoryCid
+      issuer = charlie
+      receiver = alice
+      amount = 100.0
+
+  mintResult <- submit charlie do
+    exerciseCmd mintRequestCid IssuerMintRequest.Accept
+
+  let aliceTokenCid = mintResult.tokenCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceTokenCid
+
+  -- Alice proposes transfer to Bob
+  let requestedAtPast = addRelTime now (seconds (-1))
+  let executeBefore = addRelTime now (hours 1)
+
+  let transfer = TI.Transfer with
+        sender = alice
+        receiver = bob
+        amount = 100.0
+        instrumentId = H.InstrumentId with
+          admin = charlie
+          id = instrumentId
+        requestedAt = requestedAtPast
+        executeBefore = executeBefore
+        inputHoldingCids = [aliceHolding]
+        meta = MD.emptyMetadata
+
+  transferRequestCid <- submit alice do
+    createCmd TransferRequest with
+      transferFactoryCid = transferFactoryCid
+      expectedAdmin = charlie
+      transfer = transfer
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Charlie accepts (locks tokens)
+  transferResult <- submit charlie do
+    exerciseCmd transferRequestCid TransferRequest.Accept
+
+  TI.TransferInstructionResult_Pending { transferInstructionCid } <- pure transferResult.output
+
+  -- =============================================================================
+  -- WITHDRAWAL: Alice withdraws the transfer
+  -- Authorization: Alice (sender) + Charlie (issuer for unlock)
+  -- =============================================================================
+
+  -- Alice changes her mind and withdraws the transfer
+  withdrawResult <- submit alice do
+    exerciseCmd transferInstructionCid TI.TransferInstruction_Withdraw with
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Verify Alice got her tokens back
+  TI.TransferInstructionResult_Failed <- pure withdrawResult.output
+  assertMsg "Alice should get tokens back" (length withdrawResult.senderChangeCids == 1)
+
+  pure ()

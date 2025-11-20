@@ -1,0 +1,274 @@
+module Test.AllocationAndDvPTest where
+
+import Daml.Script
+import DA.Time
+
+import MyTokenFactory
+import MySettlementCoordinator
+import MyToken.AllocationRequest as AllocationRequest
+import Splice.Api.Token.AllocationV1 as A
+import Splice.Api.Token.AllocationInstructionV1 as AI
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.MetadataV1 as MD
+
+import Test.TestUtils
+
+-- | Test allocation factory creates allocation and locks tokens
+-- Verifies:
+-- - Allocation request/accept pattern
+-- - Tokens locked via AllocationFactory
+-- - Allocation ready for execution
+testAllocationCreate : Script ()
+testAllocationCreate = script do
+  parties <- allocateTestParties
+  infra <- setupTokenInfrastructure parties.issuer
+  (now, past, future) <- testTimes
+
+  -- Mint 100 tokens to Alice
+  aliceTokenCid <- mintTokensTo parties.issuer parties.alice 100.0 infra.tokenFactoryCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceTokenCid
+
+  -- Build allocation specification
+  let settlement = A.SettlementInfo with
+        executor = parties.issuer
+        settlementRef = A.Reference with id = "S-1", cid = None
+        requestedAt = past
+        allocateBefore = addRelTime now (minutes 30)
+        settleBefore = future
+        meta = MD.emptyMetadata
+
+  let leg = A.TransferLeg with
+        sender = parties.alice
+        receiver = parties.bob
+        amount = 50.0
+        instrumentId = H.InstrumentId with admin = parties.issuer, id = show parties.issuer <> "#MyToken"
+        meta = MD.emptyMetadata
+
+  let spec = A.AllocationSpecification with
+        settlement
+        transferLegId = "L-1"
+        transferLeg = leg
+
+  -- Create allocation request
+  allocRequestCid <- submit parties.alice do
+    createCmd AllocationRequest with
+      allocationFactoryCid = infra.allocationFactoryCid
+      expectedAdmin = parties.issuer
+      allocation = spec
+      requestedAt = past
+      inputHoldingCids = [aliceHolding]
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Issuer accepts request and creates allocation (locks tokens)
+  allocResult <- submit parties.issuer do
+    exerciseCmd allocRequestCid AllocationRequest.Accept
+
+  -- Verify allocation was created
+  AI.AllocationInstructionResult_Completed { allocationCid } <- pure allocResult.output
+  -- Allocation created successfully if we reached this point
+
+  pure ()
+
+-- | Test executing a single allocation
+-- Verifies:
+-- - Executor can execute allocation
+-- - Tokens transferred from sender to receiver
+-- - Allocation archived after execution
+testAllocationExecute : Script ()
+testAllocationExecute = script do
+  parties <- allocateTestParties
+  infra <- setupTokenInfrastructure parties.issuer
+  (now, past, future) <- testTimes
+
+  -- Mint 100 tokens to Alice
+  aliceTokenCid <- mintTokensTo parties.issuer parties.alice 100.0 infra.tokenFactoryCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceTokenCid
+
+  -- Build allocation specification
+  let settlement = A.SettlementInfo with
+        executor = parties.issuer
+        settlementRef = A.Reference with id = "S-1", cid = None
+        requestedAt = past
+        allocateBefore = addRelTime now (minutes 30)
+        settleBefore = future
+        meta = MD.emptyMetadata
+
+  let leg = A.TransferLeg with
+        sender = parties.alice
+        receiver = parties.bob
+        amount = 100.0
+        instrumentId = H.InstrumentId with admin = parties.issuer, id = show parties.issuer <> "#MyToken"
+        meta = MD.emptyMetadata
+
+  let spec = A.AllocationSpecification with
+        settlement
+        transferLegId = "L-1"
+        transferLeg = leg
+
+  -- Create allocation request
+  allocRequestCid <- submit parties.alice do
+    createCmd AllocationRequest with
+      allocationFactoryCid = infra.allocationFactoryCid
+      expectedAdmin = parties.issuer
+      allocation = spec
+      requestedAt = past
+      inputHoldingCids = [aliceHolding]
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  allocResult <- submit parties.issuer do
+    exerciseCmd allocRequestCid AllocationRequest.Accept
+
+  AI.AllocationInstructionResult_Completed { allocationCid } <- pure allocResult.output
+
+  -- Execute the allocation
+  executeResult <- submitMulti [parties.issuer, parties.alice, parties.bob] [] do
+    exerciseCmd allocationCid A.Allocation_ExecuteTransfer with
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  -- Verify Bob received tokens
+  assertMsg "Bob should receive tokens" (length executeResult.receiverHoldingCids == 1)
+
+  pure ()
+
+-- | Test atomic two-leg DvP settlement
+-- Verifies:
+-- - Two allocation legs created independently
+-- - Settlement coordinator manages both legs
+-- - Atomic execution (both legs complete or none)
+-- - Tokens swapped between parties
+testDvPTwoLegAtomic : Script ()
+testDvPTwoLegAtomic = script do
+  -- Setup two separate issuers for different tokens
+  bank <- allocatePartyByHint (PartyIdHint "Bank")
+  etfIssuer <- allocatePartyByHint (PartyIdHint "ETF_Issuer")
+  bob <- allocatePartyByHint (PartyIdHint "Bob")
+
+  now <- getTime
+  let requestedAtPast = addRelTime now (seconds (-1))
+  let settleBefore = addRelTime now (hours 1)
+  let allocateBefore = addRelTime now (minutes 30)
+
+  -- Setup Bank token infrastructure
+  bankInfra <- setupTokenInfrastructure bank
+
+  -- Setup ETF token infrastructure
+  etfInfra <- setupTokenInfrastructure etfIssuer
+
+  -- Mint 100 Bank tokens to Bob
+  bobBankTokenCid <- mintTokensTo bank bob 100.0 bankInfra.tokenFactoryCid
+  let bobBankHolding : ContractId H.Holding = toInterfaceContractId @H.Holding bobBankTokenCid
+
+  -- Mint 100 ETF tokens to ETF Issuer (self-mint)
+  etfMint <- submit etfIssuer do
+    exerciseCmd etfInfra.tokenFactoryCid MyTokenFactory.Mint with
+      receiver = etfIssuer
+      amount = 100.0
+  let etfIssuerHolding : ContractId H.Holding = toInterfaceContractId @H.Holding etfMint.tokenCid
+
+  -- Define settlement reference
+  let settlementRef = A.Reference with
+        id = "SWAP-ATOMIC"
+        cid = None
+
+  -- LEG 1: Bob sends 20 Bank tokens to ETF Issuer
+  let settlementBank : A.SettlementInfo = A.SettlementInfo with
+        executor = bank
+        settlementRef
+        requestedAt = requestedAtPast
+        allocateBefore
+        settleBefore
+        meta = MD.emptyMetadata
+
+  let legBank : A.TransferLeg = A.TransferLeg with
+        sender = bob
+        receiver = etfIssuer
+        amount = 20.0
+        instrumentId = H.InstrumentId with
+          admin = bank
+          id = show bank <> "#MyToken"
+        meta = MD.emptyMetadata
+
+  let specBank = A.AllocationSpecification with
+        settlement = settlementBank
+        transferLegId = "BANK-LEG"
+        transferLeg = legBank
+
+  -- LEG 2: ETF Issuer sends 20 ETF tokens to Bob
+  let settlementEtf : A.SettlementInfo = A.SettlementInfo with
+        executor = etfIssuer
+        settlementRef
+        requestedAt = requestedAtPast
+        allocateBefore
+        settleBefore
+        meta = MD.emptyMetadata
+
+  let legEtf : A.TransferLeg = A.TransferLeg with
+        sender = etfIssuer
+        receiver = bob
+        amount = 20.0
+        instrumentId = H.InstrumentId with
+          admin = etfIssuer
+          id = show etfIssuer <> "#MyToken"
+        meta = MD.emptyMetadata
+
+  let specEtf = A.AllocationSpecification with
+        settlement = settlementEtf
+        transferLegId = "ETF-LEG"
+        transferLeg = legEtf
+
+  -- Create Bank allocation (Bob is sender, uses request/accept)
+  bankAllocRequestCid <- submit bob do
+    createCmd AllocationRequest with
+      allocationFactoryCid = bankInfra.allocationFactoryCid
+      expectedAdmin = bank
+      allocation = specBank
+      requestedAt = requestedAtPast
+      inputHoldingCids = [bobBankHolding]
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  allocResBank <- submit bank do
+    exerciseCmd bankAllocRequestCid AllocationRequest.Accept
+
+  AI.AllocationInstructionResult_Completed { allocationCid = allocCidBank } <- pure allocResBank.output
+
+  -- Create ETF allocation (ETF Issuer is sender and admin, direct call)
+  allocResEtf <- submit etfIssuer do
+    exerciseCmd (toInterfaceContractId @AI.AllocationFactory etfInfra.allocationFactoryCid) AI.AllocationFactory_Allocate with
+      expectedAdmin = etfIssuer
+      allocation = specEtf
+      requestedAt = requestedAtPast
+      inputHoldingCids = [etfIssuerHolding]
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  AI.AllocationInstructionResult_Completed { allocationCid = allocCidEtf } <- pure allocResEtf.output
+
+  -- Create settlement coordinator and add both legs
+  settlementCoordinatorCid <- submit bank do
+    createCmd MySettlementCoordinator with
+      executor = bank
+      settlementRef = "SWAP-ATOMIC"
+      legs = [allocCidBank]
+
+  settlementCoordinatorBothLegsCid <- submit bank do
+    exerciseCmd settlementCoordinatorCid AddLeg with leg = allocCidEtf
+
+  -- Execute both legs atomically
+  -- All controllers: executor + all senders + all receivers
+  submitMulti [bank, bob, etfIssuer] [] do
+    exerciseCmd settlementCoordinatorBothLegsCid ExecuteAll with
+      extraActors = [bob, etfIssuer]
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  pure ()

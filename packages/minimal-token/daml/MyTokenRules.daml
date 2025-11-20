@@ -12,8 +12,10 @@ template MyTokenRules
     signatory issuer
 
     -- | Lock a single holding for a transfer.
+    -- Following Amulet pattern: creates LockedMyToken directly, not via Lock choice.
     -- Requires both issuer (rules signatory) and the sender (owner) to authorize.
-    nonconsuming choice MyTokenRules_LockForTransfer : (ContractId LockedMyToken, MD.Metadata)
+    -- Returns: (locked token CID, sender change CID if split occurred, metadata)
+    nonconsuming choice MyTokenRules_LockForTransfer : (ContractId LockedMyToken, Optional (ContractId H.Holding), MD.Metadata)
       with
         sender : Party
         inputHoldingCid : ContractId H.Holding
@@ -27,36 +29,51 @@ template MyTokenRules
         token <- fetch tokenCid
         assertMsg "Sender must be owner" (token.owner == sender)
         assertMsg "desired amount must be positive" (desiredAmount > 0.0)
+
+        -- Archive original input
+        archive tokenCid
+
         if token.amount == desiredAmount then do
-          -- Lock the existing token as-is
-          lockedCid <- exercise tokenCid MyToken.Lock with
-            holders = [issuer]
-            expiresAt = transferBefore
-            MyToken.lockContext = Some contextText
-          pure (lockedCid, MD.emptyMetadata)
+          -- Create locked token directly (no change needed)
+          let lockedToken = MyToken with
+                issuer = token.issuer
+                owner = token.owner
+                instrumentId = token.instrumentId
+                amount = desiredAmount
+          let lock = TimeLock with
+                holders = [issuer]
+                expiresAt = transferBefore
+                lockContext = Some contextText
+          lockedCid <- create LockedMyToken with
+            token = lockedToken
+            lock = lock
+          pure (lockedCid, None, MD.emptyMetadata)
         else if token.amount > desiredAmount then do
-          -- Split: archive original; create change and a fresh token of desiredAmount; lock the fresh one
-          -- Create change for the remainder
+          -- Split: create change for sender and locked token
           let changeAmount = token.amount - desiredAmount
-          -- Archive original input
-          archive tokenCid
+
           -- Create change back to sender
-          _changeCid : ContractId MyToken <- create MyToken with
+          changeCid : ContractId MyToken <- create MyToken with
             issuer = token.issuer
             owner = token.owner
             instrumentId = token.instrumentId
             amount = changeAmount
-          -- Create the exact-amount token to lock
-          exactCid : ContractId MyToken <- create MyToken with
-            issuer = token.issuer
-            owner = token.owner
-            instrumentId = token.instrumentId
-            amount = desiredAmount
-          lockedCid <- exercise exactCid MyToken.Lock with
-            holders = [issuer]
-            expiresAt = transferBefore
-            MyToken.lockContext = Some contextText
-          pure (lockedCid, MD.emptyMetadata)
+
+          -- Create locked token with desired amount
+          let lockedToken = MyToken with
+                issuer = token.issuer
+                owner = token.owner
+                instrumentId = token.instrumentId
+                amount = desiredAmount
+          let lock = TimeLock with
+                holders = [issuer]
+                expiresAt = transferBefore
+                lockContext = Some contextText
+          lockedCid <- create LockedMyToken with
+            token = lockedToken
+            lock = lock
+          let changeHoldingCid : ContractId H.Holding = toInterfaceContractId @H.Holding changeCid
+          pure (lockedCid, Some changeHoldingCid, MD.emptyMetadata)
         else
           fail "Insufficient amount to lock the desired amount"
 

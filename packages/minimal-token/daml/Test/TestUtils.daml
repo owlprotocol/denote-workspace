@@ -1,0 +1,131 @@
+module Test.TestUtils where
+
+import Daml.Script
+import DA.Time
+
+import MyToken
+import MyTokenFactory
+import MyTokenRules
+import MyTransferFactory
+import MyAllocationFactory
+import MyToken.IssuerMintRequest as IssuerMintRequest
+import MyToken.TransferRequest as TransferRequest
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.MetadataV1 as MD
+
+-- | Standard party allocation for tests
+data TestParties = TestParties with
+    issuer : Party
+    alice : Party
+    bob : Party
+    charlie : Party
+  deriving (Eq, Show)
+
+-- | Allocate standard test parties
+allocateTestParties : Script TestParties
+allocateTestParties = script do
+    issuer <- allocatePartyByHint (PartyIdHint "Issuer")
+    alice <- allocatePartyByHint (PartyIdHint "Alice")
+    bob <- allocatePartyByHint (PartyIdHint "Bob")
+    charlie <- allocatePartyByHint (PartyIdHint "Charlie")
+    pure TestParties with ..
+
+-- | Infrastructure contracts for token operations
+data TokenInfrastructure = TokenInfrastructure with
+    rulesCid : ContractId MyTokenRules
+    transferFactoryCid : ContractId MyTransferFactory
+    allocationFactoryCid : ContractId MyAllocationFactory
+    tokenFactoryCid : ContractId MyTokenFactory
+    instrumentId : Text
+  deriving (Eq, Show)
+
+-- | Setup complete token infrastructure for an issuer
+setupTokenInfrastructure : Party -> Script TokenInfrastructure
+setupTokenInfrastructure issuer = script do
+    let instrumentId = show issuer <> "#MyToken"
+
+    -- Create rules for locking tokens
+    rulesCid <- submit issuer do
+        createCmd MyTokenRules with issuer
+
+    -- Create transfer factory
+    transferFactoryCid <- submit issuer do
+        createCmd MyTransferFactory with
+            registry = issuer
+            rulesCid
+
+    -- Create allocation factory
+    allocationFactoryCid <- submit issuer do
+        createCmd MyAllocationFactory with
+            registry = issuer
+            rulesCid
+
+    -- Create token factory
+    tokenFactoryCid <- submit issuer do
+        createCmd MyTokenFactory with
+            issuer
+            instrumentId
+
+    pure TokenInfrastructure with ..
+
+-- | Mint tokens to a receiver using request/accept pattern
+mintTokensTo : Party -> Party -> Decimal -> ContractId MyTokenFactory -> Script (ContractId MyToken)
+mintTokensTo issuer receiver amount factoryCid = script do
+    -- Receiver creates mint request
+    requestCid <- submit receiver do
+        createCmd IssuerMintRequest with
+            tokenFactoryCid = factoryCid
+            issuer
+            receiver
+            amount
+
+    -- Issuer accepts request
+    result <- submit issuer do
+        exerciseCmd requestCid IssuerMintRequest.Accept
+
+    pure result.tokenCid
+
+-- | Get standard test times: (now, past for requestedAt, future for executeBefore)
+testTimes : Script (Time, Time, Time)
+testTimes = script do
+    now <- getTime
+    let past = addRelTime now (seconds (-1))
+    let future = addRelTime now (hours 1)
+    pure (now, past, future)
+
+-- | Create a transfer request from sender to receiver
+createTransferRequest
+    : Party                         -- sender
+    -> Party                         -- receiver
+    -> Party                         -- issuer (admin)
+    -> Decimal                       -- amount
+    -> Time                          -- requestedAt
+    -> Time                          -- executeBefore
+    -> ContractId MyTransferFactory  -- factory
+    -> ContractId H.Holding          -- input holding
+    -> Script (ContractId TransferRequest)
+createTransferRequest sender receiver issuer amount requestedAt executeBefore factoryCid inputHoldingCid = script do
+    let instrumentId = show issuer <> "#MyToken"
+    let transfer = TI.Transfer with
+            sender
+            receiver
+            amount
+            instrumentId = H.InstrumentId with admin = issuer, id = instrumentId
+            requestedAt
+            executeBefore
+            inputHoldingCids = [inputHoldingCid]
+            meta = MD.emptyMetadata
+
+    submit sender do
+        createCmd TransferRequest with
+            transferFactoryCid = factoryCid
+            expectedAdmin = issuer
+            transfer
+            extraArgs = MD.ExtraArgs with
+                context = MD.emptyChoiceContext
+                meta = MD.emptyMetadata
+
+-- | Note: createAllocationRequest is intentionally not provided as a helper
+-- due to the complexity of AllocationSpecification (SettlementInfo + TransferLeg).
+-- Tests should build these structures directly for clarity.

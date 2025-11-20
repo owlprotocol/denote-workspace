@@ -36,34 +36,34 @@ executeTwoStepTransfer
 executeTwoStepTransfer TwoStepTransfer{..} lockedMyTokenCid extraArgs = do
   -- 1. Check deadline hasn't passed
   assertWithinDeadline "executeBefore" executeBefore
-  
-  -- 2. Fetch the locked token
+
+  -- 2. Fetch the locked token (now wraps MyToken)
   locked <- fetch lockedMyTokenCid
-  
+
   -- 3. Validate amount matches locked amount
-  assertMsg "Transfer amount must match locked amount" (locked.amount == amount)
-  assertMsg "Sender must be owner" (locked.owner == sender)
-  
-  -- 4. Unlock the token (must be exercised by holders, controller is holders)
-  -- Note: In a real impl, we'd check dso is in holders and use that to unlock
+  assertMsg "Transfer amount must match locked amount" (locked.token.amount == amount)
+  assertMsg "Sender must be owner" (locked.token.owner == sender)
+
+  -- 4. Unlock the token
+  -- Controller: token.owner :: lock.holders (both sender and issuer must authorize)
+  -- This works because TransferInstruction has both as signatories
   unlockedCid : ContractId MyToken <- exercise lockedMyTokenCid Unlock
-  
+
   -- 5. Archive the unlocked token (consume sender's token)
   -- Note: This requires both issuer and owner (sender) signatures
   archive unlockedCid
-  
+
   -- 6. Create new token for receiver
   -- Note: This requires both issuer and receiver to sign (MyToken has signatory issuer, owner)
-  -- In a real implementation, you'd use a factory or different authority model
   receiverTokenCid : ContractId MyToken <- create MyToken with
-    issuer = locked.issuer
+    issuer = locked.token.issuer
     owner = receiver
-    instrumentId = locked.instrumentId
+    instrumentId = locked.token.instrumentId
     amount = amount
-  
+
   -- Convert to Holding interface (MyToken implements Api.Token.HoldingV1.Holding)
   let receiverCid : ContractId Holding = toInterfaceContractId @Holding receiverTokenCid
-  
+
   -- 7. Return results: no sender change (we consumed it), receiver gets new token
   let emptyMeta = Metadata with values = TextMap.empty
   pure ([], [receiverCid], emptyMeta)
@@ -82,13 +82,18 @@ prepareTwoStepTransfer TwoStepTransfer{..} requestedAt inputHoldingCids rulesCid
   case inputHoldingCids of
     [inputCid] -> do
       -- Lock via rules (issuer + sender sign)
-      (lockedCid, meta) <- exercise rulesCid MyTokenRules_LockForTransfer with
+      -- Returns: (lockedCid, optional change CID, metadata)
+      (lockedCid, optChangeCid, meta) <- exercise rulesCid MyTokenRules_LockForTransfer with
         sender = sender
         inputHoldingCid = inputCid
         desiredAmount = amount
         transferBefore = executeBefore
         contextText = "transfer to " <> show receiver
-      pure (lockedCid, [], meta)
+      -- Convert optional change to list for return
+      let senderChangeCids = case optChangeCid of
+            Some changeCid -> [changeCid]
+            None -> []
+      pure (lockedCid, senderChangeCids, meta)
     _ -> fail "prepareTwoStepTransfer: exactly one input holding required"
 
 abortTwoStepTransfer
@@ -99,9 +104,10 @@ abortTwoStepTransfer
 abortTwoStepTransfer TwoStepTransfer{..} lockedMyTokenCid extraArgs = do
   -- On abort, unlock the token back to sender (no transfer happens)
   locked <- fetch lockedMyTokenCid
-  assertMsg "Sender must be owner" (locked.owner == sender)
-  
+  assertMsg "Sender must be owner" (locked.token.owner == sender)
+
   -- Unlock returns token to sender
+  -- Controller: token.owner :: lock.holders (both must authorize)
   unlockedTokenCid : ContractId MyToken <- exercise lockedMyTokenCid Unlock
   -- Convert to Holding interface
   let unlockedCid : ContractId Holding = toInterfaceContractId @Holding unlockedTokenCid

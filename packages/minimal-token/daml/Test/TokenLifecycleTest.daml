@@ -1,0 +1,64 @@
+module Test.TokenLifecycleTest where
+
+import Daml.Script
+
+import Test.TestUtils
+
+-- | Test basic token minting with request/accept pattern
+-- Verifies:
+-- - Issuer can create token factory
+-- - Receiver creates mint request
+-- - Issuer accepts and mints tokens
+-- - Token has correct amount, owner, and issuer
+testMintTokens : Script ()
+testMintTokens = script do
+  parties <- allocateTestParties
+  infra <- setupTokenInfrastructure parties.issuer
+
+  -- Mint 100 tokens to Alice
+  tokenCid <- mintTokensTo parties.issuer parties.alice 100.0 infra.tokenFactoryCid
+
+  -- Verify token was minted correctly
+  token <- queryContractId parties.issuer tokenCid
+  case token of
+    Some t -> do
+      assertMsg "Alice should own 100 tokens" (t.amount == 100.0 && t.owner == parties.alice)
+      assertMsg "Issuer should be the token issuer" (t.issuer == parties.issuer)
+    None -> error "Token not found"
+
+  pure ()
+
+-- | Test minting tokens to multiple receivers
+-- Verifies:
+-- - Multiple independent mint operations
+-- - Each receiver gets correct amount
+-- - Tokens are independent contracts
+testMintToMultipleReceivers : Script ()
+testMintToMultipleReceivers = script do
+  parties <- allocateTestParties
+  infra <- setupTokenInfrastructure parties.issuer
+
+  -- Mint different amounts to different parties
+  aliceTokenCid <- mintTokensTo parties.issuer parties.alice 100.0 infra.tokenFactoryCid
+  bobTokenCid <- mintTokensTo parties.issuer parties.bob 50.0 infra.tokenFactoryCid
+  charlieTokenCid <- mintTokensTo parties.issuer parties.charlie 75.0 infra.tokenFactoryCid
+
+  -- Verify Alice's tokens
+  aliceToken <- queryContractId parties.issuer aliceTokenCid
+  case aliceToken of
+    Some t -> assertMsg "Alice should have 100 tokens" (t.amount == 100.0 && t.owner == parties.alice)
+    None -> error "Alice's token not found"
+
+  -- Verify Bob's tokens
+  bobToken <- queryContractId parties.issuer bobTokenCid
+  case bobToken of
+    Some t -> assertMsg "Bob should have 50 tokens" (t.amount == 50.0 && t.owner == parties.bob)
+    None -> error "Bob's token not found"
+
+  -- Verify Charlie's tokens
+  charlieToken <- queryContractId parties.issuer charlieTokenCid
+  case charlieToken of
+    Some t -> assertMsg "Charlie should have 75 tokens" (t.amount == 75.0 && t.owner == parties.charlie)
+    None -> error "Charlie's token not found"
+
+  pure ()
