@@ -5,12 +5,7 @@ import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { ContractId, Party } from "../types/daml.js";
 import { getCreateCommand } from "../helpers/getCreateCommand.js";
 import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
-
-// Types matching Splice API interfaces
-export interface InstrumentId {
-    admin: Party;
-    id: string;
-}
+import { InstrumentId } from "../types/InstrumentId.js";
 
 export type Metadata = Record<string, unknown>;
 

@@ -1,12 +1,8 @@
 import { PrettyContract, Holding } from "@canton-network/core-ledger-client";
 import { WalletSDK } from "@canton-network/wallet-sdk";
 import { ContractId, Party } from "../types/daml.js";
+import { InstrumentId } from "../types/InstrumentId.js";
 export { getContractDisclosure } from "./contractDisclosure.js";
-
-export interface InstrumentId {
-    admin: Party;
-    id: string;
-}
 
 export const formatHoldingUtxo = (utxo: PrettyContract<Holding>) => {
     const { amount, owner, instrumentId } = utxo.interfaceViewValue;
