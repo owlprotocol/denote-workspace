@@ -1,7 +1,7 @@
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
 import { ContractId } from "../types/daml.js";
-import { emptyExtraArgs, ExtraArgs } from "./transferRequest.js";
+import { ExtraArgs } from "./transferRequest.js";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { v4 } from "uuid";
 import { Types } from "@canton-network/core-ledger-client";
@@ -13,6 +13,13 @@ export interface TransferInstructionAcceptParams {
     extraArgs: ExtraArgs;
 }
 
+const emptyExtraArgs = (): TransferInstructionAcceptParams => ({
+    extraArgs: {
+        context: { values: {} },
+        meta: { values: {} },
+    },
+});
+
 export const getTransferInstructionAcceptCommand = ({
     contractId,
     params,
@@ -22,7 +29,7 @@ export const getTransferInstructionAcceptCommand = ({
 }) =>
     getExerciseCommand({
         templateId: TRANSFER_INSTRUCTION_INTERFACE_ID,
-        params: params ?? { extraArgs: emptyExtraArgs() },
+        params: params ?? emptyExtraArgs(),
         contractId,
         choice: "TransferInstruction_Accept",
     });
