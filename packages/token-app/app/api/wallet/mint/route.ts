@@ -22,8 +22,7 @@ export async function POST(request: NextRequest) {
             keyPair
         );
 
-        await wrappedSdk.tokenFactory.mintToken({
-            tokenFactoryContractId,
+        await wrappedSdk.tokenFactory.mintToken(tokenFactoryContractId, {
             receiver,
             amount,
         });
