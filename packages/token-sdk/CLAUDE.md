@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a TypeScript SDK for interacting with Canton Network's token system via the Wallet SDK. The SDK provides helper functions for creating token factories, minting tokens, transferring tokens, and querying balances on a Canton ledger, built on top of the minimal-token Daml application located in the sibling `../minimal-token` directory.
 
+## Additional Documentation
+
+- **[Splice Wallet Kernel Reference](notes/SPLICE-WALLET-KERNEL.md)** - Key learnings about exercising Daml interface choices through the Canton Ledger HTTP API, including template ID formats, common errors, and patterns from the splice-wallet-kernel implementation.
+
 ## Prerequisites
 
 Before running this SDK:

@@ -54,6 +54,11 @@ import {
     TransferRequestParams,
 } from "./transferRequest.js";
 import { ContractId, Party } from "../types/daml.js";
+import {
+    acceptTransferInstruction,
+    TransferInstructionAcceptParams,
+} from "./transferInstruction.js";
+import { Types } from "@canton-network/core-ledger-client";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -168,6 +173,21 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                     params
                 ),
         },
+        transferInstruction: {
+            accept: (
+                userKeyPair: UserKeyPair,
+                contractId: ContractId,
+                disclosedContracts?: Types["DisclosedContract"][],
+                params?: TransferInstructionAcceptParams
+            ) =>
+                acceptTransferInstruction(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    disclosedContracts,
+                    params
+                ),
+        },
     };
 };
 
@@ -267,6 +287,20 @@ export const getWrappedSdkWithKeyPair = (
                     userLedger,
                     userKeyPair,
                     contractId,
+                    params
+                ),
+        },
+        transferInstruction: {
+            accept: (
+                contractId: ContractId,
+                disclosedContracts?: Types["DisclosedContract"][],
+                params?: TransferInstructionAcceptParams
+            ) =>
+                acceptTransferInstruction(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    disclosedContracts,
                     params
                 ),
         },
