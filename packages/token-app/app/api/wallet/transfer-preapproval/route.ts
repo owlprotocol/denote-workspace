@@ -70,12 +70,14 @@ export async function POST(request: NextRequest) {
             keyPair
         );
 
-        await wrappedSdk.transferPreapproval.send({
+        await wrappedSdk.transferPreapproval.send(
             transferPreapprovalContractId,
-            tokenCid,
-            sender,
-            amount,
-        });
+            {
+                tokenCid,
+                sender,
+                amount,
+            }
+        );
 
         return NextResponse.json({ success: true });
     } catch (error) {
