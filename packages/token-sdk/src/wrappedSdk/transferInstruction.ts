@@ -6,6 +6,7 @@ import { UserKeyPair } from "../types/UserKeyPair.js";
 import { v4 } from "uuid";
 import { Types } from "@canton-network/core-ledger-client";
 
+// Use the Splice API interface ID (must match the package name in the DAR)
 const TRANSFER_INSTRUCTION_INTERFACE_ID =
     "#splice-api-token-transfer-instruction-v1:Splice.Api.Token.TransferInstructionV1:TransferInstruction";
 

@@ -271,13 +271,7 @@ async function threePartyTransfer() {
         `  Synchronizer ID: ${disclosure.lockedTokenDisclosure.synchronizerId}`
     );
 
-    // TODO: Implement Bob's acceptance using lower-level API with disclosed contracts
-    // This would require:
-    // 1. Prepare submission with actAs: [bob, charlie, alice]
-    // 2. Include disclosedContracts: [disclosure.lockedTokenDisclosure]
-    // 3. Collect signatures from all required parties
-    // 4. Execute submission with party signatures
-    // TODO: OSCAR: Just need to add a transfer instruction accept the sdk
+    // Accept the transfer instruction with disclosure
     await bobWrappedSdk.transferInstruction.accept(transferInstructionCid, [
         disclosure.lockedTokenDisclosure,
     ]);

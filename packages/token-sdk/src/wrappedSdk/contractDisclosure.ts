@@ -10,6 +10,8 @@ import { ContractId } from "../types/daml.js";
  * that the given party can see. The returned disclosure can be used with
  * submitWithDisclosures or in the disclosedContracts field of the prepare API.
  *
+ * NOTE: the returned templateId is in package-id reference format
+ *
  * @param userLedger - The ledger controller for a party that can see the contract
  * @param templateId - The template ID of the contract (e.g., "#minimal-token:MyToken:MyToken")
  * @param contractId - The contract ID to get disclosure for
@@ -44,7 +46,7 @@ export async function getContractDisclosure(
     return {
         contractId,
         createdEventBlob: createdEvent.createdEventBlob,
-        templateId,
+        templateId: createdEvent.templateId,
         synchronizerId,
     };
 }
