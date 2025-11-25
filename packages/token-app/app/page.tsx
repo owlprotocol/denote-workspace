@@ -7,11 +7,12 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const PARTIES = ["alice", "bob"] as const;
+const PARTIES = ["charlie", "alice", "bob"] as const;
 
 export default function Home() {
-    const [selectedParty, setSelectedParty] = useState<string>("alice");
+    const [selectedParty, setSelectedParty] = useState<string>("charlie");
     const [partyIds, setPartyIds] = useState<Record<string, string | null>>({
+        charlie: null,
         alice: null,
         bob: null,
     });

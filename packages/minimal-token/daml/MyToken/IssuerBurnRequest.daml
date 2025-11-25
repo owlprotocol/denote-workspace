@@ -1,0 +1,44 @@
+module MyToken.IssuerBurnRequest where
+
+import MyToken
+import MyTokenFactory
+
+template IssuerBurnRequest
+  with
+    tokenFactoryCid: ContractId MyTokenFactory
+    -- ^ The factory that can burn tokens
+    issuer: Party
+    -- ^ The issuer of the tokens to be burned
+    owner: Party
+    -- ^ The party that owns the tokens to be burned
+    amount: Decimal
+    -- ^ Amount of tokens to burn
+    inputHoldingCid: ContractId MyToken
+    -- ^ The token holding to use as input. Will be split if needed.
+  where
+    signatory owner
+    observer issuer
+
+    ensure amount > 0.0
+
+    choice Accept : MyTokenFactory.BurnResult
+      -- ^ Accept the burn request.
+      controller issuer
+      do
+          exercise tokenFactoryCid MyTokenFactory.Burn with
+            owner = owner
+            amount = amount
+            inputHoldingCid = inputHoldingCid
+
+    choice Decline : ()
+      -- ^ Decline the request.
+      controller issuer
+      do
+        pure ()
+
+    choice Withdraw : ()
+      -- ^ Withdraw the request.
+      controller owner
+      do
+        pure ()
+

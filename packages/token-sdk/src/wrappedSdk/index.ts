@@ -1,6 +1,7 @@
 export * from "./balances.js";
 export * from "./contractDisclosure.js";
 export * from "./disclosure.js";
+export * from "./issuerBurnRequest.js";
 export * from "./issuerMintRequest.js";
 export * from "./tokenFactory.js";
 export * from "./tokenRules.js";

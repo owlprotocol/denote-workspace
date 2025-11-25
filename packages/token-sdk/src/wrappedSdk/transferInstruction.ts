@@ -54,3 +54,37 @@ export async function acceptTransferInstruction(
         disclosedContracts
     );
 }
+
+export const getTransferInstructionRejectCommand = ({
+    contractId,
+    params,
+}: {
+    contractId: ContractId;
+    params?: TransferInstructionAcceptParams;
+}) =>
+    getExerciseCommand({
+        templateId: TRANSFER_INSTRUCTION_INTERFACE_ID,
+        params: params ?? emptyExtraArgs(),
+        contractId,
+        choice: "TransferInstruction_Reject",
+    });
+
+export async function rejectTransferInstruction(
+    ledger: LedgerController,
+    keyPair: UserKeyPair,
+    contractId: ContractId,
+    disclosedContracts?: Types["DisclosedContract"][],
+    params?: TransferInstructionAcceptParams
+) {
+    const rejectCommand = getTransferInstructionRejectCommand({
+        contractId,
+        params,
+    });
+
+    await ledger.prepareSignExecuteAndWaitFor(
+        [rejectCommand],
+        keyPair.privateKey,
+        v4(),
+        disclosedContracts
+    );
+}
