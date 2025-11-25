@@ -22,6 +22,8 @@ import {
     getBalanceByInstrumentId,
     GetBalanceByInstrumentIdParams,
     getBalances,
+    getAllBalancesByInstrumentId,
+    GetAllBalancesByInstrumentIdParams,
 } from "./balances.js";
 import {
     createTransferPreapprovalProposal,
@@ -41,24 +43,37 @@ import {
 import {
     createIssuerMintRequest,
     getLatestIssuerMintRequest,
+    getAllIssuerMintRequests,
     acceptIssuerMintRequest,
     declineIssuerMintRequest,
     withdrawIssuerMintRequest,
     IssuerMintRequestParams,
 } from "./issuerMintRequest.js";
 import {
+    createIssuerBurnRequest,
+    getLatestIssuerBurnRequest,
+    getAllIssuerBurnRequests,
+    acceptIssuerBurnRequest,
+    declineIssuerBurnRequest,
+    withdrawIssuerBurnRequest,
+    IssuerBurnRequestParams,
+} from "./issuerBurnRequest.js";
+import {
     createTransferRequest,
     getLatestTransferRequest,
     acceptTransferRequest,
     declineTransferRequest,
     withdrawTransferRequest,
+    getAllTransferRequests,
     TransferRequestParams,
 } from "./transferRequest.js";
 import { ContractId, Party } from "../types/daml.js";
 import {
     acceptTransferInstruction,
+    rejectTransferInstruction,
     TransferInstructionAcceptParams,
 } from "./transferInstruction.js";
+import { getTransferInstructionDisclosure } from "./disclosure.js";
 import { Types } from "@canton-network/core-ledger-client";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
@@ -101,6 +116,9 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             get: (owner: Party) => getBalances(sdk, owner),
             getByInstrumentId: (params: GetBalanceByInstrumentIdParams) =>
                 getBalanceByInstrumentId(sdk, params),
+            getAllByInstrumentId: (
+                params: GetAllBalancesByInstrumentIdParams
+            ) => getAllBalancesByInstrumentId(sdk, params),
         },
         issuerMintRequest: {
             create: (
@@ -109,6 +127,8 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             ) => createIssuerMintRequest(userLedger, userKeyPair, params),
             getLatest: (issuer: Party) =>
                 getLatestIssuerMintRequest(userLedger, issuer),
+            getAll: (issuer: Party) =>
+                getAllIssuerMintRequests(userLedger, issuer),
             accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
                 acceptIssuerMintRequest(userLedger, userKeyPair, contractId),
             decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
@@ -116,11 +136,29 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
                 withdrawIssuerMintRequest(userLedger, userKeyPair, contractId),
         },
+        issuerBurnRequest: {
+            create: (
+                userKeyPair: UserKeyPair,
+                params: IssuerBurnRequestParams
+            ) => createIssuerBurnRequest(userLedger, userKeyPair, params),
+            getLatest: (issuer: Party) =>
+                getLatestIssuerBurnRequest(userLedger, issuer),
+            getAll: (issuer: Party) =>
+                getAllIssuerBurnRequests(userLedger, issuer),
+            accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                acceptIssuerBurnRequest(userLedger, userKeyPair, contractId),
+            decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                declineIssuerBurnRequest(userLedger, userKeyPair, contractId),
+            withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                withdrawIssuerBurnRequest(userLedger, userKeyPair, contractId),
+        },
         transferRequest: {
             create: (userKeyPair: UserKeyPair, params: TransferRequestParams) =>
                 createTransferRequest(userLedger, userKeyPair, params),
             getLatest: (expectedAdmin: Party) =>
                 getLatestTransferRequest(userLedger, expectedAdmin),
+            getAll: (expectedAdmin: Party) =>
+                getAllTransferRequests(userLedger, expectedAdmin),
             accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
                 acceptTransferRequest(userLedger, userKeyPair, contractId),
             decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
@@ -175,6 +213,8 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 ),
         },
         transferInstruction: {
+            getDisclosure: (contractId: ContractId) =>
+                getTransferInstructionDisclosure(userLedger, contractId),
             accept: (
                 userKeyPair: UserKeyPair,
                 contractId: ContractId,
@@ -182,6 +222,19 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 params?: TransferInstructionAcceptParams
             ) =>
                 acceptTransferInstruction(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    disclosedContracts,
+                    params
+                ),
+            reject: (
+                userKeyPair: UserKeyPair,
+                contractId: ContractId,
+                disclosedContracts?: Types["DisclosedContract"][],
+                params?: TransferInstructionAcceptParams
+            ) =>
+                rejectTransferInstruction(
                     userLedger,
                     userKeyPair,
                     contractId,
@@ -230,12 +283,17 @@ export const getWrappedSdkWithKeyPair = (
             get: (owner: Party) => getBalances(sdk, owner),
             getByInstrumentId: (params: GetBalanceByInstrumentIdParams) =>
                 getBalanceByInstrumentId(sdk, params),
+            getAllByInstrumentId: (
+                params: GetAllBalancesByInstrumentIdParams
+            ) => getAllBalancesByInstrumentId(sdk, params),
         },
         issuerMintRequest: {
             create: (params: IssuerMintRequestParams) =>
                 createIssuerMintRequest(userLedger, userKeyPair, params),
             getLatest: (issuer: Party) =>
                 getLatestIssuerMintRequest(userLedger, issuer),
+            getAll: (issuer: Party) =>
+                getAllIssuerMintRequests(userLedger, issuer),
             accept: (contractId: ContractId) =>
                 acceptIssuerMintRequest(userLedger, userKeyPair, contractId),
             decline: (contractId: ContractId) =>
@@ -243,11 +301,27 @@ export const getWrappedSdkWithKeyPair = (
             withdraw: (contractId: ContractId) =>
                 withdrawIssuerMintRequest(userLedger, userKeyPair, contractId),
         },
+        issuerBurnRequest: {
+            create: (params: IssuerBurnRequestParams) =>
+                createIssuerBurnRequest(userLedger, userKeyPair, params),
+            getLatest: (issuer: Party) =>
+                getLatestIssuerBurnRequest(userLedger, issuer),
+            getAll: (issuer: Party) =>
+                getAllIssuerBurnRequests(userLedger, issuer),
+            accept: (contractId: ContractId) =>
+                acceptIssuerBurnRequest(userLedger, userKeyPair, contractId),
+            decline: (contractId: ContractId) =>
+                declineIssuerBurnRequest(userLedger, userKeyPair, contractId),
+            withdraw: (contractId: ContractId) =>
+                withdrawIssuerBurnRequest(userLedger, userKeyPair, contractId),
+        },
         transferRequest: {
             create: (params: TransferRequestParams) =>
                 createTransferRequest(userLedger, userKeyPair, params),
             getLatest: (expectedAdmin: Party) =>
                 getLatestTransferRequest(userLedger, expectedAdmin),
+            getAll: (expectedAdmin: Party) =>
+                getAllTransferRequests(userLedger, expectedAdmin),
             accept: (contractId: ContractId) =>
                 acceptTransferRequest(userLedger, userKeyPair, contractId),
             decline: (contractId: ContractId) =>
@@ -292,12 +366,26 @@ export const getWrappedSdkWithKeyPair = (
                 ),
         },
         transferInstruction: {
+            getDisclosure: (contractId: ContractId) =>
+                getTransferInstructionDisclosure(userLedger, contractId),
             accept: (
                 contractId: ContractId,
                 disclosedContracts?: Types["DisclosedContract"][],
                 params?: TransferInstructionAcceptParams
             ) =>
                 acceptTransferInstruction(
+                    userLedger,
+                    userKeyPair,
+                    contractId,
+                    disclosedContracts,
+                    params
+                ),
+            reject: (
+                contractId: ContractId,
+                disclosedContracts?: Types["DisclosedContract"][],
+                params?: TransferInstructionAcceptParams
+            ) =>
+                rejectTransferInstruction(
                     userLedger,
                     userKeyPair,
                     contractId,

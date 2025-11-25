@@ -1,10 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
+export interface TokenBalance {
+    total: number;
+    utxos: { amount: number; contractId: string }[];
+}
+
 export function useBalance(
     owner: string | null,
     instrumentId?: { admin: string; id: string } | null
 ) {
-    return useQuery({
+    return useQuery<TokenBalance>({
         queryKey: ["balances", owner, instrumentId],
         queryFn: async () => {
             if (!owner) throw new Error("Owner required");
@@ -23,7 +28,7 @@ export function useBalance(
                 throw new Error(error.error || "Failed to get balance");
             }
 
-            return response.json();
+            return response.json() as Promise<TokenBalance>;
         },
         enabled: !!owner,
         refetchInterval: 5000,

@@ -6,30 +6,26 @@ import {
 
 export async function POST(request: NextRequest) {
     try {
-        const { tokenFactoryContractId, receiver, amount, seed } =
-            await request.json();
+        const { contractId, adminPartyId, seed } = await request.json();
 
-        if (!tokenFactoryContractId || !receiver || !amount || !seed) {
+        if (!contractId || !adminPartyId || !seed) {
             return NextResponse.json(
-                { error: "Missing required parameters" },
+                { error: "Missing contractId, adminPartyId, or seed" },
                 { status: 400 }
             );
         }
 
         const keyPair = keyPairFromSeed(seed);
         const wrappedSdk = await getWrappedSdkWithKeyPairForParty(
-            receiver,
+            adminPartyId,
             keyPair
         );
 
-        await wrappedSdk.tokenFactory.mintToken(tokenFactoryContractId, {
-            receiver,
-            amount,
-        });
+        await wrappedSdk.transferRequest.decline(contractId);
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error minting token:", error);
+        console.error("Error declining transfer request:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }

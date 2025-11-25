@@ -6,13 +6,13 @@ import {
 
 export async function POST(request: NextRequest) {
     try {
-        const { transferPreapprovalProposalContractId, seed, receiver } =
+        const { contractId, disclosure, receiverPartyId, seed } =
             await request.json();
 
-        if (!transferPreapprovalProposalContractId || !seed || !receiver) {
+        if (!contractId || !disclosure || !receiverPartyId || !seed) {
             return NextResponse.json(
                 {
-                    error: "Missing transferPreapprovalProposalContractId, seed, or receiver",
+                    error: "Missing contractId, disclosure, receiverPartyId, or seed",
                 },
                 { status: 400 }
             );
@@ -20,21 +20,17 @@ export async function POST(request: NextRequest) {
 
         const keyPair = keyPairFromSeed(seed);
         const wrappedSdk = await getWrappedSdkWithKeyPairForParty(
-            receiver,
+            receiverPartyId,
             keyPair
         );
 
-        await wrappedSdk.transferPreapprovalProposal.accept({
-            transferPreapprovalProposalContractId,
-        });
+        await wrappedSdk.transferInstruction.reject(contractId, [disclosure]);
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error accepting transfer preapproval proposal:", error);
+        console.error("Error rejecting transfer instruction:", error);
         return NextResponse.json(
-            {
-                error: error instanceof Error ? error.message : "Unknown error",
-            },
+            { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
         );
     }

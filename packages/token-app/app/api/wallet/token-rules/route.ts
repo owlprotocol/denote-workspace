@@ -4,31 +4,28 @@ import { getWrappedSdkForParty } from "@owlprotocol/token-sdk";
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
-        const issuer = searchParams.get("issuer");
-        const instrumentId = searchParams.get("instrumentId");
+        const admin = searchParams.get("admin");
 
-        if (!issuer || !instrumentId) {
+        if (!admin) {
             return NextResponse.json(
-                { error: "Missing issuer or instrumentId" },
+                { error: "Missing admin" },
                 { status: 400 }
             );
         }
 
-        const wrappedSdk = await getWrappedSdkForParty(issuer);
-        const tokenFactoryCid = await wrappedSdk.tokenFactory.getLatest(
-            instrumentId
-        );
+        const wrappedSdk = await getWrappedSdkForParty(admin);
+        const rulesCid = await wrappedSdk.tokenRules.getLatest();
 
-        if (!tokenFactoryCid) {
+        if (!rulesCid) {
             return NextResponse.json(
-                { error: "Token factory not found for this instrumentId" },
+                { error: "Token rules not found for this admin" },
                 { status: 404 }
             );
         }
 
-        return NextResponse.json({ tokenFactoryCid });
+        return NextResponse.json({ rulesCid });
     } catch (error) {
-        console.error("Error getting token factory:", error);
+        console.error("Error getting token rules:", error);
         return NextResponse.json(
             { error: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }

@@ -70,6 +70,35 @@ export async function createTransferRequest(
     );
 }
 
+export async function getAllTransferRequests(
+    userLedger: LedgerController,
+    expectedAdmin: Party
+) {
+    const partyId = userLedger.getPartyId();
+    const end = await userLedger.ledgerEnd();
+    const activeContracts = (await userLedger.activeContracts({
+        offset: end.offset,
+        filterByParty: true,
+        parties: [partyId],
+        templateIds: [transferRequestTemplateId],
+    })) as ActiveContractResponse<TransferRequestParams>[];
+
+    const filteredEntries = activeContracts.filter(({ contractEntry }) => {
+        const jsActive = contractEntry.JsActiveContract;
+        if (!jsActive) return false;
+        const { createArgument } = jsActive.createdEvent;
+        return (
+            (createArgument.transfer.sender === partyId &&
+                createArgument.expectedAdmin === expectedAdmin) ||
+            createArgument.expectedAdmin === partyId
+        );
+    });
+
+    return filteredEntries.map((contract) => {
+        return contract.contractEntry.JsActiveContract!.createdEvent.contractId;
+    });
+}
+
 /**
  * Get the latest transfer request for a given sender and admin
  * @param senderLedger - The sender's ledger controller
