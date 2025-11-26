@@ -39,21 +39,25 @@ export function UserView({
     const [receiverPartyId, setReceiverPartyId] = useState("");
     const [burnAmount, setBurnAmount] = useState(10);
     const [selectedBurnUtxo, setSelectedBurnUtxo] = useState("");
+    const [selectedInstrumentId, setSelectedInstrumentId] = useState<
+        string | null
+    >(null);
 
-    const instrumentId = custodianPartyId ? `${custodianPartyId}#MyToken` : "";
+    const tokenFactoryQuery = useTokenFactory(custodianPartyId);
+    const instruments =
+        tokenFactoryQuery.getInstruments.data?.instruments || [];
+
+    const selectedInstrument = instruments.find(
+        (i) => i.instrumentId === selectedInstrumentId
+    );
 
     const { data: balance } = useBalance(
         partyId,
-        custodianPartyId && instrumentId
-            ? { admin: custodianPartyId, id: instrumentId }
+        custodianPartyId && selectedInstrumentId
+            ? { admin: custodianPartyId, id: selectedInstrumentId }
             : null
     );
 
-    const tokenFactoryQuery = useTokenFactory(
-        custodianPartyId,
-        instrumentId || null
-    );
-    const tokenFactory = tokenFactoryQuery.getTokenFactory.data;
     const transferFactory = tokenFactoryQuery.getTransferFactory.data;
 
     const issuerMintRequest = useIssuerMintRequest(partyId, custodianPartyId);
@@ -79,22 +83,40 @@ export function UserView({
         .map(([name, id]) => ({ name, id: id! }));
 
     const handleCreateMintRequest = async () => {
-        if (!custodianPartyId || !tokenFactory?.tokenFactoryCid) {
+        if (!custodianPartyId) {
+            toast.error("Custodian not available");
+            return;
+        }
+
+        if (!selectedInstrumentId) {
+            toast.error("Please select an instrument");
+            return;
+        }
+
+        const tokenFactoryCidToUse = selectedInstrument?.tokenFactoryCid;
+
+        if (!tokenFactoryCidToUse) {
             toast.error(
-                "Token factory not set up yet. Please wait for custodian to set it up."
+                `Token factory not set up yet for ${
+                    selectedInstrument?.name || "selected instrument"
+                }. Please wait for custodian to set it up.`
             );
             return;
         }
 
         try {
             await issuerMintRequest.create.mutateAsync({
-                tokenFactoryCid: tokenFactory.tokenFactoryCid,
+                tokenFactoryCid: tokenFactoryCidToUse,
                 issuer: custodianPartyId,
                 receiver: partyId,
                 amount: mintAmount,
                 seed: partyName,
             });
-            toast.success("Mint request created");
+            toast.success(
+                `Mint request created for ${
+                    selectedInstrument?.name || "instrument"
+                }`
+            );
             setMintAmount(100);
         } catch (error) {
             toast.error(
@@ -110,10 +132,11 @@ export function UserView({
             !custodianPartyId ||
             !receiverPartyId ||
             !balance?.utxos.length ||
-            !transferFactory?.transferFactoryCid
+            !transferFactory?.transferFactoryCid ||
+            !selectedInstrumentId
         ) {
             toast.error(
-                "Missing required information. Ensure custodian has set up infrastructure."
+                "Missing required information. Ensure custodian has set up infrastructure and an instrument is selected."
             );
             return;
         }
@@ -132,7 +155,7 @@ export function UserView({
                 amount: transferAmount,
                 instrumentId: {
                     admin: custodianPartyId,
-                    id: instrumentId,
+                    id: selectedInstrumentId,
                 },
                 inputHoldingCids: [balance.utxos[0].contractId],
                 seed: partyName,
@@ -244,9 +267,23 @@ export function UserView({
     };
 
     const handleCreateBurnRequest = async () => {
-        if (!custodianPartyId || !tokenFactory?.tokenFactoryCid) {
+        if (!custodianPartyId) {
+            toast.error("Custodian not available");
+            return;
+        }
+
+        if (!selectedInstrumentId) {
+            toast.error("Please select an instrument");
+            return;
+        }
+
+        const tokenFactoryCidToUse = selectedInstrument?.tokenFactoryCid;
+
+        if (!tokenFactoryCidToUse) {
             toast.error(
-                "Token factory not set up yet. Please wait for custodian to set it up."
+                `Token factory not set up yet for ${
+                    selectedInstrument?.name || "selected instrument"
+                }. Please wait for custodian to set it up.`
             );
             return;
         }
@@ -271,7 +308,7 @@ export function UserView({
 
         try {
             await issuerBurnRequest.create.mutateAsync({
-                tokenFactoryCid: tokenFactory.tokenFactoryCid,
+                tokenFactoryCid: tokenFactoryCidToUse,
                 issuer: custodianPartyId,
                 owner: partyId,
                 amount: burnAmount,
@@ -322,64 +359,136 @@ export function UserView({
 
     return (
         <div className="space-y-6">
-            <BalancesView partyId={partyId} />
+            <BalancesView partyId={partyId} instruments={instruments} />
+
+            {instruments.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Select Instrument</CardTitle>
+                        <CardDescription>
+                            Choose which token instrument to use
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            <Label htmlFor="instrumentSelect">Instrument</Label>
+                            <select
+                                id="instrumentSelect"
+                                value={selectedInstrumentId || ""}
+                                onChange={(e) =>
+                                    setSelectedInstrumentId(
+                                        e.target.value || null
+                                    )
+                                }
+                                className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+                            >
+                                <option value="">Select token...</option>
+                                {instruments.map((instrument) => (
+                                    <option
+                                        key={instrument.instrumentId}
+                                        value={instrument.instrumentId}
+                                    >
+                                        {instrument.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader>
                     <CardTitle>Mint Request</CardTitle>
                     <CardDescription>
                         Request tokens from the custodian
+                        {selectedInstrument
+                            ? ` for ${selectedInstrument.name}`
+                            : ""}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="mintAmount">Amount</Label>
-                        <Input
-                            id="mintAmount"
-                            type="number"
-                            value={mintAmount}
-                            onChange={(e) =>
-                                setMintAmount(e.target.valueAsNumber || 0)
-                            }
-                            min="1"
-                        />
-                    </div>
-                    <Button
-                        onClick={handleCreateMintRequest}
-                        disabled={
-                            !custodianPartyId ||
-                            !tokenFactory?.tokenFactoryCid ||
-                            issuerMintRequest.create.isPending
-                        }
-                        className="w-full"
-                    >
-                        {issuerMintRequest.create.isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating...
-                            </>
-                        ) : (
-                            <>
-                                <Coins className="mr-2 h-4 w-4" />
-                                Create Mint Request
-                            </>
-                        )}
-                    </Button>
-                    {mintRequests?.requests &&
-                        mintRequests.requests.length > 0 && (
+                    {instruments.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            No instruments available. Please wait for custodian
+                            to create instruments.
+                        </p>
+                    ) : (
+                        <>
                             <div className="space-y-2">
-                                <Label>Pending Mint Requests</Label>
-                                {mintRequests.requests.map((request) => (
-                                    <div
-                                        key={request.contractId}
-                                        className="p-2 rounded border text-sm"
-                                    >
-                                        Amount: {request.amount} tokens (Pending
-                                        approval)
-                                    </div>
-                                ))}
+                                <Label htmlFor="mintAmount">Amount</Label>
+                                <Input
+                                    id="mintAmount"
+                                    type="number"
+                                    value={mintAmount}
+                                    onChange={(e) =>
+                                        setMintAmount(
+                                            e.target.valueAsNumber || 0
+                                        )
+                                    }
+                                    min="1"
+                                />
                             </div>
-                        )}
+                            <Button
+                                onClick={handleCreateMintRequest}
+                                disabled={
+                                    !custodianPartyId ||
+                                    !selectedInstrumentId ||
+                                    !selectedInstrument?.tokenFactoryCid ||
+                                    issuerMintRequest.create.isPending
+                                }
+                                className="w-full"
+                            >
+                                {issuerMintRequest.create.isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Coins className="mr-2 h-4 w-4" />
+                                        Create Mint Request
+                                    </>
+                                )}
+                            </Button>
+                            {mintRequests?.requests &&
+                                mintRequests.requests.length > 0 && (
+                                    <div className="space-y-2">
+                                        <Label>Pending Mint Requests</Label>
+                                        {mintRequests.requests.map(
+                                            (request) => {
+                                                const requestInstrument =
+                                                    instruments.find(
+                                                        (i) =>
+                                                            i.tokenFactoryCid ===
+                                                            request.tokenFactoryCid
+                                                    );
+                                                return (
+                                                    <div
+                                                        key={request.contractId}
+                                                        className="p-2 rounded border text-sm"
+                                                    >
+                                                        Amount: {request.amount}{" "}
+                                                        tokens
+                                                        {requestInstrument && (
+                                                            <span className="text-blue-600 dark:text-blue-400">
+                                                                {" "}
+                                                                (
+                                                                {
+                                                                    requestInstrument.name
+                                                                }
+                                                                )
+                                                            </span>
+                                                        )}
+                                                        (Pending approval)
+                                                    </div>
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                )}
+                        </>
+                    )}
                 </CardContent>
             </Card>
 
@@ -388,6 +497,9 @@ export function UserView({
                     <CardTitle>Transfer Request</CardTitle>
                     <CardDescription>
                         Create a transfer request to send tokens
+                        {selectedInstrument
+                            ? ` for ${selectedInstrument.name}`
+                            : " (select an instrument first)"}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -434,6 +546,7 @@ export function UserView({
                         onClick={handleCreateTransferRequest}
                         disabled={
                             !custodianPartyId ||
+                            !selectedInstrumentId ||
                             !receiverPartyId ||
                             !balance?.utxos.length ||
                             !transferFactory?.transferFactoryCid ||
@@ -460,44 +573,61 @@ export function UserView({
                             <CardTitle>Pending Transfer Requests</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            {transferRequests.requests.map((request) => (
-                                <div
-                                    key={request.contractId}
-                                    className="p-3 rounded-lg border space-y-2"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                To: {request.transfer.receiver}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Amount:{" "}
-                                                {request.transfer.amount} tokens
-                                            </p>
+                            {transferRequests.requests.map((request) => {
+                                const requestInstrumentId = `${request.transfer.instrumentId.admin}#${request.transfer.instrumentId.id}`;
+                                const requestInstrument = instruments.find(
+                                    (i) =>
+                                        i.instrumentId === requestInstrumentId
+                                );
+                                const instrumentName =
+                                    requestInstrument?.name ||
+                                    request.transfer.instrumentId.id.match(
+                                        /^[^#]+#(.+)$/
+                                    )?.[1] ||
+                                    request.transfer.instrumentId.id;
+                                const amount = Math.round(
+                                    request.transfer.amount
+                                );
+
+                                return (
+                                    <div
+                                        key={request.contractId}
+                                        className="p-3 rounded-lg border space-y-2"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">
+                                                    To:{" "}
+                                                    {request.transfer.receiver}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {amount} {instrumentName}
+                                                </p>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    handleWithdrawTransfer(
+                                                        request.contractId
+                                                    )
+                                                }
+                                                disabled={
+                                                    transferRequest.withdraw
+                                                        .isPending
+                                                }
+                                            >
+                                                {transferRequest.withdraw
+                                                    .isPending ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    "Withdraw"
+                                                )}
+                                            </Button>
                                         </div>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() =>
-                                                handleWithdrawTransfer(
-                                                    request.contractId
-                                                )
-                                            }
-                                            disabled={
-                                                transferRequest.withdraw
-                                                    .isPending
-                                            }
-                                        >
-                                            {transferRequest.withdraw
-                                                .isPending ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                "Withdraw"
-                                            )}
-                                        </Button>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </CardContent>
                     </Card>
                 )}
@@ -516,71 +646,94 @@ export function UserView({
                         </p>
                     ) : (
                         <div className="space-y-3">
-                            {instructions?.instructions.map((instruction) => (
-                                <div
-                                    key={instruction.contractId}
-                                    className="p-3 rounded-lg border space-y-2"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                From:{" "}
-                                                {instruction.transfer.sender}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Amount:{" "}
-                                                {instruction.transfer.amount}{" "}
-                                                tokens
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                onClick={() =>
-                                                    handleAccept(instruction)
-                                                }
-                                                disabled={
-                                                    processingId ===
-                                                        instruction.contractId ||
+                            {instructions?.instructions.map((instruction) => {
+                                const requestInstrumentId = `${instruction.transfer.instrumentId.admin}#${instruction.transfer.instrumentId.id}`;
+                                const requestInstrument = instruments.find(
+                                    (i) =>
+                                        i.instrumentId === requestInstrumentId
+                                );
+                                const instrumentName =
+                                    requestInstrument?.name ||
+                                    instruction.transfer.instrumentId.id.match(
+                                        /^[^#]+#(.+)$/
+                                    )?.[1] ||
+                                    instruction.transfer.instrumentId.id;
+                                const amount = Number(
+                                    instruction.transfer.amount
+                                );
+
+                                return (
+                                    <div
+                                        key={instruction.contractId}
+                                        className="p-3 rounded-lg border space-y-2"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">
+                                                    From:{" "}
+                                                    {
+                                                        instruction.transfer
+                                                            .sender
+                                                    }
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Amount: {amount}{" "}
+                                                    {instrumentName}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleAccept(
+                                                            instruction
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        processingId ===
+                                                            instruction.contractId ||
+                                                        transferInstruction
+                                                            .accept.isPending
+                                                    }
+                                                >
+                                                    {processingId ===
+                                                        instruction.contractId &&
                                                     transferInstruction.accept
-                                                        .isPending
-                                                }
-                                            >
-                                                {processingId ===
-                                                    instruction.contractId &&
-                                                transferInstruction.accept
-                                                    .isPending ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    "Accept"
-                                                )}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() =>
-                                                    handleReject(instruction)
-                                                }
-                                                disabled={
-                                                    processingId ===
-                                                        instruction.contractId ||
+                                                        .isPending ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        "Accept"
+                                                    )}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() =>
+                                                        handleReject(
+                                                            instruction
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        processingId ===
+                                                            instruction.contractId ||
+                                                        transferInstruction
+                                                            .reject.isPending
+                                                    }
+                                                >
+                                                    {processingId ===
+                                                        instruction.contractId &&
                                                     transferInstruction.reject
-                                                        .isPending
-                                                }
-                                            >
-                                                {processingId ===
-                                                    instruction.contractId &&
-                                                transferInstruction.reject
-                                                    .isPending ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    "Reject"
-                                                )}
-                                            </Button>
+                                                        .isPending ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        "Reject"
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </CardContent>
@@ -615,7 +768,8 @@ export function UserView({
                                         key={utxo.contractId}
                                         value={utxo.contractId}
                                     >
-                                        {utxo.amount} tokens (
+                                        {Number(utxo.amount)}{" "}
+                                        {selectedInstrument?.name || "tokens"} (
                                         {utxo.contractId.slice(0, 8)}...)
                                     </option>
                                 ))}
@@ -648,10 +802,12 @@ export function UserView({
                         {selectedBurnUtxo && (
                             <p className="text-xs text-muted-foreground">
                                 Available:{" "}
-                                {balance?.utxos.find(
-                                    (u) => u.contractId === selectedBurnUtxo
-                                )?.amount || 0}{" "}
-                                tokens
+                                {Number(
+                                    balance?.utxos.find(
+                                        (u) => u.contractId === selectedBurnUtxo
+                                    )?.amount || 0
+                                )}{" "}
+                                {selectedInstrument?.name || "tokens"}
                             </p>
                         )}
                     </div>
@@ -659,7 +815,8 @@ export function UserView({
                         onClick={handleCreateBurnRequest}
                         disabled={
                             !custodianPartyId ||
-                            !tokenFactory?.tokenFactoryCid ||
+                            !selectedInstrumentId ||
+                            !selectedInstrument?.tokenFactoryCid ||
                             !selectedBurnUtxo ||
                             burnAmount <= 0 ||
                             issuerBurnRequest.create.isPending
@@ -679,37 +836,49 @@ export function UserView({
                         burnRequests.requests.length > 0 && (
                             <div className="space-y-2">
                                 <Label>Pending Burn Requests</Label>
-                                {burnRequests.requests.map((request) => (
-                                    <div
-                                        key={request.contractId}
-                                        className="p-2 rounded border text-sm flex items-center justify-between"
-                                    >
-                                        <div>
-                                            Amount: {request.amount} tokens
-                                            (Pending approval)
-                                        </div>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() =>
-                                                handleWithdrawBurn(
-                                                    request.contractId
-                                                )
-                                            }
-                                            disabled={
-                                                issuerBurnRequest.withdraw
-                                                    .isPending
-                                            }
+                                {burnRequests.requests.map((request) => {
+                                    const requestInstrument = instruments.find(
+                                        (i) =>
+                                            i.tokenFactoryCid ===
+                                            request.tokenFactoryCid
+                                    );
+                                    const instrumentName =
+                                        requestInstrument?.name || "Unknown";
+                                    const amount = Number(request.amount);
+
+                                    return (
+                                        <div
+                                            key={request.contractId}
+                                            className="p-2 rounded border text-sm flex items-center justify-between"
                                         >
-                                            {issuerBurnRequest.withdraw
-                                                .isPending ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                "Withdraw"
-                                            )}
-                                        </Button>
-                                    </div>
-                                ))}
+                                            <div>
+                                                Amount: {amount}{" "}
+                                                {instrumentName}
+                                                (Pending approval)
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    handleWithdrawBurn(
+                                                        request.contractId
+                                                    )
+                                                }
+                                                disabled={
+                                                    issuerBurnRequest.withdraw
+                                                        .isPending
+                                                }
+                                            >
+                                                {issuerBurnRequest.withdraw
+                                                    .isPending ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    "Withdraw"
+                                                )}
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                 </CardContent>
