@@ -1,40 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+export interface Instrument {
+    name: string;
+    instrumentId: string;
+    custodianPartyId: string;
+    tokenFactoryCid?: string;
+}
+
 export interface TokenFactorySetupResult {
     rulesCid: string;
     transferFactoryCid: string;
     tokenFactoryCid: string;
 }
 
-export function useTokenFactory(
-    admin: string | null,
-    instrumentId: string | null
-) {
+export function useTokenFactory(admin: string | null) {
     const queryClient = useQueryClient();
-
-    const getTokenFactory = useQuery({
-        queryKey: ["tokenFactory", admin, instrumentId],
-        queryFn: async () => {
-            if (!admin || !instrumentId) {
-                throw new Error("Admin and instrumentId required");
-            }
-
-            const params = new URLSearchParams({
-                issuer: admin,
-                instrumentId,
-            });
-
-            const response = await fetch(`/api/wallet/token-factory?${params}`);
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Failed to get token factory");
-            }
-
-            return response.json() as Promise<{ tokenFactoryCid: string }>;
-        },
-        enabled: !!admin && !!instrumentId,
-    });
 
     const getTokenRules = useQuery({
         queryKey: ["tokenRules", admin],
@@ -87,6 +67,32 @@ export function useTokenFactory(
         enabled: !!admin && !!getTokenRules.data?.rulesCid,
     });
 
+    const getInstruments = useQuery({
+        queryKey: ["instruments", admin],
+        queryFn: async () => {
+            if (!admin) {
+                throw new Error("Custodian party ID required");
+            }
+
+            const params = new URLSearchParams({
+                custodianPartyId: admin,
+            });
+
+            const response = await fetch(`/api/wallet/token-factory?${params}`);
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || "Failed to get instruments");
+            }
+
+            return response.json() as Promise<{
+                instruments: Instrument[];
+            }>;
+        },
+        enabled: !!admin,
+        refetchInterval: 5000,
+    });
+
     const setup = useMutation({
         mutationFn: async (params: {
             partyId: string;
@@ -108,13 +114,6 @@ export function useTokenFactory(
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
-                queryKey: [
-                    "tokenFactory",
-                    variables.partyId,
-                    variables.instrumentId,
-                ],
-            });
-            queryClient.invalidateQueries({
                 queryKey: ["tokenRules", variables.partyId],
             });
             queryClient.invalidateQueries({
@@ -124,9 +123,9 @@ export function useTokenFactory(
     });
 
     return {
-        getTokenFactory,
         getTokenRules,
         getTransferFactory,
+        getInstruments,
         setup,
     };
 }

@@ -21,6 +21,22 @@ export async function POST(request: NextRequest) {
             keyPair
         );
 
+        const existingTokenFactoryCid = await wrappedSdk.tokenFactory.getLatest(
+            instrumentId
+        );
+        if (existingTokenFactoryCid) {
+            const rulesCid = await wrappedSdk.tokenRules.getOrCreate();
+            const transferFactoryCid =
+                await wrappedSdk.transferFactory.getOrCreate(rulesCid);
+
+            return NextResponse.json({
+                rulesCid,
+                transferFactoryCid,
+                tokenFactoryCid: existingTokenFactoryCid,
+                alreadyExists: true,
+            });
+        }
+
         const rulesCid = await wrappedSdk.tokenRules.getOrCreate();
 
         const transferFactoryCid = await wrappedSdk.transferFactory.getOrCreate(
