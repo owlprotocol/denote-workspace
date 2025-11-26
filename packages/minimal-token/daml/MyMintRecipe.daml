@@ -8,12 +8,12 @@ import PortfolioComposition
 -- It allows an issuer to authorize multiple parties to mint tokens according to the defined composition.
 -- This composition can be updated over time by the issuer.
 template MyMintRecipe
-  with 
+  with
     issuer : Party
     instrumentId : Text
     tokenFactory : ContractId MyTokenFactory
     authorizedMinters: [Party]
-    composition: ContractId PortfolioComposition 
+    composition: ContractId PortfolioComposition
   where
     signatory issuer
     observer authorizedMinters
@@ -25,7 +25,7 @@ template MyMintRecipe
         receiver : Party
         amount: Decimal -- number of tokens to mint
       controller receiver
-      
+
       do
         assertMsg "Receiver is not an authorized minter" (receiver `elem` authorizedMinters)
         -- TODO:check that the user has the underlying assets and lock them up
@@ -38,7 +38,7 @@ template MyMintRecipe
           amount = amount
 
     -- | Create the new portfolio composition used for minting and optionally archive the old one
-    nonconsuming choice MyMintRecipe_CreateAndUpdateComposition : ContractId MyMintRecipe
+    choice MyMintRecipe_CreateAndUpdateComposition : ContractId MyMintRecipe
       with
         newCompositionItems : [PortfolioItem]
         compositionName : Text
@@ -55,7 +55,7 @@ template MyMintRecipe
         create this with composition = newCompositionCid
 
     -- | Update the existing portfolio composition used for minting
-    nonconsuming choice MyMintRecipe_UpdateComposition : ContractId MyMintRecipe
+    choice MyMintRecipe_UpdateComposition : ContractId MyMintRecipe
       with
         newComposition : ContractId PortfolioComposition
       controller issuer
@@ -63,7 +63,7 @@ template MyMintRecipe
         create this with composition = newComposition
 
     -- | Add a new authorized minter
-    nonconsuming choice MyMintRecipe_AddAuthorizedMinter : ContractId MyMintRecipe
+    choice MyMintRecipe_AddAuthorizedMinter : ContractId MyMintRecipe
       with
         newMinter : Party
       controller issuer
@@ -73,7 +73,7 @@ template MyMintRecipe
         create this with authorizedMinters = updatedMinters
 
     -- | Remove an authorized minter
-    nonconsuming choice MyMintRecipe_RemoveAuthorizedMinter : ContractId MyMintRecipe
+    choice MyMintRecipe_RemoveAuthorizedMinter : ContractId MyMintRecipe
       with
         minterToRemove : Party
       controller issuer
