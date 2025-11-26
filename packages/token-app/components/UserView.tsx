@@ -78,7 +78,10 @@ export function UserView({
     const availableReceivers = Object.entries(allPartyIds)
         .filter(
             ([name, id]) =>
-                name !== partyName && name !== "charlie" && id && id !== partyId
+                name !== partyName &&
+                name !== "custodian" &&
+                id &&
+                id !== partyId
         )
         .map(([name, id]) => ({ name, id: id! }));
 
@@ -350,7 +353,7 @@ export function UserView({
                 <CardHeader>
                     <CardTitle>Setup Required</CardTitle>
                     <CardDescription>
-                        Please create the custodian (charlie) party first
+                        Please create the custodian party first
                     </CardDescription>
                 </CardHeader>
             </Card>

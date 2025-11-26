@@ -99,10 +99,10 @@ export function PartyView({
         );
     }
 
-    const custodianPartyId = allPartyIds.charlie;
+    const custodianPartyId = allPartyIds.custodian;
     const isCustodian = partyId === custodianPartyId;
 
-    const PartyInfoCard = ({ role }: { role: string }) => (
+    const PartyInfoCard = () => (
         <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
@@ -110,8 +110,7 @@ export function PartyView({
                         <CardTitle className="flex items-center gap-2">
                             <User className="h-5 w-5" />
                             {partyName.charAt(0).toUpperCase() +
-                                partyName.slice(1)}{" "}
-                            {role && `(${role})`}
+                                partyName.slice(1)}
                         </CardTitle>
                         <CardDescription className="mt-1">
                             Party information and status
@@ -146,7 +145,7 @@ export function PartyView({
 
     return (
         <div className="space-y-6">
-            <PartyInfoCard role={isCustodian ? "Custodian" : "Client"} />
+            <PartyInfoCard />
             {isCustodian ? (
                 <CustodianView partyId={partyId} partyName={partyName} />
             ) : (
