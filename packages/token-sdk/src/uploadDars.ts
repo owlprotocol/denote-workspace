@@ -22,7 +22,7 @@ export async function uploadDars() {
     // Obtained from runnning:
     // `pnpm get:minimal-token-id`
     const MINIMAL_TOKEN_PACKAGE_ID =
-        "0d72f4c13c12b2e85e10496e4bce230d8f847eb96782f1d36412a798ab04c17d";
+        "1b3906fcec7fe6a9d7fcaf35c3363867ad6639ed0e890b8367810fe1a7e3e126";
 
     const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
         MINIMAL_TOKEN_PACKAGE_ID

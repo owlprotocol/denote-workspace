@@ -43,6 +43,35 @@ export async function createIssuerMintRequest(
     );
 }
 
+export async function getAllIssuerMintRequests(
+    userLedger: LedgerController,
+    issuer: Party
+) {
+    const partyId = userLedger.getPartyId();
+    const end = await userLedger.ledgerEnd();
+    const activeContracts = (await userLedger.activeContracts({
+        offset: end.offset,
+        filterByParty: true,
+        parties: [partyId],
+        templateIds: [issuerMintRequestTemplateId],
+    })) as ActiveContractResponse<IssuerMintRequestParams>[];
+
+    const filteredEntries = activeContracts.filter(({ contractEntry }) => {
+        const jsActive = contractEntry.JsActiveContract;
+        if (!jsActive) return false;
+        const { createArgument } = jsActive.createdEvent;
+        return (
+            (createArgument.receiver === partyId &&
+                createArgument.issuer === issuer) ||
+            createArgument.issuer === partyId
+        );
+    });
+
+    return filteredEntries.map((contract) => {
+        return contract.contractEntry.JsActiveContract!.createdEvent.contractId;
+    });
+}
+
 /**
  * Get the latest mint request for a given receiver and issuer
  * @param receiverLedger - The receiver's ledger controller
