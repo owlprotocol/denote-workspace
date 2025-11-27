@@ -1,5 +1,5 @@
 {
-  "name": "@owlprotocol/denote-workspace",
+  "name": "@denotecapital/workspace",
   "version": "0.1.0",
   "private": true,
   "description": "Denote Monorepo",
@@ -7,7 +7,7 @@
     "pnpm",
     "workspace"
   ],
-  "license": "BSL-1.0",
+  "license": "MIT",
   "author": "Oscar Baracos",
   "type": "module",
   "scripts": {

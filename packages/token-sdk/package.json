@@ -1,5 +1,5 @@
 {
-  "name": "@owlprotocol/token-sdk",
+  "name": "@denotecapital/token-sdk",
   "version": "0.1.0",
   "keywords": [],
   "private": true,
@@ -10,7 +10,7 @@
     "url": "https://github.com/owlprotocol/token-sdk.git"
   },
   "copyright": "Copyright 2025 Denote Capital",
-  "license": "BSL-1.1",
+  "license": "MIT",
   "author": {
     "name": "Oscar Baracos",
     "email": "oscar@denotecapital.com",
