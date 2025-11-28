@@ -32,7 +32,7 @@ jobs:
       # Node Setup
       - uses: actions/setup-node@v3
         with:
-          node-version: "18.19"
+          node-version: "22.19"
       # PNPM Setup
       - uses: pnpm/action-setup@v2.0.1
         name: Install pnpm
