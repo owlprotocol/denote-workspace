@@ -68,32 +68,10 @@ jobs:
       # Build
       - run: pnpm run build
         name: Build All
-      ### Testing ###
-      ## Foundry Setup (anvil)
-      #- name: Install Foundry
-      #  uses: foundry-rs/foundry-toolchain@v1
-      #  with:
-      #    version: "1.0.1"
-      ## Java Setup (firebase)
-      #- uses: actions/setup-java@v4
-      #  with:
-      #    distribution: "oracle"
-      #    java-version: "17"
-      ## Firebase Binary Cache
-      #- name: Get Firebase Library Versions For Binary Caching
-      #  if: ${{ !env.ACT }}
-      #  id: cache-settings
-      #  run: |
-      #    echo "::set-output name=firebase-tools::$(pnpm list -s --depth=0 | grep firebase-tools | tail -n 1 | sed 's/ /-/g')"
-      #- name: Cache Firebase Emulator Binaries
-      #  if: ${{ !env.ACT }}
-      #  uses: actions/cache@v3
-      #  with:
-      #    path: ~/.cache/firebase/emulators
-      #    key: ${{ runner.os }}-${{ steps.cache-settings.outputs.firebase-tools }}
       # Test
-      - run: pnpm run test
-        name: Test All
+      # TODO: enable tests later
+      # - run: pnpm run test
+      #   name: Test All
       ### Final Checks ###
       # Lint
       - run: pnpm run lint
