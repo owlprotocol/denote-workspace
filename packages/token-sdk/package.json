@@ -50,7 +50,6 @@
     "tsc": "tsc",
     "tsc:trace": "tsc --generateTrace lib/trace && analyze-trace lib/trace",
     "tsc:watch": "tsc -w",
-    "ledger-schema": "openapi-typescript http://localhost:7575/docs/openapi -o src/ledger/schema.d.ts",
     "upload-dar": "tsx src/uploadDars.ts",
     "get:minimal-token-id": "daml damlc inspect ../minimal-token/.daml/dist/minimal-token-0.1.0.dar | head -1 | awk '{print $2}'"
   },
@@ -64,7 +63,6 @@
     "depcheck": "^1.4.7",
     "madge": "^8.0.0",
     "npm-run-all": "^4.1.5",
-    "openapi-typescript": "^7.10.1",
     "rimraf": "^6.0.1",
     "typescript": "5.8.2",
     "vite": "^6.2.2",
@@ -76,7 +74,6 @@
   },
   "dependencies": {
     "@canton-network/wallet-sdk": "^0.16.0",
-    "openapi-fetch": "^0.15.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "uuid": "^13.0.0"
