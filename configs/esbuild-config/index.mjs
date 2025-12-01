@@ -21,8 +21,8 @@ const excludeNodeModulesPlugin = NodeResolvePlugin({
     },
 });
 
-const ESBUILD_WATCH =
-    process.env.ESBUILD_WATCH === "true" || process.env.ESBUILD_WATCH === "1";
+const ESBUILD_WATCH
+    = process.env.ESBUILD_WATCH === "true" || process.env.ESBUILD_WATCH === "1";
 
 const external = ["url", "events", "path"];
 const inject = []; // ['./react-shim.mjs']
@@ -124,7 +124,8 @@ export async function buildConfig(c) {
     if (!ESBUILD_WATCH) {
         // Static build
         await esbuild.build(c);
-    } else {
+    }
+    else {
         // Incremental build
         const ctx = await esbuild.context(c);
         await ctx.watch();
