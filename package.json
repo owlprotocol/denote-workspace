@@ -17,7 +17,8 @@
     "stop:localnet": "tsx ./scripts/src/start-localnet.ts stop",
     "stop-no-cleanup:localnet": "tsx ./scripts/src/start-localnet.ts stop-no-cleanup",
     "fetch:localnet": "tsx ./scripts/src/fetch-localnet.ts",
-    "dev": "turbo run dev",
+    "upload-dar": "pnpm -C packages/token-sdk upload-dar",
+    "dev": "pnpm run upload-dar && turbo run dev",
     "start": "turbo run start",
     "clean": "turbo run clean",
     "clean:node_modules": "rimraf node_modules ./**/node_modules",
@@ -51,6 +52,6 @@
   "engines": {
     "npm": ">=v10.5.0",
     "pnpm": ">=9.12.2",
-    "node": "^22.0.0"
+    "node": "^20.0.0"
   }
 }

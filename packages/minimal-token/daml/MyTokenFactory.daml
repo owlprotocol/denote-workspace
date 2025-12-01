@@ -24,7 +24,7 @@ template MyTokenFactory
       controller issuer, receiver
       do
         assertMsg "Amount must be positive" (amount > 0.0)
-        
+
         tokenCid <- create MyToken with
           issuer
           owner = receiver
@@ -35,9 +35,51 @@ template MyTokenFactory
           tokenCid
           meta = MD.emptyMetadata
 
+    nonconsuming choice Burn : BurnResult
+      with
+        owner : Party
+        amount : Decimal
+        -- ^ Amount of tokens to burn
+        inputHoldingCid : ContractId MyToken
+        -- ^ Token contract to use as input. Will be split if needed to get the burn amount.
+      controller issuer, owner
+      do
+        assertMsg "Amount must be positive" (amount > 0.0)
+
+        -- Validate input token
+        inputToken <- fetch inputHoldingCid
+        assertMsg "Token owner must match" (inputToken.owner == owner)
+        assertMsg "Token issuer must match factory issuer" (inputToken.issuer == issuer)
+        assertMsg "Token instrument ID must match" (inputToken.instrumentId == instrumentId)
+        assertMsg "Insufficient tokens to burn" (inputToken.amount >= amount)
+
+        -- Split and burn: use a self-transfer to split off the exact amount, then archive it
+        -- This follows the splice splitAndBurn pattern
+        if inputToken.amount == amount then do
+          -- Exact match: archive the entire token
+          archive inputHoldingCid
+          pure BurnResult with
+            burnedCids = [inputHoldingCid]
+            meta = MD.emptyMetadata
+        else do
+          transferResult <- exercise inputHoldingCid MyToken_Transfer with
+            receiver = owner
+            amount = amount
+          -- Archive the newly created token (the transferred portion to be burned)
+          archive transferResult.transferredCid
+          pure BurnResult with
+            burnedCids = [transferResult.transferredCid]
+            meta = MD.emptyMetadata
+
 -- | Result of minting tokens
 data MintResult = MintResult with
     tokenCid : ContractId MyToken
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+-- | Result of burning tokens
+data BurnResult = BurnResult with
+    burnedCids : [ContractId MyToken]
     meta : MD.Metadata
   deriving (Show, Eq)
 
