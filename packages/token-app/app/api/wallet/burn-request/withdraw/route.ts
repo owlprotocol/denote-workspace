@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
     keyPairFromSeed,
     getWrappedSdkWithKeyPairForParty,
-} from "@owlprotocol/token-sdk";
+} from "@denotecapital/token-sdk";
 
 export async function POST(request: NextRequest) {
     try {

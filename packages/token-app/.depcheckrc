@@ -1,0 +1,7 @@
+ignores: [
+    "@tailwindcss/postcss",
+    "@types/node",
+    "baseline-browser-mapping",
+    "tailwindcss",
+    "tw-animate-css"
+]

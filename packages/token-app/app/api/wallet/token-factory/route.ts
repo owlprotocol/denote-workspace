@@ -4,7 +4,7 @@ import {
     getWrappedSdkForParty,
     tokenFactoryTemplateId,
     ActiveContractResponse,
-} from "@owlprotocol/token-sdk";
+} from "@denotecapital/token-sdk";
 
 interface TokenFactoryParams {
     issuer: string;

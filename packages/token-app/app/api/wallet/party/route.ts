@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
     keyPairFromSeed,
     getDefaultSdkAndConnect,
-} from "@owlprotocol/token-sdk";
+} from "@denotecapital/token-sdk";
 import { signTransactionHash } from "@canton-network/wallet-sdk";
 
 export async function POST(request: NextRequest) {

@@ -8,7 +8,7 @@ import {
     emptyExtraArgs,
     transferRequestTemplateId,
     ActiveContractResponse,
-} from "@owlprotocol/token-sdk";
+} from "@denotecapital/token-sdk";
 
 /**
  * GET /api/wallet/transfer-request

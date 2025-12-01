@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getWrappedSdkForParty } from "@owlprotocol/token-sdk";
+import { getWrappedSdkForParty } from "@denotecapital/token-sdk";
 
 export async function GET(request: NextRequest) {
     try {

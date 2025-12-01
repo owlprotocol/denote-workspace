@@ -3,7 +3,7 @@ import {
     getSdkForParty,
     tokenTransferInstructionTemplateId,
     ActiveContractResponse,
-} from "@owlprotocol/token-sdk";
+} from "@denotecapital/token-sdk";
 
 export async function GET(request: NextRequest) {
     try {
