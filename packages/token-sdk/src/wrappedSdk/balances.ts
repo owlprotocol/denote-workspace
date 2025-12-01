@@ -72,3 +72,51 @@ export async function getBalanceByInstrumentId(
     const instrumentIdStr = instrumentIdToString(instrumentId);
     return balances[instrumentIdStr] ?? { total: 0, utxos: [] };
 }
+
+export interface GetAllBalancesByInstrumentIdParams {
+    instrumentId: { admin: Party; id: string };
+}
+
+export interface PartyBalance {
+    party: Party;
+    total: number;
+    utxos: { amount: number; contractId: ContractId }[];
+}
+
+export async function getAllBalancesByInstrumentId(
+    sdk: WalletSDK,
+    { instrumentId }: GetAllBalancesByInstrumentIdParams
+): Promise<PartyBalance[]> {
+    if (!sdk.tokenStandard) {
+        throw new Error("Token standard SDK not initialized");
+    }
+
+    const utxosUnformatted = await sdk.tokenStandard.listHoldingUtxos(false);
+    const targetInstrumentIdStr = instrumentIdToString(instrumentId);
+
+    const balancesByParty: Record<Party, TokenBalance> = {};
+
+    utxosUnformatted.forEach((utxo) => {
+        const utxoInstrumentIdStr = instrumentIdToString(
+            utxo.interfaceViewValue.instrumentId
+        );
+        if (utxoInstrumentIdStr === targetInstrumentIdStr) {
+            const owner = utxo.interfaceViewValue.owner;
+            if (!balancesByParty[owner]) {
+                balancesByParty[owner] = { total: 0, utxos: [] };
+            }
+
+            const amount = Number(utxo.interfaceViewValue.amount);
+            balancesByParty[owner].total += amount;
+            balancesByParty[owner].utxos.push({
+                amount,
+                contractId: utxo.contractId,
+            });
+        }
+    });
+
+    return Object.entries(balancesByParty).map(([party, balance]) => ({
+        party,
+        ...balance,
+    }));
+}

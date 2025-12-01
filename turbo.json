@@ -17,6 +17,10 @@
                 "_types/**"
             ]
         },
+        "@denotecapital/token-app#build": {
+          "dependsOn": ["^build"],
+          "outputs": [".next/**"]
+        },
         "depcheck": {
             "cache": false,
             "outputs": []
