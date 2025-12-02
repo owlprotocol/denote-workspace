@@ -1,0 +1,67 @@
+module Bond.BondFactory where
+
+import Bond.Bond
+import Splice.Api.Token.MetadataV1 as MD
+
+
+template BondFactory
+  with
+    issuer : Party
+    instrumentId : Text -- e.g., show issuer <> "#Bond"
+  where
+    signatory issuer
+
+    nonconsuming choice Mint : MintResult
+      with
+        depository : Party  -- Trust anchor, can be same as issuer for simplified deployments
+        receiver : Party
+        principal : Decimal
+        maturityDate : Time
+        couponRate : Decimal  -- Annual rate (e.g., 0.05 for 5%)
+        couponFrequency : Int  -- Payments per year (e.g., 2 for semi-annual)
+      controller issuer, receiver
+      do
+        assertMsg "Principal must be positive" (principal > 0.0)
+        assertMsg "Coupon rate must be non-negative" (couponRate >= 0.0)
+        assertMsg "Coupon frequency must be positive" (couponFrequency > 0)
+
+        now <- getTime
+        assertMsg "Maturity date must be in the future" (maturityDate > now)
+
+        bondCid <- create Bond with
+          issuer
+          depository
+          owner = receiver
+          instrumentId = instrumentId
+          version = "0"
+          principal
+          maturityDate
+          couponRate
+          couponFrequency
+          issueDate = now
+          lastEventTimestamp = now
+
+        pure MintResult with
+          bondCid
+          meta = MD.emptyMetadata
+
+    -- | Create a new version of a bond after a lifecycle event (e.g., coupon payment).
+    -- This creates a new bond with updated version and timestamp.
+    nonconsuming choice CreateNewVersion : ContractId Bond
+      with
+        oldBond : Bond
+        newVersion : Text
+        lastEventTimestamp : Time
+      controller issuer, oldBond.owner
+      do
+        assertMsg "Bond must belong to this factory" (oldBond.instrumentId == instrumentId)
+        create oldBond with
+          version = newVersion
+          lastEventTimestamp = lastEventTimestamp
+
+-- | Result of minting bonds
+data MintResult = MintResult with
+    bondCid : ContractId Bond
+    meta : MD.Metadata
+  deriving (Show, Eq)
+

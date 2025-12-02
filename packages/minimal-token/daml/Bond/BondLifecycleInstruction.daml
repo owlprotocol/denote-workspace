@@ -1,0 +1,131 @@
+-- | Instruction for executing bond lifecycle events (coupon payments and redemption).
+--
+-- This module implements the settlement instruction pattern from Daml-Finance, where
+-- lifecycle instructions execute the actual asset movements (unlock bonds, create new versions,
+-- archive old bonds, trigger currency payments). Holders process instructions after claiming effects.
+--
+-- Daml-Finance Reference:
+-- https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Settlement/V4/Instruction.daml
+--
+-- Key differences from Daml-Finance:
+-- - Simplified to use generic eventType discriminator instead of separate instruction types
+-- - Directly processes bond lifecycle (unlock, version, archive) instead of generic settlement steps
+-- - Uses CIP-0056 patterns for bond locking/unlocking (matches Splice patterns)
+module Bond.BondLifecycleInstruction where
+
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1 as H
+import Bond.Bond
+import Bond.BondFactory as BondFactory
+import Bond.BondLifecycleEffect
+import DA.Time()
+
+-- | Result of processing a coupon payment
+data CouponPaymentResult = CouponPaymentResult with
+    newBondCid : ContractId Bond
+    couponAmount : Decimal
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+-- | Result of processing a redemption
+data RedemptionResult = RedemptionResult with
+    principalAmount : Decimal
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+-- | Sum type for lifecycle instruction results
+data LifecycleResult
+  = CouponPaymentResult_ CouponPaymentResult
+  | RedemptionResult_ RedemptionResult
+  deriving (Show, Eq)
+
+-- | Generic instruction for processing bond lifecycle events (coupon payments and redemptions).
+-- Similar to TransferInstruction but for lifecycle events.
+-- Follows daml-finance pattern of using a single generic Instruction template.
+template BondLifecycleInstruction
+  with
+    eventType : LifecycleEventType
+    lockedBond : ContractId LockedBond
+    bondFactoryCid : Optional (ContractId BondFactory)  -- Some for CouponPayment, None for Redemption
+    producedVersion : Optional Text  -- New version from effect (Some for CouponPayment, None for Redemption)
+    issuer : Party
+    holder : Party
+    eventDate : Time  -- couponPaymentDate or redemptionDate
+    amount : Decimal  -- couponAmount or principalAmount
+    currencyInstrumentId : H.InstrumentId  -- Currency instrument for payment
+  where
+    signatory issuer
+    observer holder
+
+    choice Process : LifecycleResult
+      controller holder
+      do
+        -- Fetch the locked bond
+        locked <- fetch lockedBond
+
+        -- Validate issuer and holder match
+        assertMsg "Issuer must match" (locked.bond.issuer == issuer)
+        assertMsg "Holder must match" (locked.bond.owner == holder)
+
+        -- Validate event date is in the past or present
+        now <- getTime
+        assertMsg "Event date must be in the past or present" (eventDate <= now)
+
+        -- Branch based on event type
+        case eventType of
+          CouponPayment -> do
+            -- Validate bond is locked for coupon payment
+            case locked.lock.lockContext of
+              Some ctx -> assertMsg "Bond must be locked for coupon payment" (ctx == "coupon_payment")
+              None -> fail "Bond lock context missing"
+
+            -- Unlock the bond
+            unlockedBondCid : ContractId Bond <- exercise lockedBond Unlock
+
+            unlockedBond <- fetch unlockedBondCid
+
+            archive unlockedBondCid
+
+            case bondFactoryCid of
+              Some factoryCid -> do
+                case producedVersion of
+                  Some newVersion -> do
+                    newBondCid <- exercise factoryCid BondFactory.CreateNewVersion with
+                      oldBond = unlockedBond
+                      newVersion = newVersion
+                      lastEventTimestamp = eventDate
+
+                    pure $ CouponPaymentResult_ $ CouponPaymentResult with
+                      newBondCid
+                      couponAmount = amount
+                      meta = MD.emptyMetadata
+                  None -> fail "Produced version must be present for coupon payment"
+              None -> fail "BondFactory CID must be present for coupon payment"
+
+          Redemption -> do
+            -- Validate bond is locked for redemption
+            case locked.lock.lockContext of
+              Some ctx -> assertMsg "Bond must be locked for redemption" (ctx == "redemption")
+              None -> fail "Bond lock context missing"
+
+            -- Validate redemption date is on or after maturity date
+            assertMsg "Redemption date must be on or after maturity date" (eventDate >= locked.bond.maturityDate)
+
+            -- Unlock the bond
+            unlockedBondCid : ContractId Bond <- exercise lockedBond Unlock
+
+            -- Archive the bond (no new version for redemption)
+            archive unlockedBondCid
+
+            pure $ RedemptionResult_ $ RedemptionResult with
+              principalAmount = amount
+              meta = MD.emptyMetadata
+
+    choice Abort : ContractId Bond
+      -- ^ Abort the lifecycle event: unlock bond back to holder without processing
+      controller holder
+      do
+        -- Unlock the bond back to holder
+        unlockedBondCid : ContractId Bond <- exercise lockedBond Unlock
+        pure unlockedBondCid
+

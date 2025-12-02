@@ -1,0 +1,39 @@
+-- | Effect contracts describing bond lifecycle events (coupon payments and redemption).
+--
+-- This module implements the effect pattern from Daml-Finance, where lifecycle events create
+-- effect contracts that holders can claim. Each effect describes what happens to one unit of
+-- the target instrument version (e.g., coupon payment amount, new version produced).
+--
+-- Daml-Finance Reference:
+-- https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Lifecycle/V4/Effect.daml
+--
+-- Key differences from Daml-Finance:
+-- - Simplified to use generic eventType discriminator instead of separate effect types
+-- - Uses generic eventDate and amount fields instead of event-specific fields
+-- - Produced version calculated by BondLifecycleRule using SHA256 hashing
+module Bond.BondLifecycleEffect where
+
+import Splice.Api.Token.HoldingV1 as H
+
+data LifecycleEventType = CouponPayment | Redemption
+  deriving (Eq, Show)
+
+-- | Generic effect contract describing a bond lifecycle event.
+-- Created by BondLifecycleRule when processing lifecycle events.
+-- Holders can claim this effect by presenting their bond holdings.
+template BondLifecycleEffect
+  with
+    issuer : Party
+    depository : Party
+    eventType : LifecycleEventType
+    targetInstrumentId : Text
+    targetVersion : Text
+    producedVersion : Optional Text
+    eventDate : Time
+    settlementTime : Optional Time
+    amount : Decimal
+    currencyInstrumentId : H.InstrumentId
+  where
+    signatory issuer, depository
+    observer [] : [Party]
+

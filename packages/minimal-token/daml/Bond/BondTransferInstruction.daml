@@ -1,0 +1,157 @@
+module Bond.BondTransferInstruction where
+
+import DA.TextMap as TextMap
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1 as H
+import Bond.Bond
+
+template BondTransferInstruction
+  with
+    lockedBond : ContractId LockedBond
+    transfer      : TI.Transfer
+  where
+    signatory transfer.instrumentId.admin, transfer.sender
+    observer  transfer.receiver
+
+    interface instance TI.TransferInstruction for BondTransferInstruction where
+      view = TI.TransferInstructionView with
+        originalInstructionCid = None
+        transfer = transfer
+        status   = TI.TransferPendingReceiverAcceptance
+        meta     = MD.emptyMetadata
+
+      -- Accept => unlock + transfer (atomic), return receiver holdings & sender change
+      transferInstruction_acceptImpl _self arg =
+        executeBondTransferInstr this arg.extraArgs
+
+      -- Reject => abort; returns sender change (unlocks the bond)
+      transferInstruction_rejectImpl _self arg =
+        abortBondTransferInstruction this arg.extraArgs
+
+      -- Update flow (not used by minimal implementation)
+      transferInstruction_updateImpl _self _arg =
+        fail "BondTransferInstruction.updateImpl: not implemented"
+
+      -- Withdraw => same as reject for proposer-initiated cancel
+      transferInstruction_withdrawImpl _self arg =
+        abortBondTransferInstruction this arg.extraArgs
+
+
+-- | Two-step transfer data structure.
+-- Note: Bonds cannot be split - senderChangeCids will always be empty for bond transfers.
+data TwoStepTransfer = TwoStepTransfer
+  with
+    issuer : Party
+    sender : Party
+    receiver : Party
+    amount : Decimal
+    executeBefore : Time
+  deriving (Eq, Show)
+
+-- | Check deadline hasn't passed. See: DA.Time.assertWithinDeadline
+assertWithinDeadline : Text -> Time -> Update ()
+assertWithinDeadline name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has passed") (now <= deadline)
+
+-- | Execute a two-step transfer: check deadline, unlock bond, create new bond for receiver.
+-- Returns: (senderChangeCids, receiverHoldingCids, metadata)
+-- Note: Bonds cannot be split - senderChangeCids will always be empty.
+executeTwoStepTransfer
+  : TwoStepTransfer
+  -> ContractId LockedBond
+  -> MD.ExtraArgs
+  -> Update ([ContractId H.Holding], [ContractId H.Holding], MD.Metadata)
+executeTwoStepTransfer TwoStepTransfer{..} lockedBondCid extraArgs = do
+  -- 1. Check deadline hasn't passed
+  assertWithinDeadline "executeBefore" executeBefore
+
+  -- 2. Fetch the locked bond
+  locked <- fetch lockedBondCid
+
+  -- 3. Validate amount matches locked principal
+  assertMsg "Transfer amount must match locked principal" (locked.bond.principal == amount)
+  assertMsg "Sender must be owner" (locked.bond.owner == sender)
+
+  -- 4. Unlock the bond
+  -- Controller: bond.owner :: lock.holders (both sender and issuer must authorize)
+  -- This works because TransferInstruction has both as signatories
+  unlockedCid : ContractId Bond <- exercise lockedBondCid Unlock
+
+  -- 5. Archive the unlocked bond (consume sender's bond)
+  -- Note: This requires both issuer and owner (sender) signatures
+  archive unlockedCid
+
+  -- 6. Create new bond for receiver
+  -- Note: This requires issuer, depository, and receiver to sign (Bond has signatory issuer, depository, owner)
+  receiverBondCid : ContractId Bond <- create Bond with
+    issuer = locked.bond.issuer
+    depository = locked.bond.depository
+    owner = receiver
+    instrumentId = locked.bond.instrumentId
+    version = locked.bond.version
+    principal = amount
+    maturityDate = locked.bond.maturityDate
+    couponRate = locked.bond.couponRate
+    couponFrequency = locked.bond.couponFrequency
+    issueDate = locked.bond.issueDate
+    lastEventTimestamp = locked.bond.lastEventTimestamp
+
+  -- Convert to Holding interface (Bond implements H.Holding)
+  let receiverCid : ContractId H.Holding = toInterfaceContractId @H.Holding receiverBondCid
+
+  -- 7. Return results: no sender change (we consumed it), receiver gets new bond
+  let emptyMeta = MD.Metadata with values = TextMap.empty
+  pure ([], [receiverCid], emptyMeta)
+
+-- | Abort a two-step transfer: unlock bond back to sender (no transfer happens).
+abortTwoStepTransfer
+  : TwoStepTransfer
+  -> ContractId LockedBond
+  -> MD.ExtraArgs
+  -> Update [ContractId H.Holding]
+abortTwoStepTransfer TwoStepTransfer{..} lockedBondCid extraArgs = do
+  -- On abort, unlock the bond back to sender (no transfer happens)
+  locked <- fetch lockedBondCid
+  assertMsg "Sender must be owner" (locked.bond.owner == sender)
+
+  -- Unlock returns bond to sender
+  -- Controller: bond.owner :: lock.holders (both must authorize)
+  unlockedBondCid : ContractId Bond <- exercise lockedBondCid Unlock
+  -- Convert to Holding interface
+  let unlockedCid : ContractId H.Holding = toInterfaceContractId @H.Holding unlockedBondCid
+  pure [unlockedCid]
+
+-- | Map the standard Transfer (TI.Transfer) into our TwoStepTransfer type.
+-- Matches the pattern from AmuletTransferInstruction.
+standardTransferToTwoStepTransfer : TI.Transfer -> TwoStepTransfer
+standardTransferToTwoStepTransfer tr =
+  TwoStepTransfer with
+    issuer  = tr.instrumentId.admin
+    sender = tr.sender
+    receiver = tr.receiver
+    amount = tr.amount
+    executeBefore = tr.executeBefore
+
+-- | Accept path: delegates to two-step helper (deadline check, unlock, transfer).
+executeBondTransferInstr : BondTransferInstruction -> MD.ExtraArgs -> Update TI.TransferInstructionResult
+executeBondTransferInstr instr extraArgs = do
+  let twoStepTransfer = standardTransferToTwoStepTransfer instr.transfer
+  (senderChangeCids, receiverHoldingCids, meta) <-
+    executeTwoStepTransfer twoStepTransfer instr.lockedBond extraArgs
+  pure TI.TransferInstructionResult with
+    senderChangeCids
+    output = TI.TransferInstructionResult_Completed with receiverHoldingCids
+    meta
+
+-- | Reject/Withdraw path: delegates to abort (unlocks bond back to sender).
+abortBondTransferInstruction : BondTransferInstruction -> MD.ExtraArgs -> Update TI.TransferInstructionResult
+abortBondTransferInstruction instr extraArgs = do
+  let twoStepTransfer = standardTransferToTwoStepTransfer instr.transfer
+  senderChangeCids <- abortTwoStepTransfer twoStepTransfer instr.lockedBond extraArgs
+  pure TI.TransferInstructionResult with
+    senderChangeCids
+    output = TI.TransferInstructionResult_Failed
+    meta   = MD.emptyMetadata
+

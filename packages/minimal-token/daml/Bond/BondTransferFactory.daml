@@ -1,0 +1,117 @@
+module Bond.BondTransferFactory where
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1 as H
+import Bond.Bond
+import Bond.BondRules
+import Bond.BondTransferInstruction as BTI
+
+template BondTransferFactory
+  with
+    registry : Party  -- The party representing the registry/admin
+    rulesCid : ContractId BondRules
+  where
+    signatory registry
+
+    interface instance TI.TransferFactory for BondTransferFactory where
+      view = TI.TransferFactoryView with
+        admin = registry
+        meta = MD.emptyMetadata
+
+      -- Implement transfer factory logic
+      transferFactory_transferImpl _self arg =
+        bondTransferFactory_transferImpl this arg
+
+      -- Fetch the factory view
+      transferFactory_publicFetchImpl _self arg = do
+        -- Validate expected admin matches
+        assertMsg "expectedAdmin must match factory admin" (arg.expectedAdmin == registry)
+        pure (view $ toInterface @TI.TransferFactory this)
+
+
+-- | Main implementation of the transfer factory.
+-- Validates the transfer specification.
+-- Auto-locks bonds via rules.
+bondTransferFactory_transferImpl
+  : BondTransferFactory
+  -> TI.TransferFactory_Transfer
+  -> Update TI.TransferInstructionResult
+bondTransferFactory_transferImpl factory arg = do
+  let TI.TransferFactory_Transfer {expectedAdmin, transfer, extraArgs} = arg
+
+  -- Validate expected admin matches factory admin
+  require "expectedAdmin mismatch" (expectedAdmin == factory.registry)
+
+  -- Validate transfer specification (matches Amulet pattern)
+  require "Amount must be positive" (transfer.amount > 0.0)
+  require "At least one holding must be provided" (not $ Prelude.null transfer.inputHoldingCids)
+  assertDeadlineExceeded "Transfer.requestedAt" transfer.requestedAt
+  assertWithinDeadlineHelper "Transfer.executeBefore" transfer.executeBefore
+
+  -- Auto-lock via rules
+  let twoStep = BTI.TwoStepTransfer with
+        issuer = transfer.instrumentId.admin
+        sender = transfer.sender
+        receiver = transfer.receiver
+        amount = transfer.amount
+        executeBefore = transfer.executeBefore
+
+  (lockedCid, senderChangeCids, meta) <- prepareTwoStepTransfer twoStep transfer.requestedAt transfer.inputHoldingCids factory.rulesCid
+
+  -- Create transfer instruction pending receiver acceptance
+  instrCid <- create BondTransferInstruction with
+    lockedBond = lockedCid
+    transfer = transfer
+
+  pure TI.TransferInstructionResult with
+    senderChangeCids = senderChangeCids
+    output = TI.TransferInstructionResult_Pending with
+      transferInstructionCid = toInterfaceContractId @TI.TransferInstruction instrCid
+    meta = meta
+
+
+-- Helper functions
+
+assertWithinDeadlineHelper : Text -> Time -> Update ()
+assertWithinDeadlineHelper name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has passed") (now <= deadline)
+
+assertDeadlineExceeded : Text -> Time -> Update ()
+assertDeadlineExceeded name deadline = do
+  now <- getTime
+  assertMsg (name <> " deadline has not passed") (now > deadline)
+
+require : CanAssert m => Text -> Bool -> m ()
+require msg condition = assertMsg msg condition
+
+-- | Prepare (lock) step using BondRules to create a LockedBond for a future transfer.
+-- This helper is used by BondTransferFactory to lock bonds before creating transfer instructions.
+prepareTwoStepTransfer
+  : BTI.TwoStepTransfer
+  -> Time
+  -> [ContractId H.Holding]
+  -> ContractId BondRules
+  -> Update (ContractId LockedBond, [ContractId H.Holding], MD.Metadata)
+prepareTwoStepTransfer twoStep requestedAt inputHoldingCids rulesCid = do
+  -- requestedAt < executeBefore
+  assertMsg "requestedAt must be < executeBefore" (requestedAt < twoStep.executeBefore)
+  -- For minimal impl require exactly 1 input
+  case inputHoldingCids of
+    [inputCid] -> do
+      -- Lock via rules (issuer + sender sign)
+      -- Returns: (lockedCid, optional change CID, metadata)
+      (lockedCid, optChangeCid, meta) <- exercise rulesCid BondRules_LockForTransfer with
+        sender = twoStep.sender
+        inputHoldingCid = inputCid
+        desiredAmount = twoStep.amount
+        transferBefore = twoStep.executeBefore
+        contextText = "transfer to " <> show twoStep.receiver
+      -- Convert optional change to list for return
+      let senderChangeCids = case optChangeCid of
+            Some changeCid -> [changeCid]
+            None -> []
+      pure (lockedCid, senderChangeCids, meta)
+    _ -> fail "prepareTwoStepTransfer: exactly one input holding required"
+

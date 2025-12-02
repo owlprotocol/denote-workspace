@@ -1,0 +1,212 @@
+-- | Claim processor for lifecycle effects (coupon payments and redemption).
+--
+-- This module implements the claim pattern from Daml-Finance, where holders claim lifecycle
+-- effects and generate settlement instructions. It follows the propose/accept pattern:
+-- holders create claim requests, issuers accept them (locking bonds and creating instructions).
+--
+-- Daml-Finance Reference:
+-- https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Lifecycle/V4/Rule/Claim.daml
+--
+-- Key differences from Daml-Finance:
+-- - Simplified to use propose/accept pattern (BondLifecycleClaimRequest) instead of direct
+--   Claim.ClaimEffect choice, avoiding submitMulti requirements
+-- - Directly creates BondLifecycleInstruction and currency transfer instructions (factory
+--   logic inlined, matching Daml-Finance pattern where Rule.Claim creates settlement instructions)
+-- - Uses CIP-0056 TransferFactory interface for currency payments (modular, works with any token)
+module Bond.BondLifecycleClaim where
+
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import Bond.Bond
+import Bond.BondRules
+import Bond.BondLifecycleEffect
+import Bond.BondLifecycleInstruction
+import Bond.BondFactory
+import DA.Time
+
+-- | Result of creating a coupon payment instruction
+data CouponPaymentInstructionResult = CouponPaymentInstructionResult with
+    instructionCid : ContractId BondLifecycleInstruction
+    couponAmount : Decimal
+    currencyTransferInstructionCid : Optional (ContractId TI.TransferInstruction)
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+-- | Result of creating a redemption instruction
+data RedemptionInstructionResult = RedemptionInstructionResult with
+    instructionCid : ContractId BondLifecycleInstruction
+    principalAmount : Decimal
+    currencyTransferInstructionCid : Optional (ContractId TI.TransferInstruction)
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+-- | Sum type for lifecycle instruction results
+data LifecycleInstructionResult
+  = ClaimResult_CouponPayment CouponPaymentInstructionResult
+  | ClaimResult_Redemption RedemptionInstructionResult
+  deriving (Show, Eq)
+
+-- | Request to claim a lifecycle effect (coupon payment or redemption).
+-- Holder creates this request, issuer accepts it.
+-- Follows propose/accept pattern.
+-- When issuer accepts, it locks the bond and creates the appropriate lifecycle instruction.
+template BondLifecycleClaimRequest
+  with
+    effectCid : ContractId BondLifecycleEffect
+    bondHoldingCid : ContractId H.Holding
+    bondRulesCid : ContractId BondRules
+    bondFactoryCid : ContractId BondFactory
+    currencyTransferFactoryCid : ContractId TI.TransferFactory
+    issuerCurrencyHoldingCid : ContractId H.Holding
+    holder : Party
+    issuer : Party
+  where
+    signatory holder
+    observer issuer
+
+    choice Accept : LifecycleInstructionResult
+      controller issuer
+      do
+        effect <- fetch effectCid
+        let bondCid : ContractId Bond = fromInterfaceContractId bondHoldingCid
+        bond <- fetch bondCid
+
+        -- Validate issuer matches effect
+        assertMsg "Issuer must match effect issuer" (this.issuer == effect.issuer)
+
+        -- Validate bond matches effect target
+        assertMsg "Bond instrument ID must match effect target" (bond.instrumentId == effect.targetInstrumentId)
+        assertMsg "Bond version must match effect target version" (bond.version == effect.targetVersion)
+        assertMsg "Bond issuer must match effect issuer" (bond.issuer == effect.issuer)
+        assertMsg "Bond depository must match effect depository" (bond.depository == effect.depository)
+
+        case effect.eventType of
+          CouponPayment -> do
+            assertMsg "Coupon payment date must be after last event timestamp" (effect.eventDate > bond.lastEventTimestamp)
+            assertMsg "Coupon payment date must be before maturity date" (effect.eventDate < bond.maturityDate)
+
+            (lockedBondCid, _, _) <- exercise bondRulesCid BondRules_LockForCoupon with
+              holder = bond.owner
+              inputBondCid = bondHoldingCid
+              couponPaymentDate = effect.eventDate
+              contextText = "coupon_payment"
+
+            let lockedBondCidTyped : ContractId LockedBond = lockedBondCid
+
+            locked <- fetch lockedBondCidTyped
+            assertMsg "Bond must belong to this issuer" (locked.bond.issuer == issuer)
+            assertMsg "Coupon payment date must be after issue date" (effect.eventDate >= locked.bond.issueDate)
+            assertMsg "Coupon payment date must be after last event timestamp" (effect.eventDate > locked.bond.lastEventTimestamp)
+            assertMsg "Coupon payment date must be before maturity date" (effect.eventDate < locked.bond.maturityDate)
+            assertMsg "Coupon amount must be positive" (effect.amount > 0.0)
+
+            now <- getTime
+            let requestedAt = addRelTime now (seconds (-1))
+            let executeBefore = addRelTime now (days 365)
+            let transfer = TI.Transfer with
+                  sender = issuer
+                  receiver = locked.bond.owner
+                  amount = effect.amount
+                  instrumentId = effect.currencyInstrumentId
+                  requestedAt = requestedAt
+                  executeBefore = executeBefore
+                  inputHoldingCids = [issuerCurrencyHoldingCid]
+                  meta = MD.emptyMetadata
+
+            currencyTransferResult <- exercise currencyTransferFactoryCid TI.TransferFactory_Transfer with
+              expectedAdmin = issuer
+              transfer
+              extraArgs = MD.ExtraArgs with
+                context = MD.emptyChoiceContext
+                meta = MD.emptyMetadata
+
+            currencyTransferInstructionCid <- case currencyTransferResult.output of
+              TI.TransferInstructionResult_Pending { transferInstructionCid } -> pure transferInstructionCid
+              _ -> fail "Failed to create currency transfer instruction"
+
+            instructionCid <- create BondLifecycleInstruction with
+              eventType = CouponPayment
+              lockedBond = lockedBondCidTyped
+              bondFactoryCid = Some bondFactoryCid
+              producedVersion = effect.producedVersion
+              issuer = locked.bond.issuer
+              holder = locked.bond.owner
+              eventDate = effect.eventDate
+              amount = effect.amount
+              currencyInstrumentId = effect.currencyInstrumentId
+
+            pure $ ClaimResult_CouponPayment $ CouponPaymentInstructionResult with
+              instructionCid
+              couponAmount = effect.amount
+              currencyTransferInstructionCid = Some currencyTransferInstructionCid
+              meta = MD.emptyMetadata
+
+          Redemption -> do
+            now <- getTime
+            assertMsg "Redemption date must be on or after maturity date" (effect.eventDate >= bond.maturityDate)
+            assertMsg "Redemption date must be in the past or present" (effect.eventDate <= now)
+
+            (lockedBondCid, _, _) <- exercise bondRulesCid BondRules_LockForRedemption with
+              holder = bond.owner
+              inputBondCid = bondHoldingCid
+              redemptionDate = effect.eventDate
+              contextText = "redemption"
+
+            let lockedBondCidTyped : ContractId LockedBond = lockedBondCid
+
+            locked <- fetch lockedBondCidTyped
+            assertMsg "Bond must belong to this issuer" (locked.bond.issuer == issuer)
+            assertMsg "Redemption date must be on or after maturity date" (effect.eventDate >= locked.bond.maturityDate)
+            assertMsg "Principal amount must be positive" (effect.amount > 0.0)
+
+            let requestedAt = addRelTime now (seconds (-1))
+            let executeBefore = addRelTime now (days 365)
+            let transfer = TI.Transfer with
+                  sender = issuer
+                  receiver = locked.bond.owner
+                  amount = effect.amount
+                  instrumentId = effect.currencyInstrumentId
+                  requestedAt = requestedAt
+                  executeBefore = executeBefore
+                  inputHoldingCids = [issuerCurrencyHoldingCid]
+                  meta = MD.emptyMetadata
+
+            currencyTransferResult <- exercise currencyTransferFactoryCid TI.TransferFactory_Transfer with
+              expectedAdmin = issuer
+              transfer
+              extraArgs = MD.ExtraArgs with
+                context = MD.emptyChoiceContext
+                meta = MD.emptyMetadata
+
+            currencyTransferInstructionCid <- case currencyTransferResult.output of
+              TI.TransferInstructionResult_Pending { transferInstructionCid } -> pure transferInstructionCid
+              _ -> fail "Failed to create currency transfer instruction"
+
+            instructionCid <- create BondLifecycleInstruction with
+              eventType = Redemption
+              lockedBond = lockedBondCidTyped
+              bondFactoryCid = None
+              producedVersion = effect.producedVersion
+              issuer = locked.bond.issuer
+              holder = locked.bond.owner
+              eventDate = effect.eventDate
+              amount = effect.amount
+              currencyInstrumentId = effect.currencyInstrumentId
+
+            pure $ ClaimResult_Redemption $ RedemptionInstructionResult with
+              instructionCid
+              principalAmount = effect.amount
+              currencyTransferInstructionCid = Some currencyTransferInstructionCid
+              meta = MD.emptyMetadata
+
+    choice Decline : ()
+      controller issuer
+      do
+        pure ()
+
+    choice Withdraw : ()
+      controller holder
+      do
+        pure ()
+
