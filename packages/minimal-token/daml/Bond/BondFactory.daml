@@ -9,7 +9,6 @@ template BondFactory
     instrumentId : Text -- e.g., show issuer <> "#Bond"
   where
     signatory issuer
-
     -- | Create a bond instrument definition with all terms.
     -- This is called once by the issuer to define the bond instrument.
     nonconsuming choice CreateInstrument : ContractId BondInstrument
@@ -34,4 +33,5 @@ template BondFactory
           maturityDate
 
         pure instrumentCid
+
 

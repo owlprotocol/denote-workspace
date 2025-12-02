@@ -63,7 +63,6 @@ template BondLifecycleInstruction
         -- Fetch the locked bond
         locked <- fetch lockedBond
 
-
         -- Branch based on event type
         case eventType of
           CouponPayment -> do
@@ -102,7 +101,6 @@ template BondLifecycleInstruction
             case locked.lock.lockContext of
               Some ctx -> assertMsg "Bond must be locked for redemption" (ctx == "redemption")
               None -> fail "Bond lock context missing"
-
 
             let totalPrincipalAmount = amount * locked.bond.amount
 
