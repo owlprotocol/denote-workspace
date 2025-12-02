@@ -1,0 +1,3 @@
+[submodule "daml/daml-finance"]
+	path = daml/daml-finance
+	url = git@github.com:oscbacon/daml-finance.git

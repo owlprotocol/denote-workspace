@@ -1,137 +1,139 @@
 // Copyright (c) 2025 Digital Asset (Switzerland) GmbH and/or its affiliates. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import zlib from 'zlib'
-import { pipeline } from 'stream/promises'
-import crypto from 'crypto'
-import * as fs from 'fs'
-import * as path from 'path'
-import * as process from 'process'
-import { white, green, italic, red, yellow, bold } from 'yoctocolors'
-import * as jsonc from 'jsonc-parser'
-import * as tar from 'tar-fs'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import zlib from "zlib";
+import { pipeline } from "stream/promises";
+import crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import * as process from "process";
+import { white, green, italic, red, yellow, bold } from "yoctocolors";
+import * as jsonc from "jsonc-parser";
+import * as tar from "tar-fs";
+import { exec } from "child_process";
+import { promisify } from "util";
 
-const ex = promisify(exec)
+const ex = promisify(exec);
 
-export const info = (message: string): string => italic(white(message))
-export const warn = (message: string): string => bold(yellow(message))
-export const error = (message: string): string => bold(red(message))
-export const success = (message: string): string => green(message)
+export const info = (message: string): string => italic(white(message));
+export const warn = (message: string): string => bold(yellow(message));
+export const error = (message: string): string => bold(red(message));
+export const success = (message: string): string => green(message);
 export const trimNewline = (message: string): string =>
-    message.replace(/\n$/, '')
+    message.replace(/\n$/, "");
 
-const repoRoot = getRepoRoot()
-export const CANTON_PATH = path.join(repoRoot, '.canton')
-export const SPLICE_PATH = path.join(repoRoot, '.splice')
-export const SPLICE_SPEC_PATH = path.join(repoRoot, '.splice-spec')
-export const CANTON_BIN = path.join(CANTON_PATH, 'bin/canton')
-export const CANTON_CONF = path.join(repoRoot, 'canton/canton.conf')
-export const CANTON_BOOTSTRAP = path.join(repoRoot, 'canton/bootstrap.canton')
-export const API_SPECS_PATH = path.join(repoRoot, 'api-specs')
-export const UTILS_FILE_PATH = path.join(repoRoot, 'scripts/src/lib/utils.ts')
+const repoRoot = getRepoRoot();
+export const CANTON_PATH = path.join(repoRoot, ".canton");
+export const SPLICE_PATH = path.join(repoRoot, ".splice");
+export const SPLICE_SPEC_PATH = path.join(repoRoot, ".splice-spec");
+export const CANTON_BIN = path.join(CANTON_PATH, "bin/canton");
+export const CANTON_CONF = path.join(repoRoot, "canton/canton.conf");
+export const CANTON_BOOTSTRAP = path.join(repoRoot, "canton/bootstrap.canton");
+export const API_SPECS_PATH = path.join(repoRoot, "api-specs");
+export const UTILS_FILE_PATH = path.join(repoRoot, "scripts/src/lib/utils.ts");
 
 export type CantonVersionAndHash = {
-    version: string
-    hash: string
-}
+    version: string;
+    hash: string;
+};
 // Canton versions
-export const DAML_RELEASE_VERSION = '3.3.0-snapshot.20251108.16145.0.v21f4ad7f'
+// export const DAML_RELEASE_VERSION = '3.3.0-snapshot.20251108.16145.0.v21f4ad7f'
+export const DAML_RELEASE_VERSION = "3.4.8";
 
 export const LOCALNET_ARCHIVE_HASH =
-    '706c4412d1cb29285fe8a591e74f44458d2afcbb04603c32cdb6c6260538145f'
+    // "706c4412d1cb29285fe8a591e74f44458d2afcbb04603c32cdb6c6260538145f";
+    "2c3d3d15724f29c26ecbea9162a426710ff4a56d12ee8247f01c825259a465b6";
 export const SPLICE_ARCHIVE_HASH =
-    'dbe943a466f06624c2f55e2e4ad66180e81804bbcb0288b6a4882df49702a4b1'
+    "dbe943a466f06624c2f55e2e4ad66180e81804bbcb0288b6a4882df49702a4b1";
 export const SPLICE_SPEC_ARCHIVE_HASH =
-    '102dba4a7224a0acc2544111ecdf2e6538de2b29bcc3bd7348edf4b445e07329'
+    "102dba4a7224a0acc2544111ecdf2e6538de2b29bcc3bd7348edf4b445e07329";
 export const CANTON_ARCHIVE_HASH =
-    '43c89d9833886fc68cac4951ba1959b7f6cc5269abfff1ba5129859203aa8cd3'
-export const SPLICE_VERSION = '0.4.25'
+    "43c89d9833886fc68cac4951ba1959b7f6cc5269abfff1ba5129859203aa8cd3";
+export const SPLICE_VERSION = "0.5.3";
 
 export const SUPPORTED_VERSIONS = {
     devnet: {
         canton: {
-            version: '3.4.0-snapshot.20250922.16951.0.v1eb3f268',
-            hash: 'e0f59a7b5015b56479ef4786662c5935a0fee9ac803465bb0f70bdc6c3bf4dff',
+            version: "3.4.0-snapshot.20250922.16951.0.v1eb3f268",
+            hash: "e0f59a7b5015b56479ef4786662c5935a0fee9ac803465bb0f70bdc6c3bf4dff",
         },
     },
     mainnet: {
         canton: {
-            version: '3.3.0-snapshot.20250910.16087.0.v82d35a4d',
-            hash: '43c89d9833886fc68cac4951ba1959b7f6cc5269abfff1ba5129859203aa8cd3',
+            version: "3.3.0-snapshot.20250910.16087.0.v82d35a4d",
+            hash: "43c89d9833886fc68cac4951ba1959b7f6cc5269abfff1ba5129859203aa8cd3",
         },
     },
-}
+};
 
 export async function downloadToFile(
     url: string | URL,
     directory: string,
     hash?: string
 ) {
-    const filename = path.basename(url.toString())
-    const res = await fetch(url)
+    const filename = path.basename(url.toString());
+    const res = await fetch(url);
     if (!res.ok || !res.body) {
-        throw new Error(`Failed to download: ${url}`)
+        throw new Error(`Failed to download: ${url}`);
     }
-    await ensureDir(directory)
+    await ensureDir(directory);
     await pipeline(
         res.body,
         fs.createWriteStream(path.join(directory, filename))
-    )
+    );
 
     if (hash) {
         await verifyFileIntegrity(
             path.join(directory, filename),
             hash,
-            'sha256'
-        )
+            "sha256"
+        );
     }
 }
 
 export async function verifyFileIntegrity(
     filePath: string,
     expectedHash: string,
-    algo = 'sha256'
+    algo = "sha256"
 ): Promise<boolean> {
     if (!fs.existsSync(filePath)) {
-        return false
+        return false;
     }
-    const computedHash = await computeFileHash(filePath, algo)
+    const computedHash = await computeFileHash(filePath, algo);
 
     if (computedHash === expectedHash) {
         console.log(
             success(
                 `${algo.toUpperCase()} checksum verification of ${filePath} successful.`
             )
-        )
+        );
     } else {
         console.log(
             error(
                 `File hashes did not match.\n\tExpected: ${expectedHash}\n\tReceived: ${computedHash}\nDeleting ${filePath}...`
             )
-        )
+        );
         //process.exit(1)
     }
 
-    return true
+    return true;
 }
 
 async function computeFileHash(
     filePath: string,
-    algo = 'sha256'
+    algo = "sha256"
 ): Promise<string> {
     return new Promise((resolve, reject) => {
-        const hash = crypto.createHash(algo)
-        const stream = fs.createReadStream(filePath)
+        const hash = crypto.createHash(algo);
+        const stream = fs.createReadStream(filePath);
 
-        stream.on('data', (chunk) => hash.update(chunk))
-        stream.on('end', () => {
-            const computedHash = hash.digest('hex')
-            resolve(computedHash)
-        })
-        stream.on('error', (err) => reject(err))
-    })
+        stream.on("data", (chunk) => hash.update(chunk));
+        stream.on("end", () => {
+            const computedHash = hash.digest("hex");
+            resolve(computedHash);
+        });
+        stream.on("error", (err) => reject(err));
+    });
 }
 
 export async function downloadAndUnpackTarball(
@@ -140,157 +142,161 @@ export async function downloadAndUnpackTarball(
     unpackDir: string,
     options?: { hash?: string; strip?: number; updateHash?: boolean }
 ) {
-    let shouldDownload = true
-    let currentHash = options?.hash
-    const algo = 'sha256'
+    let shouldDownload = true;
+    let currentHash = options?.hash;
+    const algo = "sha256";
 
-    ensureDir(path.dirname(tarfile))
-    ensureDir(path.dirname(unpackDir))
+    ensureDir(path.dirname(tarfile));
+    ensureDir(path.dirname(unpackDir));
 
     if (fs.existsSync(tarfile) && options?.hash) {
         // File exists, check hash
-        const validFile = await verifyFileIntegrity(tarfile, options.hash, algo)
-        shouldDownload = !validFile
+        const validFile = await verifyFileIntegrity(
+            tarfile,
+            options.hash,
+            algo
+        );
+        shouldDownload = !validFile;
     }
 
     if (shouldDownload) {
-        console.log(info(`Downloading tarball from ${url} to ${tarfile}...`))
-        const res = await fetch(url)
+        console.log(info(`Downloading tarball from ${url} to ${tarfile}...`));
+        const res = await fetch(url);
         if (!res.ok || !res.body) {
-            throw new Error(`Failed to download: ${url}`)
+            throw new Error(`Failed to download: ${url}`);
         }
-        await pipeline(res.body, fs.createWriteStream(tarfile))
-        console.log(success('Download complete.'))
+        await pipeline(res.body, fs.createWriteStream(tarfile));
+        console.log(success("Download complete."));
     }
 
     if (options?.updateHash) {
-        const newHash = await computeFileHash(tarfile, algo)
+        const newHash = await computeFileHash(tarfile, algo);
 
         // Update the hash in utils.ts if present
-        const fileContent = fs.readFileSync(UTILS_FILE_PATH, 'utf8')
+        const fileContent = fs.readFileSync(UTILS_FILE_PATH, "utf8");
         // Find the old hash in the file (matching the old value)
         if (options?.hash && fileContent.includes(options.hash)) {
-            const updatedContent = fileContent.replace(options.hash, newHash)
+            const updatedContent = fileContent.replace(options.hash, newHash);
             if (updatedContent !== fileContent) {
-                fs.writeFileSync(UTILS_FILE_PATH, updatedContent, 'utf8')
-                console.log(success(`Updated hash in utils.ts to ${newHash}`))
+                fs.writeFileSync(UTILS_FILE_PATH, updatedContent, "utf8");
+                console.log(success(`Updated hash in utils.ts to ${newHash}`));
             }
         } else {
             console.log(
-                warn('Old hash not found in utils.ts, no update performed.')
-            )
+                warn("Old hash not found in utils.ts, no update performed.")
+            );
         }
 
-        currentHash = newHash
+        currentHash = newHash;
     }
 
     if (!options?.updateHash && currentHash) {
-        const validFile = await verifyFileIntegrity(tarfile, currentHash, algo)
+        const validFile = await verifyFileIntegrity(tarfile, currentHash, algo);
 
         const downloadedHash = crypto
             .createHash(algo)
             .update(fs.readFileSync(tarfile))
-            .digest('hex')
+            .digest("hex");
         if (!validFile) {
             // Remove the bad file
             throw new Error(
                 error(
                     `Checksum mismatch for downloaded tarball.\n\tExpected: ${currentHash}\n\tReceived: ${downloadedHash}`
                 )
-            )
+            );
         }
     }
 
-    await ensureDir(unpackDir)
+    await ensureDir(unpackDir);
     await pipeline(
         fs.createReadStream(tarfile),
         zlib.createGunzip(),
         tar.extract(unpackDir, { strip: options?.strip ?? 1 })
-    )
-    console.log(success(`Unpacked tarball into ${unpackDir}`))
+    );
+    console.log(success(`Unpacked tarball into ${unpackDir}`));
 }
 // Get the root of the current repository
 // Assumption: the root of the repository is the closest
 //     ancestor directory of the CWD that contains a .git directory
 export function getRepoRoot(): string {
-    const cwd = process.cwd()
-    const segments = cwd.split('/')
+    const cwd = process.cwd();
+    const segments = cwd.split("/");
 
     for (let i = segments.length; i > 0; i--) {
-        const potentialRoot = segments.slice(0, i).join('/')
-        if (fs.existsSync(path.join(potentialRoot, '.git'))) {
-            return potentialRoot
+        const potentialRoot = segments.slice(0, i).join("/");
+        if (fs.existsSync(path.join(potentialRoot, ".git"))) {
+            return potentialRoot;
         }
     }
 
     console.error(
         error(`${cwd} does not seem to be inside a valid git repository.`)
-    )
-    process.exit(1)
+    );
+    process.exit(1);
 }
 
 export function findJsonKeyPosition(
     jsonContent: string,
     key: string
 ): { line: number; column: number } {
-    const keyPath = key.split('.')
-    let found: { line: number; column: number } | null = null
+    const keyPath = key.split(".");
+    let found: { line: number; column: number } | null = null;
 
     function search(node: jsonc.Node, pathIdx: number) {
-        if (!node || found) return
-        if (node.type === 'object') {
+        if (!node || found) return;
+        if (node.type === "object") {
             for (const prop of node.children ?? []) {
-                if (prop.type === 'property' && prop.children?.[0]?.value) {
-                    const propName = prop.children[0].value as string
-                    const isLast = pathIdx === keyPath.length - 1
+                if (prop.type === "property" && prop.children?.[0]?.value) {
+                    const propName = prop.children[0].value as string;
+                    const isLast = pathIdx === keyPath.length - 1;
                     const matches = isLast
                         ? propName.startsWith(keyPath[pathIdx])
-                        : propName === keyPath[pathIdx]
+                        : propName === keyPath[pathIdx];
                     // If matches, advance pathIdx
                     if (matches) {
                         if (isLast) {
-                            const offset = prop.children[0].offset
-                            const before = jsonContent.slice(0, offset)
-                            const lines = before.split('\n')
+                            const offset = prop.children[0].offset;
+                            const before = jsonContent.slice(0, offset);
+                            const lines = before.split("\n");
                             found = {
                                 line: lines.length,
                                 column: lines[lines.length - 1].length + 1,
-                            }
-                            return
+                            };
+                            return;
                         } else if (prop.children[1]) {
-                            search(prop.children[1], pathIdx + 1)
+                            search(prop.children[1], pathIdx + 1);
                         }
                     }
                     // Always search deeper with the same pathIdx (skip intermediate keys)
                     if (prop.children[1]) {
-                        search(prop.children[1], pathIdx)
+                        search(prop.children[1], pathIdx);
                     }
                 }
             }
-        } else if (node.type === 'array') {
+        } else if (node.type === "array") {
             for (const child of node.children ?? []) {
-                search(child, pathIdx)
+                search(child, pathIdx);
             }
         }
     }
 
-    const root = jsonc.parseTree(jsonContent)
-    if (root) search(root, 0)
+    const root = jsonc.parseTree(jsonContent);
+    if (root) search(root, 0);
 
-    return found ?? { line: 1, column: 1 }
+    return found ?? { line: 1, column: 1 };
 }
 
 export function traverseDirectory(
     directory: string,
     callback: (filePath: string) => void
 ): void {
-    const entries = fs.readdirSync(directory)
+    const entries = fs.readdirSync(directory);
     for (const entry of entries) {
-        const fullPath = path.join(directory, entry)
+        const fullPath = path.join(directory, entry);
         if (fs.statSync(fullPath).isDirectory()) {
-            traverseDirectory(fullPath, callback)
+            traverseDirectory(fullPath, callback);
         } else {
-            callback(fullPath)
+            callback(fullPath);
         }
     }
 }
@@ -301,37 +307,37 @@ export function getAllFilesWithExtension(
     ext?: string,
     recursive = true
 ): string[] {
-    let results: string[] = []
-    const list = fs.readdirSync(dir)
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
     for (const file of list) {
-        const filePath = path.join(dir, file)
-        const stat = fs.statSync(filePath)
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
         if (stat && stat.isDirectory()) {
             if (recursive) {
                 results = results.concat(
                     getAllFilesWithExtension(filePath, ext, true)
-                )
+                );
             }
         } else if (ext === undefined || filePath.endsWith(ext)) {
-            results.push(filePath)
+            results.push(filePath);
         }
     }
-    return results
+    return results;
 }
 
 // Ensure a directory exists
 export async function ensureDir(dir: string) {
     if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
+        fs.mkdirSync(dir, { recursive: true });
     }
 }
 
 // Copy a file
 export async function copyFileRecursive(src: string, dest: string) {
-    fs.copyFileSync(src, dest)
+    fs.copyFileSync(src, dest);
 }
 
-export type markingLevel = 'info' | 'warn' | 'error'
+export type markingLevel = "info" | "warn" | "error";
 export function markFile(
     relativePath: string,
     fileContent: string,
@@ -339,21 +345,21 @@ export function markFile(
     warning: string,
     markingLevel: markingLevel
 ): void {
-    const typePosition = findJsonKeyPosition(fileContent, key)
-    const line = typePosition.line || 1
-    const column = typePosition.column || 1
-    if (markingLevel === 'error') {
+    const typePosition = findJsonKeyPosition(fileContent, key);
+    const line = typePosition.line || 1;
+    const column = typePosition.column || 1;
+    if (markingLevel === "error") {
         console.error(
             `::error file=${relativePath},line=${line},col=${column}::${warning}`
-        )
-    } else if (markingLevel === 'warn') {
+        );
+    } else if (markingLevel === "warn") {
         console.warn(
             `::warning file=${relativePath},line=${line},col=${column}::${warning}`
-        )
-    } else if (markingLevel === 'info') {
+        );
+    } else if (markingLevel === "info") {
         console.info(
             `::info file=${relativePath},line=${line},col=${column}::${warning}`
-        )
+        );
     }
 }
 
@@ -370,10 +376,10 @@ export function mapObject<V>(
 ): Record<string, V> {
     return Object.fromEntries(
         Object.entries(obj).map(([k, v]) => {
-            const mapped = mapFn(k, v)
-            return Array.isArray(mapped) ? mapped : [k, mapped]
+            const mapped = mapFn(k, v);
+            return Array.isArray(mapped) ? mapped : [k, mapped];
         })
-    )
+    );
 }
 
 /**
@@ -384,19 +390,19 @@ export function mapObject<V>(
  * @returns the elided string
  */
 export function elideMiddle(s: string, len = 8) {
-    const elider = '...'
-    const totalLen = s.length
+    const elider = "...";
+    const totalLen = s.length;
 
-    if (totalLen <= len) return s
-    if (len <= elider.length) return s
+    if (totalLen <= len) return s;
+    if (len <= elider.length) return s;
 
-    const halfway = Math.floor(totalLen / 2)
+    const halfway = Math.floor(totalLen / 2);
 
     return (
         s.slice(0, halfway - Math.floor(len / 2)) +
         elider +
         s.slice(halfway + Math.floor(len / 2))
-    )
+    );
 }
 
 /**
@@ -407,39 +413,39 @@ export async function getAllNxDependencies(
 ): Promise<string[]> {
     const projects: string[] = await ex(`yarn nx show projects --json`, {
         cwd: repoRoot,
-    }).then(({ stdout }) => JSON.parse(stdout))
+    }).then(({ stdout }) => JSON.parse(stdout));
 
     if (!projects.includes(projectName)) {
-        throw new Error(`Project ${projectName} does not exist.`)
+        throw new Error(`Project ${projectName} does not exist.`);
     }
 
     interface NxGraph {
-        nodes: Record<string, { data: { tags: string[] } }>
-        dependencies: Record<string, { target: string }[]>
+        nodes: Record<string, { data: { tags: string[] } }>;
+        dependencies: Record<string, { target: string }[]>;
     }
 
     const { nodes, dependencies }: NxGraph = await ex(
         `yarn nx graph --print --focus=${projectName}`,
         { cwd: repoRoot }
-    ).then(({ stdout }) => JSON.parse(stdout).graph)
+    ).then(({ stdout }) => JSON.parse(stdout).graph);
 
     // Nx shows both child dependencies and parent (reverse) dependencies for the focused package.
     // Filter out reverse dependencies.
     const childDependencies: string[] = Object.entries(dependencies).reduce<
         string[]
     >((prev, current) => {
-        const [key, value] = current
+        const [key, value] = current;
         if (value.every((dep) => dep.target !== projectName)) {
-            prev.push(key)
+            prev.push(key);
         }
-        return prev
-    }, [])
+        return prev;
+    }, []);
 
     // Nx shows dependencies (example: @daml.js) that are not published to npm
     // Filter to only public packages (those tagged with "npm:public").
     const publicDependencies: string[] = childDependencies.filter((dep) => {
-        return nodes[dep].data.tags.includes('npm:public')
-    })
+        return nodes[dep].data.tags.includes("npm:public");
+    });
 
-    return publicDependencies
+    return publicDependencies;
 }
