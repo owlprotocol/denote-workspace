@@ -75,6 +75,39 @@ import {
 } from "./transferInstruction.js";
 import { getTransferInstructionDisclosure } from "./disclosure.js";
 import { Types } from "@canton-network/core-ledger-client";
+import {
+    acceptBondIssuerMintRequest,
+    BondIssuerMintRequestParams,
+    createBondIssuerMintRequest,
+    declineBondIssuerMintRequest,
+    getAllBondIssuerMintRequests,
+    getLatestBondIssuerMintRequest,
+    withdrawBondIssuerMintRequest,
+} from "./bonds/issuerMintRequest.js";
+import {
+    createBondLifecycleRule,
+    CreateBondLifecycleRuleParams,
+    getLatestBondLifecycleRule,
+    getOrCreateBondLifecycleRule,
+    processCouponPaymentEvent,
+    ProcessCouponPaymentEventParams,
+    processRedemptionEvent,
+    ProcessRedemptionEventParams,
+} from "./bonds/lifecycleRule.js";
+import {
+    createBondFactory,
+    getLatestBondFactory,
+    getOrCreateBondFactory,
+} from "./bonds/factory.js";
+import {
+    acceptBondLifecycleClaimRequest,
+    BondLifecycleClaimRequestParams,
+    createBondLifecycleClaimRequest,
+    declineBondLifecycleClaimRequest,
+    getAllBondLifecycleClaimRequests,
+    getLatestBondLifecycleClaimRequest,
+    withdrawBondLifecycleClaimRequest,
+} from "./bonds/lifecycleClaimRequest.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -84,6 +117,125 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
     const userLedger = sdk.userLedger;
 
     return {
+        bonds: {
+            factory: {
+                create: (userKeyPair: UserKeyPair, instrumentId: string) =>
+                    createBondFactory(userLedger, userKeyPair, instrumentId),
+                getLatest: (instrumentId: string) =>
+                    getLatestBondFactory(userLedger, instrumentId),
+                getOrCreate: (userKeyPair: UserKeyPair, instrumentId: string) =>
+                    getOrCreateBondFactory(
+                        userLedger,
+                        userKeyPair,
+                        instrumentId
+                    ),
+            },
+            issuerMintRequest: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: BondIssuerMintRequestParams
+                ) =>
+                    createBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                getLatest: (issuer: Party) =>
+                    getLatestBondIssuerMintRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllBondIssuerMintRequests(userLedger, issuer),
+                accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    acceptBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    declineBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    withdrawBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+            lifecycleRule: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: CreateBondLifecycleRuleParams
+                ) => createBondLifecycleRule(userLedger, userKeyPair, params),
+                getLatest: (params: CreateBondLifecycleRuleParams) =>
+                    getLatestBondLifecycleRule(userLedger, params),
+                getOrCreate: (
+                    userKeyPair: UserKeyPair,
+                    params: CreateBondLifecycleRuleParams
+                ) =>
+                    getOrCreateBondLifecycleRule(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                processCouponPaymentEvent: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: ProcessCouponPaymentEventParams
+                ) =>
+                    processCouponPaymentEvent(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                processRedemptionEvent: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: ProcessRedemptionEventParams
+                ) =>
+                    processRedemptionEvent(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            lifecycleClaimRequest: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: BondLifecycleClaimRequestParams
+                ) =>
+                    createBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                getLatest: (issuer: Party) =>
+                    getLatestBondLifecycleClaimRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllBondLifecycleClaimRequests(userLedger, issuer),
+                accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    acceptBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    declineBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    withdrawBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+        },
         tokenFactory: {
             create: (userKeyPair: UserKeyPair, instrumentId: string) =>
                 createTokenFactory(userLedger, userKeyPair, instrumentId),
@@ -256,6 +408,112 @@ export const getWrappedSdkWithKeyPair = (
     const userLedger = sdk.userLedger;
 
     return {
+        bonds: {
+            factory: {
+                create: (instrumentId: string) =>
+                    createBondFactory(userLedger, userKeyPair, instrumentId),
+                getLatest: (instrumentId: string) =>
+                    getLatestBondFactory(userLedger, instrumentId),
+                getOrCreate: (instrumentId: string) =>
+                    getOrCreateBondFactory(
+                        userLedger,
+                        userKeyPair,
+                        instrumentId
+                    ),
+            },
+            issuerMintRequest: {
+                create: (params: BondIssuerMintRequestParams) =>
+                    createBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                getLatest: (issuer: Party) =>
+                    getLatestBondIssuerMintRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllBondIssuerMintRequests(userLedger, issuer),
+                accept: (contractId: ContractId) =>
+                    acceptBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (contractId: ContractId) =>
+                    declineBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (contractId: ContractId) =>
+                    withdrawBondIssuerMintRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+            lifecycleRule: {
+                create: (params: CreateBondLifecycleRuleParams) =>
+                    createBondLifecycleRule(userLedger, userKeyPair, params),
+                getLatest: (params: CreateBondLifecycleRuleParams) =>
+                    getLatestBondLifecycleRule(userLedger, params),
+                getOrCreate: (params: CreateBondLifecycleRuleParams) =>
+                    getOrCreateBondLifecycleRule(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                processCouponPaymentEvent: (
+                    contractId: ContractId,
+                    params: ProcessCouponPaymentEventParams
+                ) =>
+                    processCouponPaymentEvent(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                processRedemptionEvent: (
+                    contractId: ContractId,
+                    params: ProcessRedemptionEventParams
+                ) =>
+                    processRedemptionEvent(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            lifecycleClaimRequest: {
+                create: (params: BondLifecycleClaimRequestParams) =>
+                    createBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        params
+                    ),
+                getLatest: (issuer: Party) =>
+                    getLatestBondLifecycleClaimRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllBondLifecycleClaimRequests(userLedger, issuer),
+                accept: (contractId: ContractId) =>
+                    acceptBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (contractId: ContractId) =>
+                    declineBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (contractId: ContractId) =>
+                    withdrawBondLifecycleClaimRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+        },
         tokenFactory: {
             create: (instrumentId: string) =>
                 createTokenFactory(userLedger, userKeyPair, instrumentId),

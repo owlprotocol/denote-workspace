@@ -1,12 +1,15 @@
 import { Types } from "@canton-network/core-ledger-client";
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { ContractId, Party } from "../types/daml.js";
-import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { getContractDisclosure } from "./contractDisclosure.js";
 import {
+    bondFactoryTemplateId,
     lockedMyTokenTemplateId,
+    tokenTemplateId,
     tokenTransferInstructionTemplateId,
 } from "../constants/templateIds.js";
+import { getCreatedEventByCid } from "../helpers/getCreatedEventByCid.js";
+import { CreatedEvent } from "../types/CreatedEvent.js";
 
 /**
  * Disclosure-related types and helpers for three-party transfer flows
@@ -29,42 +32,6 @@ export interface MyTransferInstructionParams {
 }
 
 /**
- * Get the MyTransferInstruction contract to extract the locked token CID
- * This is needed to get disclosure for the receiver party
- *
- * @param adminLedger - The admin/issuer's ledger controller who can see the instruction
- * @param transferInstructionCid - The transfer instruction contract ID
- * @returns The transfer instruction contract data
- */
-export async function getTransferInstruction(
-    adminLedger: LedgerController,
-    transferInstructionCid: ContractId
-) {
-    const admin = adminLedger.getPartyId();
-    const end = await adminLedger.ledgerEnd();
-    const activeContracts = (await adminLedger.activeContracts({
-        offset: end.offset,
-        filterByParty: true,
-        parties: [admin],
-        templateIds: [tokenTransferInstructionTemplateId],
-    })) as ActiveContractResponse<MyTransferInstructionParams>[];
-
-    const contract = activeContracts.find(
-        ({ contractEntry }) =>
-            contractEntry.JsActiveContract?.createdEvent.contractId ===
-            transferInstructionCid
-    );
-
-    if (!contract?.contractEntry.JsActiveContract) {
-        throw new Error(
-            `Transfer instruction not found: ${transferInstructionCid}`
-        );
-    }
-
-    return contract.contractEntry.JsActiveContract.createdEvent;
-}
-
-/**
  * Get disclosure information for a transfer instruction
  * The admin/issuer can see both the MyTransferInstruction and the LockedMyToken
  * This disclosure is needed for the receiver to accept/reject the transfer
@@ -78,11 +45,12 @@ export async function getTransferInstructionDisclosure(
     transferInstructionCid: ContractId
 ): Promise<{
     lockedTokenDisclosure: Types["DisclosedContract"];
-    transferInstruction: Awaited<ReturnType<typeof getTransferInstruction>>;
+    transferInstruction: CreatedEvent<MyTransferInstructionParams>;
 }> {
-    const instruction = await getTransferInstruction(
+    const instruction = await getCreatedEventByCid<MyTransferInstructionParams>(
         adminLedger,
-        transferInstructionCid
+        transferInstructionCid,
+        tokenTransferInstructionTemplateId
     );
     const lockedTokenCid = instruction.createArgument.lockedMyToken;
 
@@ -111,7 +79,17 @@ export async function getMyTokenDisclosure(
     tokenCid: ContractId
 ): Promise<Types["DisclosedContract"]> {
     return getContractDisclosure(ledger, {
-        templateId: "#minimal-token:MyToken:MyToken",
+        templateId: tokenTemplateId,
         contractId: tokenCid,
+    });
+}
+
+export async function getBondFactoryDisclosure(
+    ledger: LedgerController,
+    bondFactoryCid: ContractId
+): Promise<Types["DisclosedContract"]> {
+    return getContractDisclosure(ledger, {
+        templateId: bondFactoryTemplateId,
+        contractId: bondFactoryCid,
     });
 }

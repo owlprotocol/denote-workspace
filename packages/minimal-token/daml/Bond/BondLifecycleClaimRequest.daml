@@ -13,7 +13,7 @@
 -- - Directly creates BondLifecycleInstruction and currency transfer instructions (factory
 --   logic inlined, matching Daml-Finance pattern where Rule.Claim creates settlement instructions)
 -- - Uses CIP-0056 TransferFactory interface for currency payments (modular, works with any token)
-module Bond.BondLifecycleClaim where
+module Bond.BondLifecycleClaimRequest where
 
 import Splice.Api.Token.HoldingV1 as H
 import Splice.Api.Token.TransferInstructionV1 as TI

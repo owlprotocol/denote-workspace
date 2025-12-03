@@ -63,6 +63,7 @@ export async function getAllIssuerBurnRequests(
     });
 }
 
+// TODO: fix param types to be more specific
 export async function getLatestIssuerBurnRequest(
     ownerLedger: LedgerController,
     issuer: Party

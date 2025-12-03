@@ -1,40 +1,45 @@
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
-import { UserKeyPair } from "../types/UserKeyPair.js";
-import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
-import { ContractId, Party } from "../types/daml.js";
-import { getCreateCommand } from "../helpers/getCreateCommand.js";
-import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
+import { bondIssuerMintRequestTemplateId } from "../../constants/templateIds.js";
+import { getCreateCommand } from "../../helpers/getCreateCommand.js";
+import { getExerciseCommand } from "../../helpers/getExerciseCommand.js";
+import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
+import { ContractId, Party } from "../../types/daml.js";
+import { UserKeyPair } from "../../types/UserKeyPair.js";
+import { getLatestContract } from "../../helpers/getLatestContract.js";
 
-export interface IssuerMintRequestParams {
-    tokenFactoryCid: ContractId;
+export interface BondIssuerMintRequestParams {
+    bondFactoryCid: ContractId;
     issuer: Party;
+    depositary: Party;
     receiver: Party;
-    amount: number;
+    principal: number;
+    maturityDate: string;
+    couponRate: number;
+    couponFrequency: number; // Int
 }
 
-export const issuerMintRequestTemplateId =
-    "#minimal-token:MyToken.IssuerMintRequest:IssuerMintRequest";
-
-const getCreateIssuerMintRequestCommand = (params: IssuerMintRequestParams) =>
-    getCreateCommand({ templateId: issuerMintRequestTemplateId, params });
+const getCreateBondIssuerMintRequestCommand = (
+    params: BondIssuerMintRequestParams
+) => getCreateCommand({ templateId: bondIssuerMintRequestTemplateId, params });
 
 /**
- * Create an issuer mint request (receiver proposes to receive minted tokens)
+ * Create an issuer mint request (receiver proposes to receive minted bonds)
  * This is part of the two-step minting pattern:
  * 1. Receiver creates IssuerMintRequest
- * 2. Issuer accepts the request to mint tokens
+ * 2. Issuer accepts the request to mint bonds
  *
  * @param receiverLedger - The receiver's ledger controller
  * @param receiverKeyPair - The receiver's key pair for signing
  * @param params - Mint request parameters
  */
-export async function createIssuerMintRequest(
+export async function createBondIssuerMintRequest(
     receiverLedger: LedgerController,
     receiverKeyPair: UserKeyPair,
-    params: IssuerMintRequestParams
+    params: BondIssuerMintRequestParams
 ) {
-    const createMintRequestCommand = getCreateIssuerMintRequestCommand(params);
+    const createMintRequestCommand =
+        getCreateBondIssuerMintRequestCommand(params);
 
     await receiverLedger.prepareSignExecuteAndWaitFor(
         [createMintRequestCommand],
@@ -44,7 +49,7 @@ export async function createIssuerMintRequest(
 }
 
 // TODO: handle both issuer and receiver querying
-export async function getAllIssuerMintRequests(
+export async function getAllBondIssuerMintRequests(
     userLedger: LedgerController,
     issuer: Party
 ) {
@@ -54,8 +59,8 @@ export async function getAllIssuerMintRequests(
         offset: end.offset,
         filterByParty: true,
         parties: [partyId],
-        templateIds: [issuerMintRequestTemplateId],
-    })) as ActiveContractResponse<IssuerMintRequestParams>[];
+        templateIds: [bondIssuerMintRequestTemplateId],
+    })) as ActiveContractResponse<BondIssuerMintRequestParams>[];
 
     const filteredEntries = activeContracts.filter(({ contractEntry }) => {
         const jsActive = contractEntry.JsActiveContract;
@@ -73,61 +78,57 @@ export async function getAllIssuerMintRequests(
     });
 }
 
-// TODO: fix param types to be more specific
+// const bondIssuerMintRequestsEqual = (
+//     a: BondIssuerMintRequestParams,
+//     b: BondIssuerMintRequestParams
+// ) =>
+//     a.bondFactoryCid === b.bondFactoryCid &&
+//     a.issuer === b.issuer &&
+//     a.depositary === b.depositary &&
+//     a.receiver === b.receiver &&
+//     a.principal === b.principal &&
+//     a.maturityDate === b.maturityDate &&
+//     a.couponRate === b.couponRate &&
+//     a.couponFrequency === b.couponFrequency;
+
+const issuerReceiverEqual = (
+    a: { issuer: Party; receiver: Party },
+    b: { issuer: Party; receiver: Party }
+) => a.issuer === b.issuer && a.receiver === b.receiver;
+
+// TODO: decide if we just want to pass issuer as param
 /**
  * Get the latest mint request for a given receiver and issuer
  * @param receiverLedger - The receiver's ledger controller
- * @param issuer - The issuer party
  */
-export async function getLatestIssuerMintRequest(
+export async function getLatestBondIssuerMintRequest(
     receiverLedger: LedgerController,
     issuer: Party
 ) {
     const receiver = receiverLedger.getPartyId();
-    const end = await receiverLedger.ledgerEnd();
-    const activeContracts = (await receiverLedger.activeContracts({
-        offset: end.offset,
-        filterByParty: true,
-        parties: [receiver],
-        templateIds: [issuerMintRequestTemplateId],
-    })) as ActiveContractResponse<IssuerMintRequestParams>[];
 
-    if (activeContracts.length === 0) {
-        return;
-    }
-
-    const filteredEntries = activeContracts.filter(({ contractEntry }) => {
-        const jsActive = contractEntry.JsActiveContract;
-        if (!jsActive) return false;
-        const { createArgument } = jsActive.createdEvent;
-        return (
-            createArgument.receiver === receiver &&
-            createArgument.issuer === issuer
-        );
-    });
-
-    if (filteredEntries.length === 0) {
-        return;
-    }
-    const contract = filteredEntries[filteredEntries.length - 1];
-
-    return contract.contractEntry.JsActiveContract!.createdEvent.contractId;
+    return getLatestContract(
+        receiverLedger,
+        bondIssuerMintRequestTemplateId,
+        { issuer, receiver },
+        issuerReceiverEqual
+    );
 }
 
 /**
  * Accept an issuer mint request (issuer action)
- * Mints tokens to the receiver
+ * Mints bonds to the receiver
  * @param issuerLedger - The issuer's ledger controller
  * @param issuerKeyPair - The issuer's key pair for signing
  * @param contractId - The mint request contract ID
  */
-export async function acceptIssuerMintRequest(
+export async function acceptBondIssuerMintRequest(
     issuerLedger: LedgerController,
     issuerKeyPair: UserKeyPair,
     contractId: ContractId
 ) {
     const acceptCommand = getExerciseCommand({
-        templateId: issuerMintRequestTemplateId,
+        templateId: bondIssuerMintRequestTemplateId,
         contractId,
         choice: "Accept",
         params: {},
@@ -146,13 +147,13 @@ export async function acceptIssuerMintRequest(
  * @param issuerKeyPair - The issuer's key pair for signing
  * @param contractId - The mint request contract ID
  */
-export async function declineIssuerMintRequest(
+export async function declineBondIssuerMintRequest(
     issuerLedger: LedgerController,
     issuerKeyPair: UserKeyPair,
     contractId: ContractId
 ) {
     const declineCommand = getExerciseCommand({
-        templateId: issuerMintRequestTemplateId,
+        templateId: bondIssuerMintRequestTemplateId,
         contractId,
         choice: "Decline",
         params: {},
@@ -171,13 +172,13 @@ export async function declineIssuerMintRequest(
  * @param receiverKeyPair - The receiver's key pair for signing
  * @param contractId - The mint request contract ID
  */
-export async function withdrawIssuerMintRequest(
+export async function withdrawBondIssuerMintRequest(
     receiverLedger: LedgerController,
     receiverKeyPair: UserKeyPair,
     contractId: ContractId
 ) {
     const withdrawCommand = getExerciseCommand({
-        templateId: issuerMintRequestTemplateId,
+        templateId: bondIssuerMintRequestTemplateId,
         contractId,
         choice: "Withdraw",
         params: {},

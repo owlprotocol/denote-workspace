@@ -8,7 +8,7 @@ import Bond.BondFactory as BondFactory
 import Bond.BondRules as BondRules
 import Bond.IssuerMintRequest as IssuerMintRequest
 import Bond.TransferRequest as TransferRequest
-import Bond.BondLifecycleClaim as BondLifecycleClaim
+import Bond.BondLifecycleClaimRequest as BondLifecycleClaimRequest
 import Bond.BondLifecycleInstruction as BondLifecycleInstruction
 import Bond.BondLifecycleRule as BondLifecycleRule
 import Bond.BondTransferInstruction
@@ -145,7 +145,7 @@ testBondFullLifecycle = script do
       None -> fail "BondFactory disclosure not found"
 
   claimRequestCid1 <- submit alice do
-    createCmd BondLifecycleClaim.BondLifecycleClaimRequest with
+    createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
       effectCid = effectCid1
       bondHoldingCid = aliceHolding
       bondRulesCid = rulesCid
@@ -156,7 +156,7 @@ testBondFullLifecycle = script do
       issuer = charlie
 
   claimResult1 <- submit charlie do
-    exerciseCmd claimRequestCid1 BondLifecycleClaim.Accept
+    exerciseCmd claimRequestCid1 BondLifecycleClaimRequest.Accept
 
   let (instructionCid1, couponAmount1, currencyTransferCidOpt1) = case claimResult1 of
         ClaimResult_CouponPayment result -> (result.instructionCid, result.couponAmount, result.currencyTransferInstructionCid)
@@ -297,7 +297,7 @@ testBondFullLifecycle = script do
       couponFrequency = couponFrequency
 
   claimRequestCid2 <- submit bob do
-    createCmd BondLifecycleClaim.BondLifecycleClaimRequest with
+    createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
       effectCid = effectCid2
       bondHoldingCid = bobBondHolding
       bondRulesCid = rulesCid
@@ -308,7 +308,7 @@ testBondFullLifecycle = script do
       issuer = charlie
 
   claimResult2 <- submit charlie do
-    exerciseCmd claimRequestCid2 BondLifecycleClaim.Accept
+    exerciseCmd claimRequestCid2 BondLifecycleClaimRequest.Accept
 
   let (instructionCid2, redemptionAmount2, currencyTransferCidOpt2) = case claimResult2 of
         ClaimResult_Redemption result -> (result.instructionCid, result.principalAmount, result.currencyTransferInstructionCid)

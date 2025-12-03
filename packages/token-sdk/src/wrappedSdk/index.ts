@@ -11,3 +11,4 @@ export * from "./transferPreapproval.js";
 export * from "./transferPreapprovalProposal.js";
 export * from "./transferRequest.js";
 export * from "./wrappedSdk.js";
+export * from "./bonds/index.js";
