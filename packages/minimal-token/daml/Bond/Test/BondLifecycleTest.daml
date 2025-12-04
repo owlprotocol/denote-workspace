@@ -327,6 +327,9 @@ testBondFullLifecycle = script do
   -- Verify effect amount: should be 1025 per bond (notional 1000 + final coupon 25)
   assertMsg "Effect amount should be 1025.0 per bond" (effect2.amount == 1025.0)
 
+  Some effect2 <- queryContractId @BondLifecycleEffect charlie effectCid2
+  let redemptionDate = effect2.eventDate
+
   claimRequestCid2 <- submit bob do
     createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
       effectCid = effectCid2
