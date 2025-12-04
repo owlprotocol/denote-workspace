@@ -31,8 +31,11 @@ export interface BondFactoryParams {
     issuer: Party;
     /** Unique identifier for the bond instrument (e.g., "party123#Bond") */
     instrumentId: string;
+    /** Face value per bond unit (e.g., 1000 means each bond has $1000 face value) */
     notional: number;
+    /** Annual coupon rate as a decimal (e.g., 0.05 = 5% annual interest) */
     couponRate: number;
+    /** Number of coupon payments per year (e.g., 2 = semi-annual, 4 = quarterly) */
     couponFrequency: number;
 }
 
