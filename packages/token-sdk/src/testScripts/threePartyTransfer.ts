@@ -2,13 +2,7 @@ import { signTransactionHash } from "@canton-network/wallet-sdk";
 import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
 import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
-import {
-    buildTransfer,
-    emptyExtraArgs,
-    getTransferInstructionDisclosure,
-} from "../wrappedSdk/index.js";
-import { tokenTransferInstructionTemplateId } from "../constants/templateIds.js";
-import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
+import { buildTransfer, emptyExtraArgs } from "../wrappedSdk/index.js";
 
 /**
  * Three-party transfer test script demonstrating:
@@ -213,41 +207,23 @@ async function threePartyTransfer() {
     // === DISCLOSURE PHASE ===
     console.info("6. Getting disclosure for Bob...");
 
-    // Note: We need to find the transfer instruction CID
-    // In a real implementation, this would be returned from acceptTransferRequest
-    // For now, we'll need to query for it
-    console.info(
-        "⚠ Finding transfer instruction (requires querying active contracts)..."
-    );
-
-    // Query for the transfer instruction
-    const end = await charlieLedger.ledgerEnd();
-    const transferInstructions = (await charlieLedger.activeContracts({
-        offset: end.offset,
-        templateIds: [tokenTransferInstructionTemplateId],
-        filterByParty: true,
-        parties: [charlieAllocatedParty.partyId],
-    })) as ActiveContractResponse[]; // TODO: Use specific type once we define TransferInstructionParams
-
-    if (transferInstructions.length === 0) {
-        throw new Error("Transfer instruction not found");
-    }
-
+    // Get the latest transfer instruction
     const transferInstructionCid =
-        transferInstructions[transferInstructions.length - 1].contractEntry
-            .JsActiveContract?.createdEvent.contractId;
+        await charlieWrappedSdk.transferInstruction.getLatest(
+            charlieAllocatedParty.partyId
+        );
 
     if (!transferInstructionCid) {
-        throw new Error("Transfer instruction CID not found");
+        throw new Error("Transfer instruction not found");
     }
 
     console.info(`✓ Transfer instruction CID: ${transferInstructionCid}`);
 
     // Get disclosure
-    const disclosure = await getTransferInstructionDisclosure(
-        charlieLedger,
-        transferInstructionCid
-    );
+    const disclosure =
+        await charlieWrappedSdk.transferInstruction.getDisclosure(
+            transferInstructionCid
+        );
 
     console.info("✓ Disclosure obtained for locked token\n");
 
