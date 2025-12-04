@@ -11,7 +11,7 @@ import { getLatestContract } from "../../helpers/getLatestContract.js";
 export interface BondIssuerMintRequestParams {
     bondFactoryCid: ContractId;
     issuer: Party;
-    depositary: Party;
+    depository: Party;
     receiver: Party;
     principal: number;
     maturityDate: string;

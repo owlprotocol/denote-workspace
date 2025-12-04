@@ -5,6 +5,8 @@ import { ExtraArgs } from "./transferRequest.js";
 import { UserKeyPair } from "../types/UserKeyPair.js";
 import { v4 } from "uuid";
 import { Types } from "@canton-network/core-ledger-client";
+import { tokenTransferInstructionTemplateId } from "../constants/templateIds.js";
+import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 
 // Use the Splice API interface ID (must match the package name in the DAR)
 const TRANSFER_INSTRUCTION_INTERFACE_ID =
@@ -87,4 +89,24 @@ export async function rejectTransferInstruction(
         v4(),
         disclosedContracts
     );
+}
+
+export async function getLatestTokenTransferInstruction(
+    ledger: LedgerController,
+    party: string
+): Promise<ContractId | undefined> {
+    const end = await ledger.ledgerEnd();
+    const instructions = (await ledger.activeContracts({
+        offset: end.offset,
+        templateIds: [tokenTransferInstructionTemplateId],
+        filterByParty: true,
+        parties: [party],
+    })) as ActiveContractResponse[];
+
+    if (instructions.length === 0) {
+        return undefined;
+    }
+
+    const latest = instructions[instructions.length - 1];
+    return latest.contractEntry.JsActiveContract?.createdEvent.contractId;
 }

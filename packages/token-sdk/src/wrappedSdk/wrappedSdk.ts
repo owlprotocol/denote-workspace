@@ -72,6 +72,7 @@ import {
     acceptTransferInstruction,
     rejectTransferInstruction,
     TransferInstructionAcceptParams,
+    getLatestTokenTransferInstruction,
 } from "./transferInstruction.js";
 import { getTransferInstructionDisclosure } from "./disclosure.js";
 import { Types } from "@canton-network/core-ledger-client";
@@ -108,6 +109,41 @@ import {
     getLatestBondLifecycleClaimRequest,
     withdrawBondLifecycleClaimRequest,
 } from "./bonds/lifecycleClaimRequest.js";
+import {
+    createBondRules,
+    getLatestBondRules,
+    getOrCreateBondRules,
+} from "./bonds/bondRules.js";
+import {
+    createBondTransferFactory,
+    getLatestBondTransferFactory,
+    getOrCreateBondTransferFactory,
+} from "./bonds/transferFactory.js";
+import {
+    acceptBondTransferRequest,
+    BondTransferRequestParams,
+    createBondTransferRequest,
+    declineBondTransferRequest,
+    getAllBondTransferRequests,
+    getLatestBondTransferRequest,
+    withdrawBondTransferRequest,
+} from "./bonds/transferRequest.js";
+import {
+    acceptBondTransferInstruction,
+    getBondTransferInstructionDisclosure,
+    getLatestBondTransferInstruction,
+    rejectBondTransferInstruction,
+    withdrawBondTransferInstruction,
+    BondTransferInstructionAcceptParams,
+} from "./bonds/transferInstruction.js";
+import {
+    abortBondLifecycleInstruction,
+    getBondLifecycleInstruction,
+    getBondLifecycleInstructionDisclosure,
+    getLatestBondLifecycleInstruction,
+    processBondLifecycleInstruction,
+} from "./bonds/lifecycleInstruction.js";
+import { getLatestBondLifecycleEffect } from "./bonds/lifecycleEffect.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -234,6 +270,135 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                         userKeyPair,
                         contractId
                     ),
+            },
+            bondRules: {
+                create: (userKeyPair: UserKeyPair) =>
+                    createBondRules(userLedger, userKeyPair),
+                getLatest: () => getLatestBondRules(userLedger),
+                getOrCreate: (userKeyPair: UserKeyPair) =>
+                    getOrCreateBondRules(userLedger, userKeyPair),
+            },
+            transferFactory: {
+                create: (userKeyPair: UserKeyPair, rulesCid: ContractId) =>
+                    createBondTransferFactory(
+                        userLedger,
+                        userKeyPair,
+                        rulesCid
+                    ),
+                getLatest: (rulesCid: ContractId) =>
+                    getLatestBondTransferFactory(userLedger, rulesCid),
+                getOrCreate: (userKeyPair: UserKeyPair, rulesCid: ContractId) =>
+                    getOrCreateBondTransferFactory(
+                        userLedger,
+                        userKeyPair,
+                        rulesCid
+                    ),
+            },
+            transferRequest: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: BondTransferRequestParams
+                ) => createBondTransferRequest(userLedger, userKeyPair, params),
+                getLatest: (expectedAdmin: Party) =>
+                    getLatestBondTransferRequest(userLedger, expectedAdmin),
+                getAll: (expectedAdmin: Party) =>
+                    getAllBondTransferRequests(userLedger, expectedAdmin),
+                accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    acceptBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    declineBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    withdrawBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+            transferInstruction: {
+                getLatest: (party: Party) =>
+                    getLatestBondTransferInstruction(userLedger, party),
+                getDisclosure: (contractId: ContractId) =>
+                    getBondTransferInstructionDisclosure(
+                        userLedger,
+                        contractId
+                    ),
+                accept: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][],
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    acceptBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts,
+                        params
+                    ),
+                reject: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][],
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    rejectBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts,
+                        params
+                    ),
+                withdraw: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    withdrawBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            lifecycleInstruction: {
+                process: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][]
+                ) =>
+                    processBondLifecycleInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts
+                    ),
+                abort: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    abortBondLifecycleInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                get: (contractId: ContractId) =>
+                    getBondLifecycleInstruction(userLedger, contractId),
+                getLatest: (party: Party) =>
+                    getLatestBondLifecycleInstruction(userLedger, party),
+                getDisclosure: (contractId: ContractId) =>
+                    getBondLifecycleInstructionDisclosure(
+                        userLedger,
+                        contractId
+                    ),
+            },
+            lifecycleEffect: {
+                getLatest: (party: Party) =>
+                    getLatestBondLifecycleEffect(userLedger, party),
             },
         },
         tokenFactory: {
@@ -365,6 +530,8 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 ),
         },
         transferInstruction: {
+            getLatest: (party: Party) =>
+                getLatestTokenTransferInstruction(userLedger, party),
             getDisclosure: (contractId: ContractId) =>
                 getTransferInstructionDisclosure(userLedger, contractId),
             accept: (
@@ -513,6 +680,128 @@ export const getWrappedSdkWithKeyPair = (
                         contractId
                     ),
             },
+            bondRules: {
+                create: () => createBondRules(userLedger, userKeyPair),
+                getLatest: () => getLatestBondRules(userLedger),
+                getOrCreate: () =>
+                    getOrCreateBondRules(userLedger, userKeyPair),
+            },
+            transferFactory: {
+                create: (rulesCid: ContractId) =>
+                    createBondTransferFactory(
+                        userLedger,
+                        userKeyPair,
+                        rulesCid
+                    ),
+                getLatest: (rulesCid: ContractId) =>
+                    getLatestBondTransferFactory(userLedger, rulesCid),
+                getOrCreate: (rulesCid: ContractId) =>
+                    getOrCreateBondTransferFactory(
+                        userLedger,
+                        userKeyPair,
+                        rulesCid
+                    ),
+            },
+            transferRequest: {
+                create: (params: BondTransferRequestParams) =>
+                    createBondTransferRequest(userLedger, userKeyPair, params),
+                getLatest: (expectedAdmin: Party) =>
+                    getLatestBondTransferRequest(userLedger, expectedAdmin),
+                getAll: (expectedAdmin: Party) =>
+                    getAllBondTransferRequests(userLedger, expectedAdmin),
+                accept: (contractId: ContractId) =>
+                    acceptBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                decline: (contractId: ContractId) =>
+                    declineBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                withdraw: (contractId: ContractId) =>
+                    withdrawBondTransferRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+            },
+            transferInstruction: {
+                getLatest: (party: Party) =>
+                    getLatestBondTransferInstruction(userLedger, party),
+                getDisclosure: (contractId: ContractId) =>
+                    getBondTransferInstructionDisclosure(
+                        userLedger,
+                        contractId
+                    ),
+                accept: (
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][],
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    acceptBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts,
+                        params
+                    ),
+                reject: (
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][],
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    rejectBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts,
+                        params
+                    ),
+                withdraw: (
+                    contractId: ContractId,
+                    params?: BondTransferInstructionAcceptParams
+                ) =>
+                    withdrawBondTransferInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            lifecycleInstruction: {
+                process: (
+                    contractId: ContractId,
+                    disclosedContracts?: Types["DisclosedContract"][]
+                ) =>
+                    processBondLifecycleInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        disclosedContracts
+                    ),
+                abort: (contractId: ContractId) =>
+                    abortBondLifecycleInstruction(
+                        userLedger,
+                        userKeyPair,
+                        contractId
+                    ),
+                get: (contractId: ContractId) =>
+                    getBondLifecycleInstruction(userLedger, contractId),
+                getLatest: (party: Party) =>
+                    getLatestBondLifecycleInstruction(userLedger, party),
+                getDisclosure: (contractId: ContractId) =>
+                    getBondLifecycleInstructionDisclosure(
+                        userLedger,
+                        contractId
+                    ),
+            },
+            lifecycleEffect: {
+                getLatest: (party: Party) =>
+                    getLatestBondLifecycleEffect(userLedger, party),
+            },
         },
         tokenFactory: {
             create: (instrumentId: string) =>
@@ -624,6 +913,8 @@ export const getWrappedSdkWithKeyPair = (
                 ),
         },
         transferInstruction: {
+            getLatest: (party: Party) =>
+                getLatestTokenTransferInstruction(userLedger, party),
             getDisclosure: (contractId: ContractId) =>
                 getTransferInstructionDisclosure(userLedger, contractId),
             accept: (

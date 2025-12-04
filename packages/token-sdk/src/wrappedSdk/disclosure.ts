@@ -4,6 +4,7 @@ import { ContractId, Party } from "../types/daml.js";
 import { getContractDisclosure } from "./contractDisclosure.js";
 import {
     bondFactoryTemplateId,
+    lockedBondTemplateId,
     lockedMyTokenTemplateId,
     tokenTemplateId,
     tokenTransferInstructionTemplateId,
@@ -91,5 +92,23 @@ export async function getBondFactoryDisclosure(
     return getContractDisclosure(ledger, {
         templateId: bondFactoryTemplateId,
         contractId: bondFactoryCid,
+    });
+}
+
+/**
+ * Get disclosure for a LockedBond contract
+ * Useful when the receiver needs to see a locked bond that's owned by sender and issuer
+ *
+ * @param ledger - Ledger controller for a party that can see the locked bond (issuer or sender)
+ * @param lockedBondCid - The LockedBond contract ID
+ * @returns Disclosure object for the locked bond
+ */
+export async function getLockedBondDisclosure(
+    ledger: LedgerController,
+    lockedBondCid: ContractId
+): Promise<Types["DisclosedContract"]> {
+    return getContractDisclosure(ledger, {
+        templateId: lockedBondTemplateId,
+        contractId: lockedBondCid,
     });
 }
