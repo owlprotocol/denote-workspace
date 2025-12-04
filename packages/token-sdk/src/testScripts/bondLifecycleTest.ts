@@ -151,7 +151,10 @@ async function bondLifecycleTest() {
 
     const bondRulesCid = await charlieWrappedSdk.bonds.bondRules.getOrCreate();
     const bondFactoryCid = await charlieWrappedSdk.bonds.factory.getOrCreate(
-        bondInstrumentId
+        bondInstrumentId,
+        1000.0, // notional
+        0.05, // couponRate (5% annual)
+        2 // couponFrequency (semi-annual)
     );
     if (!bondFactoryCid) {
         throw new Error("Bond factory contract ID not found after getOrCreate");
