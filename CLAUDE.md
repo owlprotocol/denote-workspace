@@ -271,7 +271,11 @@ CIP-0056 interfaces use `ExtraArgs` and `Metadata` for extensibility. This imple
 
 ## Overview
 
-TypeScript SDK for interacting with Canton Network's token system via the Wallet SDK. Provides helper functions for creating token factories, minting tokens, transferring tokens, and querying balances, built on top of the minimal-token Daml application.
+TypeScript SDK for interacting with Canton Network's token and bond systems via the Wallet SDK. Provides helper functions for:
+- **Tokens**: Token factories, minting, transferring, and balance queries
+- **Bonds**: Fungible bond instruments with full lifecycle management (minting, coupon payments, transfers, redemption)
+
+Built on top of the minimal-token Daml application located in `packages/minimal-token`.
 
 ## Development Commands
 
@@ -291,7 +295,9 @@ TypeScript SDK for interacting with Canton Network's token system via the Wallet
 
 ### Running Scripts
 - `tsx src/uploadDars.ts` - Upload minimal-token DAR to ledger (run once)
-- `tsx src/hello.ts` - Main demo script
+- `tsx src/hello.ts` - Basic token operations demo
+- `tsx src/testScripts/threePartyTransfer.ts` - Three-party token transfer demonstration
+- `tsx src/testScripts/bondLifecycleTest.ts` - Complete bond lifecycle (mint, coupon, transfer, redemption)
 
 ### Other Commands
 - `pnpm clean` - Remove build artifacts
@@ -342,6 +348,31 @@ All helpers follow a consistent pattern with template IDs prefixed by `#minimal-
 - `getBalances()` / `getBalanceByInstrumentId()` - Query token holdings via tokenStandard SDK
 
 **`transferPreapproval.ts` / `transferPreapprovalProposal.ts`** - Transfer preapproval patterns
+
+**Bond Operations (`src/wrappedSdk/bonds/`)**
+
+The SDK provides comprehensive bond instrument support with 8 wrapper modules:
+- **`bondRules.ts`** - Centralized locking authority (issuer-signed, owner-controlled)
+- **`factory.ts`** - Bond minting factory (stores notional, couponRate, couponFrequency)
+- **`issuerMintRequest.ts`** - Two-step bond minting (receiver proposes, issuer accepts)
+- **`lifecycleRule.ts`** - Lifecycle event processing (coupon, redemption) using ledger time
+- **`lifecycleEffect.ts`** - Effect query helper (single source of truth for lifecycle events)
+- **`lifecycleClaimRequest.ts`** - Claim lifecycle events (holder creates, issuer accepts)
+- **`lifecycleInstruction.ts`** - Execute lifecycle events (process coupon or redemption)
+- **`transferFactory.ts`** - Bond transfer factory (with bond rules reference)
+- **`transferRequest.ts`** - Bond transfer request/accept pattern (supports partial transfers)
+- **`transferInstruction.ts`** - Bond transfer acceptance (requires LockedBond disclosure)
+
+**Bond Architecture Highlights:**
+- **Fungible Bonds**: Single contract can hold multiple bond units (`notional × amount`)
+- **Term Storage**: BondFactory stores bond terms shared by all bonds from that factory
+- **Per-Unit Payments**: Coupon = `(notional × rate / frequency) × amount`
+- **Partial Transfers**: BondRules automatically splits bonds and creates change
+- **Version Tracking**: Bond versions increment with each coupon event
+- **Ledger Time Security**: Uses ledger time to prevent time manipulation
+- **Three-Party Authorization**: Requires issuer, depository, and owner signatures
+
+For detailed bond documentation, see `packages/token-sdk/CLAUDE.md` Bond Operations section.
 
 **DAR Upload (`src/uploadDars.ts`)**
 - Checks if minimal-token package already uploaded via `isPackageUploaded()`

@@ -1,3 +1,44 @@
+/**
+ * Bond Lifecycle Test Script
+ *
+ * This script demonstrates the complete lifecycle of fungible bond instruments on Canton Network,
+ * including minting, coupon payments, transfers, and redemption at maturity.
+ *
+ * ## Test Scenario:
+ * - Charlie acts as both issuer and depository
+ * - Alice receives 3 bond units (fungible bonds)
+ * - Alice claims a coupon payment (receives currency)
+ * - Alice transfers 1 bond unit to Bob (partial transfer, receives 2 bonds as change)
+ * - Bob redeems his bond at maturity (receives principal + final coupon)
+ * - Alice redeems her remaining 2 bonds
+ *
+ * ## Key Features Demonstrated:
+ * 1. **Fungible Bond Architecture**: Mints 3 bond units in a single contract (notional × amount)
+ * 2. **Per-Unit Payments**: Coupon payments calculated as (notional × rate / frequency) × amount
+ * 3. **Partial Transfers**: BondRules automatically splits bonds (1 transferred, 2 returned as change)
+ * 4. **Version Tracking**: Bond versions increment after each coupon event
+ * 5. **Lifecycle Events**: Issuer creates effects that all holders can claim
+ * 6. **Ledger Time Security**: Uses ledger time to prevent time manipulation
+ * 7. **Term Inference**: Lifecycle rules infer bond terms from sample bond contracts
+ * 8. **Disclosure Patterns**: Required for cross-party visibility (BondFactory, LockedBond)
+ *
+ * ## Bond Terms:
+ * - Notional (face value per unit): $1000
+ * - Coupon rate: 5% annual
+ * - Coupon frequency: 2 (semi-annual)
+ * - Maturity: 10 seconds after minting (for test speed)
+ *
+ * ## Expected Payments:
+ * - Coupon payment: $1000 × 0.05 / 2 = $25 per bond
+ *   - Alice (3 bonds): 3 × $25 = $75
+ *   - Bob (1 bond after transfer): 1 × $25 = $25
+ * - Redemption: Principal + final coupon
+ *   - Bob: $1000 + $25 = $1025
+ *   - Alice (2 bonds): 2 × $1025 = $2050
+ *
+ * Run with: `tsx src/testScripts/bondLifecycleTest.ts`
+ */
+
 import { signTransactionHash } from "@canton-network/wallet-sdk";
 import { getDefaultSdkAndConnect } from "../sdkHelpers.js";
 import { keyPairFromSeed } from "../helpers/keyPairFromSeed.js";
