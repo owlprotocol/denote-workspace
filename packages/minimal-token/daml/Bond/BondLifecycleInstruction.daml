@@ -63,13 +63,6 @@ template BondLifecycleInstruction
         -- Fetch the locked bond
         locked <- fetch lockedBond
 
-        -- Validate issuer and holder match
-        assertMsg "Issuer must match" (locked.bond.issuer == issuer)
-        assertMsg "Holder must match" (locked.bond.owner == holder)
-
-        -- Validate event date is in the past or present
-        now <- getTime
-        assertMsg "Event date must be in the past or present" (eventDate <= now)
 
         -- Branch based on event type
         case eventType of
@@ -95,9 +88,11 @@ template BondLifecycleInstruction
                       newVersion = newVersion
                       lastEventTimestamp = eventDate
 
+                    let totalCouponAmount = amount * unlockedBond.amount
+
                     pure $ CouponPaymentResult_ $ CouponPaymentResult with
                       newBondCid
-                      couponAmount = amount
+                      couponAmount = totalCouponAmount
                       meta = MD.emptyMetadata
                   None -> fail "Produced version must be present for coupon payment"
               None -> fail "BondFactory CID must be present for coupon payment"
@@ -108,8 +103,8 @@ template BondLifecycleInstruction
               Some ctx -> assertMsg "Bond must be locked for redemption" (ctx == "redemption")
               None -> fail "Bond lock context missing"
 
-            -- Validate redemption date is on or after maturity date
-            assertMsg "Redemption date must be on or after maturity date" (eventDate >= locked.bond.maturityDate)
+
+            let totalPrincipalAmount = amount * locked.bond.amount
 
             -- Unlock the bond
             unlockedBondCid : ContractId Bond <- exercise lockedBond Unlock
@@ -118,7 +113,7 @@ template BondLifecycleInstruction
             archive unlockedBondCid
 
             pure $ RedemptionResult_ $ RedemptionResult with
-              principalAmount = amount
+              principalAmount = totalPrincipalAmount
               meta = MD.emptyMetadata
 
     choice Abort : ContractId Bond

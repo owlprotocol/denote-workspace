@@ -155,15 +155,37 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
     return {
         bonds: {
             factory: {
-                create: (userKeyPair: UserKeyPair, instrumentId: string) =>
-                    createBondFactory(userLedger, userKeyPair, instrumentId),
+                create: (
+                    userKeyPair: UserKeyPair,
+                    instrumentId: string,
+                    notional: number,
+                    couponRate: number,
+                    couponFrequency: number
+                ) =>
+                    createBondFactory(
+                        userLedger,
+                        userKeyPair,
+                        instrumentId,
+                        notional,
+                        couponRate,
+                        couponFrequency
+                    ),
                 getLatest: (instrumentId: string) =>
                     getLatestBondFactory(userLedger, instrumentId),
-                getOrCreate: (userKeyPair: UserKeyPair, instrumentId: string) =>
+                getOrCreate: (
+                    userKeyPair: UserKeyPair,
+                    instrumentId: string,
+                    notional: number,
+                    couponRate: number,
+                    couponFrequency: number
+                ) =>
                     getOrCreateBondFactory(
                         userLedger,
                         userKeyPair,
-                        instrumentId
+                        instrumentId,
+                        notional,
+                        couponRate,
+                        couponFrequency
                     ),
             },
             issuerMintRequest: {
@@ -577,15 +599,35 @@ export const getWrappedSdkWithKeyPair = (
     return {
         bonds: {
             factory: {
-                create: (instrumentId: string) =>
-                    createBondFactory(userLedger, userKeyPair, instrumentId),
+                create: (
+                    instrumentId: string,
+                    notional: number,
+                    couponRate: number,
+                    couponFrequency: number
+                ) =>
+                    createBondFactory(
+                        userLedger,
+                        userKeyPair,
+                        instrumentId,
+                        notional,
+                        couponRate,
+                        couponFrequency
+                    ),
                 getLatest: (instrumentId: string) =>
                     getLatestBondFactory(userLedger, instrumentId),
-                getOrCreate: (instrumentId: string) =>
+                getOrCreate: (
+                    instrumentId: string,
+                    notional: number,
+                    couponRate: number,
+                    couponFrequency: number
+                ) =>
                     getOrCreateBondFactory(
                         userLedger,
                         userKeyPair,
-                        instrumentId
+                        instrumentId,
+                        notional,
+                        couponRate,
+                        couponFrequency
                     ),
             },
             issuerMintRequest: {

@@ -9,6 +9,9 @@ import { UserKeyPair } from "../../types/UserKeyPair.js";
 export interface BondFactoryParams {
     issuer: Party;
     instrumentId: string;
+    notional: number;
+    couponRate: number;
+    couponFrequency: number;
 }
 
 const getCreateBondFactoryCommand = (params: BondFactoryParams) =>
@@ -18,12 +21,18 @@ const getCreateBondFactoryCommand = (params: BondFactoryParams) =>
 export async function createBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string
+    instrumentId: string,
+    notional: number,
+    couponRate: number,
+    couponFrequency: number
 ) {
     const issuer = userLedger.getPartyId();
     const createBondFactoryCommand = getCreateBondFactoryCommand({
         instrumentId,
         issuer,
+        notional,
+        couponRate,
+        couponFrequency,
     });
     await userLedger.prepareSignExecuteAndWaitFor(
         [createBondFactoryCommand],
@@ -32,8 +41,10 @@ export async function createBondFactory(
     );
 }
 
-const bondFactoriesEqual = (a: BondFactoryParams, b: BondFactoryParams) =>
-    a.instrumentId === b.instrumentId && a.issuer === b.issuer;
+const bondFactoriesEqual = (
+    a: BondFactoryParams | { instrumentId: string; issuer: Party },
+    b: BondFactoryParams | { instrumentId: string; issuer: Party }
+) => a.instrumentId === b.instrumentId && a.issuer === b.issuer;
 
 // Assumes owner is also the party
 export async function getLatestBondFactory(
@@ -54,20 +65,28 @@ export async function getLatestBondFactory(
 export async function getOrCreateBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string
+    instrumentId: string,
+    notional: number,
+    couponRate: number,
+    couponFrequency: number
 ) {
     const contractId = await getLatestBondFactory(userLedger, instrumentId);
     if (contractId) return contractId;
 
-    await createBondFactory(userLedger, userKeyPair, instrumentId);
+    await createBondFactory(
+        userLedger,
+        userKeyPair,
+        instrumentId,
+        notional,
+        couponRate,
+        couponFrequency
+    );
     return (await getLatestBondFactory(userLedger, instrumentId))!;
 }
 
 export interface MintBondParams {
     depository: Party;
     receiver: Party;
-    principal: number;
+    amount: number;
     maturityDate: string;
-    couponRate: number;
-    couponFrequency: number; // Int
 }

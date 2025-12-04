@@ -12,7 +12,7 @@ data TimeLock = TimeLock with
     lockContext : Optional Text
   deriving (Eq, Show)
 
--- | Bond with principal, maturity date, coupon rate, and version.
+-- | Bond with notional (face value per unit) and amount (number of units), maturity date, coupon rate, and version.
 --
 -- Issuer vs Depository:
 -- Both issuer and depository are required signatories, following Daml-Finance patterns.
@@ -44,7 +44,8 @@ template Bond
     owner  : Party
     instrumentId : Text -- e.g., issuer <> "#Bond"
     version : Text      -- e.g., "v1" - tracks lifecycle state
-    principal : Decimal
+    notional : Decimal  -- Face value per bond unit (e.g., 1000.0 USD per bond)
+    amount : Decimal    -- Number of bond units (e.g., 10.0 for 10 bonds)
     maturityDate : Time
     couponRate : Decimal  -- Annual rate (e.g., 0.05 for 5%)
     couponFrequency : Int  -- Payments per year (e.g., 2 for semi-annual)
@@ -57,7 +58,7 @@ template Bond
       view = Api.Token.HoldingV1.HoldingView with
         instrumentId = Api.Token.HoldingV1.InstrumentId with admin = issuer, id = instrumentId
         owner = owner
-        amount = principal
+        amount = amount
         lock = None
         meta = bondMetadata this
 
@@ -79,7 +80,7 @@ template LockedBond
       view = Api.Token.HoldingV1.HoldingView with
         instrumentId = Api.Token.HoldingV1.InstrumentId with admin = bond.issuer, id = bond.instrumentId
         owner = bond.owner
-        amount = bond.principal
+        amount = bond.amount
         -- Must expose lock details when bond is locked (matches Amulet reference impl)
         lock = Some (Api.Token.HoldingV1.Lock with
           holders = lock.holders

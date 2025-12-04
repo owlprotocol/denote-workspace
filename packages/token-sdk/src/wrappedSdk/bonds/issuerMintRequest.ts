@@ -13,10 +13,8 @@ export interface BondIssuerMintRequestParams {
     issuer: Party;
     depository: Party;
     receiver: Party;
-    principal: number;
+    amount: number;
     maturityDate: string;
-    couponRate: number;
-    couponFrequency: number; // Int
 }
 
 const getCreateBondIssuerMintRequestCommand = (

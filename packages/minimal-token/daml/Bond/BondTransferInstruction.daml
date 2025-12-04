@@ -70,8 +70,8 @@ executeTwoStepTransfer TwoStepTransfer{..} lockedBondCid extraArgs = do
   -- 2. Fetch the locked bond
   locked <- fetch lockedBondCid
 
-  -- 3. Validate amount matches locked principal
-  assertMsg "Transfer amount must match locked principal" (locked.bond.principal == amount)
+  -- 3. Validate amount matches locked bond amount
+  assertMsg "Transfer amount must match locked bond amount" (locked.bond.amount == amount)
   assertMsg "Sender must be owner" (locked.bond.owner == sender)
 
   -- 4. Unlock the bond
@@ -91,7 +91,8 @@ executeTwoStepTransfer TwoStepTransfer{..} lockedBondCid extraArgs = do
     owner = receiver
     instrumentId = locked.bond.instrumentId
     version = locked.bond.version
-    principal = amount
+    notional = locked.bond.notional
+    amount = amount
     maturityDate = locked.bond.maturityDate
     couponRate = locked.bond.couponRate
     couponFrequency = locked.bond.couponFrequency

@@ -8,22 +8,26 @@ template BondFactory
   with
     issuer : Party
     instrumentId : Text -- e.g., show issuer <> "#Bond"
+    notional : Decimal
+    couponRate : Decimal
+    couponFrequency : Int
   where
     signatory issuer
+
+    ensure
+      notional > 0.0 &&
+      couponRate >= 0.0 &&
+      couponFrequency > 0
 
     nonconsuming choice Mint : MintResult
       with
         depository : Party  -- Trust anchor, can be same as issuer for simplified deployments
         receiver : Party
-        principal : Decimal
+        amount : Decimal   -- Number of bond units to mint (e.g., 10.0 for 10 bonds)
         maturityDate : Time
-        couponRate : Decimal  -- Annual rate (e.g., 0.05 for 5%)
-        couponFrequency : Int  -- Payments per year (e.g., 2 for semi-annual)
       controller issuer, receiver
       do
-        assertMsg "Principal must be positive" (principal > 0.0)
-        assertMsg "Coupon rate must be non-negative" (couponRate >= 0.0)
-        assertMsg "Coupon frequency must be positive" (couponFrequency > 0)
+        assertMsg "Amount must be positive" (amount > 0.0)
 
         now <- getTime
         assertMsg "Maturity date must be in the future" (maturityDate > now)
@@ -34,10 +38,11 @@ template BondFactory
           owner = receiver
           instrumentId = instrumentId
           version = "0"
-          principal
+          notional = notional
+          amount
           maturityDate
-          couponRate
-          couponFrequency
+          couponRate = couponRate
+          couponFrequency = couponFrequency
           issueDate = now
           lastEventTimestamp = now
 

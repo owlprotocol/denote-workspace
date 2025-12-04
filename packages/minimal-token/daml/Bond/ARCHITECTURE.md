@@ -13,7 +13,8 @@ This document describes the architecture of the bond instrument implementation, 
 1. **`Bond.daml`** - Core bond template
 
     - **Purpose**: Represents a bond instrument implementing CIP-0056 `Holding` interface
-    - **Key Fields**: `issuer`, `depository`, `owner`, `instrumentId`, `version`, `principal`, `maturityDate`, `couponRate`, `couponFrequency`, `lastEventTimestamp`
+    - **Key Fields**: `issuer`, `depository`, `owner`, `instrumentId`, `version`, `notional` (face value per unit), `amount` (number of units), `maturityDate`, `couponRate`, `couponFrequency`, `lastEventTimestamp`
+    - **Fungibility**: Bonds are fungible - a single contract can hold multiple bond units (e.g., `notional=1000`, `amount=3` means 3 bonds each with face value 1000, total face value 3000). Bonds can be split and merged as long as they share the same lifecycle state (version, lastEventTimestamp).
     - **Authorization**: `signatory issuer, depository, owner` - all three must authorize creation
     - **Includes**: `LockedBond` template for locked state during transfers/lifecycle events
     - **Reference**: Matches CIP-0056 `Holding` interface pattern, similar to `MyToken` structure
@@ -21,8 +22,9 @@ This document describes the architecture of the bond instrument implementation, 
 2. **`BondFactory.daml`** - Minting factory
 
     - **Purpose**: Creates new bonds and manages version creation
+    - **Key Fields**: Stores `notional`, `couponRate`, `couponFrequency` - all bonds minted from this factory share these terms
     - **Choices**:
-        - `Mint`: Creates bond with version "0" (requires `controller issuer, receiver`)
+        - `Mint`: Creates bond with version "0" (requires `controller issuer, receiver`). Takes `amount` (number of units) and `maturityDate` as parameters - bond terms (notional, couponRate, couponFrequency) are stored in the factory.
         - `CreateNewVersion`: Creates new bond version after lifecycle events (requires `controller issuer, owner`)
     - **Authorization**: Dual-signatory pattern (issuer + receiver for minting)
     - **Reference**: Matches Splice `AmuletRules_Mint` pattern (both parties must sign)
@@ -31,9 +33,9 @@ This document describes the architecture of the bond instrument implementation, 
 
     - **Purpose**: Centralized authority for locking bonds (matches Splice `MyTokenRules` pattern)
     - **Choices**:
-        - `BondRules_LockForTransfer`: Locks bond for transfer (whole-unit only)
-        - `BondRules_LockForCoupon`: Locks bond for coupon payment processing
-        - `BondRules_LockForRedemption`: Locks bond for principal redemption
+        - `BondRules_LockForTransfer`: Locks bond for transfer. Supports partial transfers - if `desiredAmount < bond.amount`, creates a change bond for the remainder. Returns `(lockedBondCid, Optional changeBondCid, metadata)`.
+        - `BondRules_LockForCoupon`: Locks bond for coupon payment processing. Validates date constraints using ledger time (`getTime`) - ensures coupon payment date is in the past/present, after issue date, after last event timestamp, and before maturity date.
+        - `BondRules_LockForRedemption`: Locks bond for principal redemption. Validates date constraints using ledger time (`getTime`) - ensures redemption date is in the past/present, on or after maturity date, and after last event timestamp.
     - **Authorization**: Issuer-signed, owner-controlled (sender/holder controls choice, issuer signs via rules)
     - **Reference**: Matches Splice pattern - uses disclosure for cross-party visibility, not observable to all
 
@@ -76,8 +78,9 @@ This document describes the architecture of the bond instrument implementation, 
 
     - **Purpose**: Processes lifecycle events and creates effect contracts (matches daml-finance `Lifecycle.Rule`)
     - **Choices**:
-        - `ProcessCouponPaymentEvent`: Creates `BondLifecycleEffect` for coupon payments
-        - `ProcessRedemptionEvent`: Creates `BondLifecycleEffect` for redemptions
+        - `ProcessCouponPaymentEvent`: Creates `BondLifecycleEffect` for coupon payments. Uses ledger time (`getTime`) directly as the event date to prevent time manipulation. Infers bond terms (`notional`, `couponRate`, `couponFrequency`) from a sample bond contract passed as parameter, ensuring consistency.
+        - `ProcessRedemptionEvent`: Creates `BondLifecycleEffect` for redemptions. Uses ledger time (`getTime`) directly as the event date. Infers bond terms from a sample bond contract.
+    - **Time Security**: Uses ledger time directly instead of accepting dates as parameters, preventing time manipulation attacks. For production use, a `DateClock` pattern (as used in daml-finance) would provide additional flexibility for retroactive processing and time zone handling.
     - **Authorization**: Issuer and depository signatories (both must sign)
     - **Why Separate**: Different authorization from factory (factory = issuer only, rule = issuer+depository)
     - **Reference**: Matches daml-finance centralized lifecycle rule pattern - single source of truth for lifecycle events
@@ -90,13 +93,14 @@ This document describes the architecture of the bond instrument implementation, 
     - **Why Separate**: Multiple holders reference the same effect contract (single source of truth)
     - **Reference**: Matches daml-finance effect pattern - version-tied to prevent double-claiming
 
-10. **`BondLifecycleClaim.daml`** - Claim processor
+10. **`BondLifecycleClaimRequest.daml`** - Claim processor
 
     - **Purpose**: Processes effect claims and creates lifecycle instructions (matches daml-finance `Rule.Claim`)
     - **Functionality**:
         - Holder creates `BondLifecycleClaimRequest` → Issuer accepts
-        - On accept: locks bond, creates `BondLifecycleInstruction`, creates currency transfer instruction
+        - On accept: validates bond matches effect target, calls `BondRules` to lock bond (which performs authoritative date validations), creates `BondLifecycleInstruction`, creates currency transfer instruction
         - Factory logic inlined (matches daml-finance where `Rule.Claim` directly creates settlement instructions)
+        - Calculates total payment amounts: `effect.amount * bond.amount` (effect amount is per unit, multiplied by number of units in the bond contract)
     - **Authorization**: Holder creates request, issuer accepts (propose/accept pattern)
     - **Why Separate**: Different authorization flow from instruction (claim = propose/accept, instruction = execute)
     - **Reference**: Matches daml-finance `Rule.Claim` pattern - directly creates settlement instructions
@@ -213,7 +217,7 @@ Holder → Currency transfer instruction accepted → Principal received
 
 ### Two-Step Transfer Pattern
 
--   **Prepare (Lock)**: Via `BondRules_LockForTransfer` - archives bond, creates `LockedBond`
+-   **Prepare (Lock)**: Via `BondRules_LockForTransfer` - archives bond, creates `LockedBond`. Supports partial transfers - if transferring less than the full amount, creates a change bond for the remainder that is immediately available to the sender.
 -   **Execute (Transfer)**: Via `executeTwoStepTransfer` - validates deadline, unlocks, creates new bond for receiver
 -   **Abort (Unlock)**: Via `abortTwoStepTransfer` - unlocks bond back to sender
 
@@ -222,6 +226,8 @@ Holder → Currency transfer instruction accepted → Principal received
 -   **Single Source of Truth**: Issuer creates one effect for all holders
 -   **Version-Tied**: Effects tied to specific bond version (prevents double-claiming)
 -   **Gradual Migration**: Holders claim effects at their own pace
+-   **Per-Unit Amounts**: Effect amounts are per bond unit. When holders claim, the system multiplies `effect.amount` by `bond.amount` to calculate the total payment. For example, if `effect.amount = 25` (per bond) and a holder has `bond.amount = 3` (3 bonds), they receive `25 × 3 = 75`.
+-   **Term Inference**: `BondLifecycleRule` infers bond terms (`notional`, `couponRate`, `couponFrequency`) from a sample bond contract, ensuring consistency and reducing redundant parameters
 
 ### Disclosure Pattern
 

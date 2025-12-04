@@ -84,9 +84,7 @@ export async function getOrCreateBondLifecycleRule(
 export interface ProcessCouponPaymentEventParams {
     targetInstrumentId: string;
     targetVersion: string;
-    couponRate: number;
-    couponFrequency: number; // Int
-    principalPerUnit: number;
+    bondCid: ContractId;
 }
 
 export const getProcessCouponPaymentEventCommand = ({
@@ -126,9 +124,7 @@ export async function processCouponPaymentEvent(
 export interface ProcessRedemptionEventParams {
     targetInstrumentId: string;
     targetVersion: string;
-    principalPerUnit: number;
-    couponRate: number;
-    couponFrequency: number; // Int
+    bondCid: ContractId;
 }
 
 export const getProcessRedemptionEventCommand = ({

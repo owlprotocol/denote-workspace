@@ -110,8 +110,15 @@ async function bondLifecycleTest() {
 
     const bondRulesCid = await charlieWrappedSdk.bonds.bondRules.getOrCreate();
     const bondFactoryCid = await charlieWrappedSdk.bonds.factory.getOrCreate(
-        bondInstrumentId
+        bondInstrumentId,
+        1000.0, // notional
+        0.05, // couponRate (5% annual)
+        2 // couponFrequency (semi-annual)
     );
+    if (!bondFactoryCid) {
+        throw new Error("Bond factory contract ID not found after getOrCreate");
+    }
+    console.info(`Bond factory CID: ${bondFactoryCid}`);
     const currencyRulesCid = await charlieWrappedSdk.tokenRules.getOrCreate();
     const currencyTransferFactoryCid =
         await charlieWrappedSdk.transferFactory.getOrCreate(currencyRulesCid);
@@ -129,41 +136,40 @@ async function bondLifecycleTest() {
 
     console.info("Minting currency tokens");
     await charlieWrappedSdk.tokenFactory.mintToken(currencyTokenFactoryCid, {
-        amount: 25.0,
+        amount: 75.0,
         receiver: charlie.partyId,
     });
     await charlieWrappedSdk.tokenFactory.mintToken(currencyTokenFactoryCid, {
         amount: 1025.0,
         receiver: charlie.partyId,
     });
+    await charlieWrappedSdk.tokenFactory.mintToken(currencyTokenFactoryCid, {
+        amount: 2050.0,
+        receiver: charlie.partyId,
+    });
     const currencyBalance = await charlieWrappedSdk.balances.getByInstrumentId({
         owner: charlie.partyId,
         instrumentId: { admin: charlie.partyId, id: currencyInstrumentId },
     });
-    const [currencyHolding1, currencyHolding2] = currencyBalance.utxos.map(
-        (u) => u.contractId
-    );
-    if (!currencyHolding1 || !currencyHolding2) {
+    const [currencyHolding1, currencyHolding2, currencyHolding3] =
+        currencyBalance.utxos.map((u) => u.contractId);
+    if (!currencyHolding1 || !currencyHolding2 || !currencyHolding3) {
         throw new Error("Currency holdings not found");
     }
     console.info("Currency minted");
 
-    // Phase 1: Mint bond
-    console.info("Minting bond to Alice");
+    // Phase 1: Mint 3 bonds to Alice
+    console.info("Minting 3 bonds to Alice");
     const now = new Date();
     const maturityDate = new Date(now.getTime() + 10 * 1000);
-    const couponRate = 0.05;
-    const couponFrequency = 2;
 
     await aliceWrappedSdk.bonds.issuerMintRequest.create({
         bondFactoryCid,
         issuer: charlie.partyId,
         depository: charlie.partyId,
         receiver: alice.partyId,
-        principal: 1000.0,
+        amount: 3.0, // Mint 3 bonds
         maturityDate: maturityDate.toISOString(),
-        couponRate,
-        couponFrequency,
     });
     const bondMintCid = await aliceWrappedSdk.bonds.issuerMintRequest.getLatest(
         charlie.partyId
@@ -199,9 +205,7 @@ async function bondLifecycleTest() {
         {
             targetInstrumentId: bondInstrumentId,
             targetVersion: "0",
-            couponRate,
-            couponFrequency,
-            principalPerUnit: 1000.0,
+            bondCid: aliceBondCid,
         }
     );
 
@@ -289,7 +293,7 @@ async function bondLifecycleTest() {
         transfer: buildTransfer({
             sender: alice.partyId,
             receiver: bob.partyId,
-            amount: 1000.0,
+            amount: 1.0, // Transfer 1 bond (out of 3)
             instrumentId: { admin: charlie.partyId, id: bondInstrumentId },
             requestedAt: new Date(now.getTime() - 1000),
             executeBefore: new Date(now.getTime() + 400 * 24 * 60 * 60 * 1000),
@@ -317,6 +321,18 @@ async function bondLifecycleTest() {
         disclosure,
     ]);
     console.info("Bond transferred");
+
+    // Get Alice's remaining bond after transfer (she should have 2 bonds remaining)
+    const aliceBondAfterTransfer =
+        await aliceWrappedSdk.balances.getByInstrumentId({
+            owner: alice.partyId,
+            instrumentId: { admin: charlie.partyId, id: bondInstrumentId },
+        });
+    const aliceRemainingBondCid = aliceBondAfterTransfer.utxos[0]?.contractId;
+    if (!aliceRemainingBondCid) {
+        throw new Error("Alice's remaining bond not found");
+    }
+
     await printBalances(
         aliceWrappedSdk,
         bobWrappedSdk,
@@ -333,14 +349,19 @@ async function bondLifecycleTest() {
         setTimeout(resolve, 3000);
     });
 
+    const bobBondBalance = await bobWrappedSdk.balances.getByInstrumentId({
+        owner: bob.partyId,
+        instrumentId: { admin: charlie.partyId, id: bondInstrumentId },
+    });
+    const bobBondCid = bobBondBalance.utxos[0]?.contractId;
+    if (!bobBondCid) throw new Error("Bob's bond not found");
+
     await charlieWrappedSdk.bonds.lifecycleRule.processRedemptionEvent(
         lifecycleRuleCid,
         {
             targetInstrumentId: bondInstrumentId,
             targetVersion: bondVersionAfterCoupon,
-            principalPerUnit: 1000.0,
-            couponRate,
-            couponFrequency,
+            bondCid: bobBondCid,
         }
     );
 
@@ -348,13 +369,6 @@ async function bondLifecycleTest() {
         await charlieWrappedSdk.bonds.lifecycleEffect.getLatest(
             charlie.partyId
         );
-
-    const bobBondBalance = await bobWrappedSdk.balances.getByInstrumentId({
-        owner: bob.partyId,
-        instrumentId: { admin: charlie.partyId, id: bondInstrumentId },
-    });
-    const bobBondCid = bobBondBalance.utxos[0]?.contractId;
-    if (!bobBondCid) throw new Error("Bob's bond not found");
 
     // Holder creates claim request
     await bobWrappedSdk.bonds.lifecycleClaimRequest.create({
@@ -395,7 +409,48 @@ async function bondLifecycleTest() {
             transferDisclosure2.lockedTokenDisclosure,
         ]);
     }
-    console.info("Redemption completed");
+    console.info("Bob's redemption completed");
+
+    // Phase 5: Alice redeems her 2 remaining bonds
+    console.info("Alice redeeming her 2 remaining bonds");
+    await aliceWrappedSdk.bonds.lifecycleClaimRequest.create({
+        effectCid: effectCid2,
+        bondHoldingCid: aliceRemainingBondCid,
+        bondRulesCid,
+        bondFactoryCid,
+        currencyTransferFactoryCid,
+        issuerCurrencyHoldingCid: currencyHolding3,
+        holder: alice.partyId,
+        issuer: charlie.partyId,
+    });
+
+    const claimCid3 =
+        await aliceWrappedSdk.bonds.lifecycleClaimRequest.getLatest(
+            charlie.partyId
+        );
+    if (!claimCid3)
+        throw new Error("Alice's lifecycle claim request not found");
+    await charlieWrappedSdk.bonds.lifecycleClaimRequest.accept(claimCid3);
+
+    const instructionCid3 =
+        await charlieWrappedSdk.bonds.lifecycleInstruction.getLatest(
+            charlie.partyId
+        );
+    await aliceWrappedSdk.bonds.lifecycleInstruction.process(instructionCid3);
+
+    const transferCid3 = await charlieWrappedSdk.transferInstruction.getLatest(
+        charlie.partyId
+    );
+    if (transferCid3) {
+        const transferDisclosure3 =
+            await charlieWrappedSdk.transferInstruction.getDisclosure(
+                transferCid3
+            );
+        await aliceWrappedSdk.transferInstruction.accept(transferCid3, [
+            transferDisclosure3.lockedTokenDisclosure,
+        ]);
+    }
+    console.info("Alice's redemption completed");
     await printBalances(
         aliceWrappedSdk,
         bobWrappedSdk,

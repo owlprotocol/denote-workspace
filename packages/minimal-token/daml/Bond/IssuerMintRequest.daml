@@ -5,26 +5,23 @@ import Bond.BondFactory as BondFactory
 template IssuerMintRequest
   with
     bondFactoryCid: ContractId BondFactory
-    -- ^ The factory that can mint bonds
+    -- ^ The factory that can mint bonds (contains notional, couponRate, couponFrequency)
     issuer: Party
     -- ^ The issuer of the bonds to be minted
     depository: Party
     -- ^ The depository (trust anchor), can be same as issuer
     receiver: Party
     -- ^ The party to receive the minted bonds
-    principal: Decimal
-    -- ^ The principal amount of bonds to mint
+    amount: Decimal
+    -- ^ The number of bond units to mint (e.g., 10.0 for 10 bonds)
     maturityDate: Time
     -- ^ The maturity date of the bonds
-    couponRate: Decimal
-    -- ^ Annual coupon rate (e.g., 0.05 for 5%)
-    couponFrequency: Int
-    -- ^ Number of coupon payments per year (e.g., 2 for semi-annual)
   where
     signatory receiver
     observer issuer
 
-    ensure principal > 0.0 && couponRate >= 0.0 && couponFrequency > 0
+    ensure
+      amount > 0.0
 
     choice Accept : BondFactory.MintResult
       -- ^ Accept the request.
@@ -33,10 +30,8 @@ template IssuerMintRequest
           exercise bondFactoryCid BondFactory.Mint with
             depository = depository
             receiver = receiver
-            principal = principal
+            amount = amount
             maturityDate = maturityDate
-            couponRate = couponRate
-            couponFrequency = couponFrequency
 
     choice Decline : ()
       -- ^ Decline the request.

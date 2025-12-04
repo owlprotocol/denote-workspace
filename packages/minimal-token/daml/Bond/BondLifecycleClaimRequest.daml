@@ -83,8 +83,6 @@ template BondLifecycleClaimRequest
 
         case effect.eventType of
           CouponPayment -> do
-            assertMsg "Coupon payment date must be after last event timestamp" (effect.eventDate > bond.lastEventTimestamp)
-            assertMsg "Coupon payment date must be before maturity date" (effect.eventDate < bond.maturityDate)
 
             (lockedBondCid, _, _) <- exercise bondRulesCid BondRules_LockForCoupon with
               holder = bond.owner
@@ -96,18 +94,17 @@ template BondLifecycleClaimRequest
 
             locked <- fetch lockedBondCidTyped
             assertMsg "Bond must belong to this issuer" (locked.bond.issuer == issuer)
-            assertMsg "Coupon payment date must be after issue date" (effect.eventDate >= locked.bond.issueDate)
-            assertMsg "Coupon payment date must be after last event timestamp" (effect.eventDate > locked.bond.lastEventTimestamp)
-            assertMsg "Coupon payment date must be before maturity date" (effect.eventDate < locked.bond.maturityDate)
             assertMsg "Coupon amount must be positive" (effect.amount > 0.0)
 
             now <- getTime
+            -- Effect amount is per bond unit, multiply by number of bonds in the contract
+            let totalCouponAmount = effect.amount * locked.bond.amount
             let requestedAt = addRelTime now (seconds (-1))
             let executeBefore = addRelTime now (days 365)
             let transfer = TI.Transfer with
                   sender = issuer
                   receiver = locked.bond.owner
-                  amount = effect.amount
+                  amount = totalCouponAmount
                   instrumentId = effect.currencyInstrumentId
                   requestedAt = requestedAt
                   executeBefore = executeBefore
@@ -138,14 +135,13 @@ template BondLifecycleClaimRequest
 
             pure $ ClaimResult_CouponPayment $ CouponPaymentInstructionResult with
               instructionCid
-              couponAmount = effect.amount
+              couponAmount = totalCouponAmount
               currencyTransferInstructionCid = Some currencyTransferInstructionCid
               meta = MD.emptyMetadata
 
           Redemption -> do
             now <- getTime
-            assertMsg "Redemption date must be on or after maturity date" (effect.eventDate >= bond.maturityDate)
-            assertMsg "Redemption date must be in the past or present" (effect.eventDate <= now)
+
 
             (lockedBondCid, _, _) <- exercise bondRulesCid BondRules_LockForRedemption with
               holder = bond.owner
@@ -157,15 +153,18 @@ template BondLifecycleClaimRequest
 
             locked <- fetch lockedBondCidTyped
             assertMsg "Bond must belong to this issuer" (locked.bond.issuer == issuer)
-            assertMsg "Redemption date must be on or after maturity date" (effect.eventDate >= locked.bond.maturityDate)
             assertMsg "Principal amount must be positive" (effect.amount > 0.0)
+            assertMsg "Locked bond amount must be positive" (locked.bond.amount > 0.0)
 
+            -- Effect amount is per bond unit, multiply by number of bonds in the contract
+            let totalRedemptionAmount = effect.amount * locked.bond.amount
+            assertMsg ("Total redemption amount calculation: effect.amount " <> show effect.amount <> " * locked.bond.amount " <> show locked.bond.amount <> " = " <> show totalRedemptionAmount) (totalRedemptionAmount > 0.0)
             let requestedAt = addRelTime now (seconds (-1))
             let executeBefore = addRelTime now (days 365)
             let transfer = TI.Transfer with
                   sender = issuer
                   receiver = locked.bond.owner
-                  amount = effect.amount
+                  amount = totalRedemptionAmount
                   instrumentId = effect.currencyInstrumentId
                   requestedAt = requestedAt
                   executeBefore = executeBefore
@@ -191,12 +190,12 @@ template BondLifecycleClaimRequest
               issuer = locked.bond.issuer
               holder = locked.bond.owner
               eventDate = effect.eventDate
-              amount = effect.amount
+              amount = effect.amount  -- Per-unit amount stored in instruction
               currencyInstrumentId = effect.currencyInstrumentId
 
             pure $ ClaimResult_Redemption $ RedemptionInstructionResult with
               instructionCid
-              principalAmount = effect.amount
+              principalAmount = totalRedemptionAmount
               currencyTransferInstructionCid = Some currencyTransferInstructionCid
               meta = MD.emptyMetadata
 
