@@ -9,6 +9,7 @@ import Bond.BondRules as BondRules
 import Bond.IssuerMintRequest as IssuerMintRequest
 import Bond.TransferRequest as TransferRequest
 import Bond.BondLifecycleClaimRequest as BondLifecycleClaimRequest
+import Bond.BondLifecycleEffect
 import Bond.BondLifecycleInstruction as BondLifecycleInstruction
 import Bond.BondLifecycleRule as BondLifecycleRule
 import Bond.BondTransferInstruction
@@ -126,17 +127,16 @@ testBondFullLifecycle = script do
   -- Phase 2: First coupon payment to Alice (6 months)
   passTime (days 182)
 
-  let couponPaymentDate1 = addRelTime now (days 182)
-
   effectCid1 <- submit charlie do
     exerciseCmd lifecycleRuleCid BondLifecycleRule.ProcessCouponPaymentEvent with
       targetInstrumentId = instrumentId
       targetVersion = initialVersion
-      couponPaymentDate = couponPaymentDate1
-      maturityDate = maturityDate
       couponRate = couponRate
       couponFrequency = couponFrequency
       principalPerUnit = 1000.0
+
+  Some effect1 <- queryContractId @BondLifecycleEffect charlie effectCid1
+  let couponPaymentDate1 = effect1.eventDate
 
   bondFactoryDisclosure <- do
     optDisc <- queryDisclosure @BondFactory charlie bondFactoryCid
@@ -285,16 +285,16 @@ testBondFullLifecycle = script do
   -- Phase 4: Redemption at maturity (includes final coupon)
   passTime (days 183)
 
-  let redemptionDate = addRelTime now (days 365)
-
   effectCid2 <- submit charlie do
     exerciseCmd lifecycleRuleCid BondLifecycleRule.ProcessRedemptionEvent with
       targetInstrumentId = instrumentId
       targetVersion = versionAfterCoupon1
-      redemptionDate = redemptionDate
       principalPerUnit = 1000.0
       couponRate = couponRate
       couponFrequency = couponFrequency
+
+  Some effect2 <- queryContractId @BondLifecycleEffect charlie effectCid2
+  let redemptionDate = effect2.eventDate
 
   claimRequestCid2 <- submit bob do
     createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with

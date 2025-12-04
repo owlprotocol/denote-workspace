@@ -77,6 +77,11 @@ template BondRules
         bond <- fetch bondCid
         assertMsg "Holder must be owner" (bond.owner == holder)
 
+        now <- getTime
+        assertMsg "Coupon payment date must be in the past or present" (couponPaymentDate <= now)
+        assertMsg "Coupon payment date must be after issue date" (couponPaymentDate >= bond.issueDate)
+        assertMsg "Coupon payment date must be after last event timestamp" (couponPaymentDate > bond.lastEventTimestamp)
+
         -- Archive original input
         -- Requires issuer, depository, and owner signatures (all signatories of bond).
         -- Issuer and holder authorize via controller, depository must also be in transaction.

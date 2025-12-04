@@ -189,7 +189,7 @@ async function bondLifecycleTest() {
     );
 
     console.info("Processing coupon payment");
-    console.info("  Waiting 3 seconds...");
+    console.info("  Waiting 3 seconds to ensure we're past issue date...");
     await new Promise((resolve) => {
         setTimeout(resolve, 3000);
     });
@@ -199,8 +199,6 @@ async function bondLifecycleTest() {
         {
             targetInstrumentId: bondInstrumentId,
             targetVersion: "0",
-            couponPaymentDate: new Date().toISOString(),
-            maturityDate: maturityDate.toISOString(),
             couponRate,
             couponFrequency,
             principalPerUnit: 1000.0,
@@ -330,19 +328,16 @@ async function bondLifecycleTest() {
     );
 
     console.info("Processing redemption");
-    console.info("  Waiting 3 seconds...");
+    console.info("  Waiting 3 seconds to ensure we're past maturity date...");
     await new Promise((resolve) => {
         setTimeout(resolve, 3000);
     });
-
-    const redemptionDate = new Date();
 
     await charlieWrappedSdk.bonds.lifecycleRule.processRedemptionEvent(
         lifecycleRuleCid,
         {
             targetInstrumentId: bondInstrumentId,
             targetVersion: bondVersionAfterCoupon,
-            redemptionDate: redemptionDate.toISOString(),
             principalPerUnit: 1000.0,
             couponRate,
             couponFrequency,

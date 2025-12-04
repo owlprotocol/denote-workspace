@@ -30,28 +30,30 @@ template BondLifecycleRule
     signatory issuer, depository
 
     -- | Process a coupon payment event.
-    -- Creates a BondLifecycleEffect for the specified coupon payment date.
+    -- Creates a BondLifecycleEffect using the current ledger time as the event date.
     -- All holders of bonds with the target version can claim this effect.
+    --
+    -- NOTE: For production use, we would likely need a DateClock pattern
+    -- (see https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Data/V4/Time/DateClock.daml)
+    -- for retroactive processing and time zone flexibility. We use ledger time directly here for simplicity.
+    --
+    -- The maturity date validation is performed in BondLifecycleClaimRequest.Accept when holders claim the effect,
+    -- ensuring that coupon payments can only be processed before bond maturity.
     nonconsuming choice ProcessCouponPaymentEvent : ContractId BondLifecycleEffect
       with
         targetInstrumentId : Text
         targetVersion : Text
-        couponPaymentDate : Time
-        maturityDate : Time
         couponRate : Decimal
         couponFrequency : Int
         principalPerUnit : Decimal
       controller issuer
       do
-        now <- getTime
-        assertMsg "Coupon payment date must be in the past or present" (couponPaymentDate <= now)
-
-        assertMsg "Coupon payment date must be before maturity date" (couponPaymentDate < maturityDate)
+        eventTime <- getTime
 
         let couponAmount = principalPerUnit * couponRate / intToDecimal couponFrequency
         assertMsg "Coupon amount must be positive" (couponAmount > 0.0)
 
-        let newVersion = sha256 $ show targetVersion <> show couponPaymentDate <> show CouponPayment <> show couponAmount
+        let newVersion = sha256 $ show targetVersion <> show eventTime <> show CouponPayment <> show couponAmount
 
         effectCid <- create BondLifecycleEffect with
           issuer
@@ -60,28 +62,26 @@ template BondLifecycleRule
           targetInstrumentId
           targetVersion
           producedVersion = Some newVersion
-          eventDate = couponPaymentDate
-          settlementTime = Some couponPaymentDate
+          eventDate = eventTime
+          settlementTime = Some eventTime
           amount = couponAmount
           currencyInstrumentId
 
         pure effectCid
 
     -- | Process a redemption event.
-    -- Creates a BondLifecycleEffect for the specified redemption date.
-
+    -- Creates a BondLifecycleEffect using the current ledger time as the event date.
     nonconsuming choice ProcessRedemptionEvent : ContractId BondLifecycleEffect
       with
         targetInstrumentId : Text
         targetVersion : Text
-        redemptionDate : Time
         principalPerUnit : Decimal
         couponRate : Decimal
         couponFrequency : Int
       controller issuer
       do
-        now <- getTime
-        assertMsg "Redemption date must be in the past or present" (redemptionDate <= now)
+        eventTime <- getTime
+
         assertMsg "Principal amount must be positive" (principalPerUnit > 0.0)
 
         let finalCouponAmount = principalPerUnit * couponRate / intToDecimal couponFrequency
@@ -97,8 +97,8 @@ template BondLifecycleRule
           targetInstrumentId
           targetVersion
           producedVersion = None
-          eventDate = redemptionDate
-          settlementTime = Some redemptionDate
+          eventDate = eventTime
+          settlementTime = Some eventTime
           amount = totalRedemptionAmount
           currencyInstrumentId
 

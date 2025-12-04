@@ -84,8 +84,6 @@ export async function getOrCreateBondLifecycleRule(
 export interface ProcessCouponPaymentEventParams {
     targetInstrumentId: string;
     targetVersion: string;
-    couponPaymentDate: string;
-    maturityDate: string;
     couponRate: number;
     couponFrequency: number; // Int
     principalPerUnit: number;
@@ -128,7 +126,6 @@ export async function processCouponPaymentEvent(
 export interface ProcessRedemptionEventParams {
     targetInstrumentId: string;
     targetVersion: string;
-    redemptionDate: string;
     principalPerUnit: number;
     couponRate: number;
     couponFrequency: number; // Int
