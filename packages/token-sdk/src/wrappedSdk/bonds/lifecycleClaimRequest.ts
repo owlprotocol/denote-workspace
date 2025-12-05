@@ -1,4 +1,5 @@
 import { LedgerController } from "@canton-network/wallet-sdk";
+import { Types } from "@canton-network/core-ledger-client";
 import { v4 } from "uuid";
 import { bondLifecycleClaimRequestTemplateId } from "../../constants/templateIds.js";
 import { getCreateCommand } from "../../helpers/getCreateCommand.js";
@@ -12,7 +13,7 @@ export interface BondLifecycleClaimRequestParams {
     effectCid: ContractId;
     bondHoldingCid: ContractId;
     bondRulesCid: ContractId;
-    bondFactoryCid: ContractId;
+    bondInstrumentCid: ContractId;
     currencyTransferFactoryCid: ContractId;
     issuerCurrencyHoldingCid: ContractId;
     holder: Party;
@@ -30,7 +31,8 @@ const getCreateBondLifecycleClaimRequestCommand = (
 export async function createBondLifecycleClaimRequest(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    params: BondLifecycleClaimRequestParams
+    params: BondLifecycleClaimRequestParams,
+    disclosedContracts?: Types["DisclosedContract"][]
 ) {
     const createMintRequestCommand =
         getCreateBondLifecycleClaimRequestCommand(params);
@@ -38,7 +40,8 @@ export async function createBondLifecycleClaimRequest(
     await userLedger.prepareSignExecuteAndWaitFor(
         [createMintRequestCommand],
         userKeyPair.privateKey,
-        v4()
+        v4(),
+        disclosedContracts
     );
 }
 

@@ -1,21 +1,17 @@
 module Bond.IssuerMintRequest where
 
-import Bond.BondFactory as BondFactory
+import Bond.BondInstrument as BondInstrument
 
 template IssuerMintRequest
   with
-    bondFactoryCid: ContractId BondFactory
-    -- ^ The factory that can mint bonds (contains notional, couponRate, couponFrequency)
+    instrumentCid: ContractId BondInstrument
+    -- ^ The bond instrument contract
     issuer: Party
     -- ^ The issuer of the bonds to be minted
-    depository: Party
-    -- ^ The depository (trust anchor), can be same as issuer
     receiver: Party
     -- ^ The party to receive the minted bonds
     amount: Decimal
     -- ^ The number of bond units to mint (e.g., 10.0 for 10 bonds)
-    maturityDate: Time
-    -- ^ The maturity date of the bonds
   where
     signatory receiver
     observer issuer
@@ -23,15 +19,15 @@ template IssuerMintRequest
     ensure
       amount > 0.0
 
-    choice Accept : BondFactory.MintResult
+    choice Accept : BondInstrument.MintResult
       -- ^ Accept the request.
       controller issuer
       do
-          exercise bondFactoryCid BondFactory.Mint with
-            depository = depository
+          instrument <- fetch instrumentCid
+          assertMsg "Issuer must match instrument issuer" (issuer == instrument.issuer)
+          exercise instrumentCid BondInstrument.Mint with
             receiver = receiver
             amount = amount
-            maturityDate = maturityDate
 
     choice Decline : ()
       -- ^ Decline the request.

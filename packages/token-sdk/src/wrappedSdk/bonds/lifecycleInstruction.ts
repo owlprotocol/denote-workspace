@@ -5,7 +5,7 @@ import { UserKeyPair } from "../../types/UserKeyPair.js";
 import { v4 } from "uuid";
 import { Types } from "@canton-network/core-ledger-client";
 import {
-    bondFactoryTemplateId,
+    bondInstrumentTemplateId,
     bondLifecycleInstructionTemplateId,
 } from "../../constants/templateIds.js";
 import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
@@ -90,7 +90,7 @@ export async function getBondLifecycleInstruction(
     })) as ActiveContractResponse<{
         eventType: unknown;
         lockedBond: ContractId;
-        bondFactoryCid: ContractId | null;
+        bondInstrumentCid: ContractId | null;
         producedVersion: string | null;
         issuer: string;
         holder: string;
@@ -125,12 +125,12 @@ export async function getBondLifecycleInstructionDisclosure(
         throw new Error("Bond lifecycle instruction not found");
     }
 
-    if (!instruction.createArgument.bondFactoryCid) {
+    if (!instruction.createArgument.bondInstrumentCid) {
         return undefined;
     }
 
     return getContractDisclosure(issuerLedger, {
-        templateId: bondFactoryTemplateId,
-        contractId: instruction.createArgument.bondFactoryCid,
+        templateId: bondInstrumentTemplateId,
+        contractId: instruction.createArgument.bondInstrumentCid,
     });
 }

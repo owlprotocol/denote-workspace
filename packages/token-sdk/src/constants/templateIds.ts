@@ -13,6 +13,8 @@ export const bondLifecycleRuleTemplateId =
     "#minimal-token:Bond.BondLifecycleRule:BondLifecycleRule";
 export const bondFactoryTemplateId =
     "#minimal-token:Bond.BondFactory:BondFactory";
+export const bondInstrumentTemplateId =
+    "#minimal-token:Bond.BondInstrument:BondInstrument";
 export const bondLifecycleClaimRequestTemplateId =
     "#minimal-token:Bond.BondLifecycleClaimRequest:BondLifecycleClaimRequest";
 export const bondRulesTemplateId = "#minimal-token:Bond.BondRules:BondRules";

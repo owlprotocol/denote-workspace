@@ -5,6 +5,7 @@ import DA.Time
 
 import Bond.Bond (Bond, LockedBond)
 import Bond.BondFactory as BondFactory
+import Bond.BondInstrument as BondInstrument
 import Bond.BondRules as BondRules
 import Bond.IssuerMintRequest as IssuerMintRequest
 import Bond.TransferRequest as TransferRequest
@@ -46,9 +47,6 @@ testBondFullLifecycle = script do
     createCmd BondFactory with
       issuer = charlie
       instrumentId = instrumentId
-      notional = 1000.0
-      couponRate = couponRate
-      couponFrequency = couponFrequency
 
   let currencyInstrumentId = show charlie <> "#Currency"
   currencyRulesCid <- submit charlie do
@@ -113,16 +111,23 @@ testBondFullLifecycle = script do
   let charlieCurrencyHoldingCid2 : ContractId H.Holding = toInterfaceContractId @H.Holding currencyMintResult2.tokenCid
   let charlieCurrencyHoldingCid3 : ContractId H.Holding = toInterfaceContractId @H.Holding currencyMintResult3.tokenCid
 
-  -- Phase 1: Mint 3 bonds to Alice
+  -- Phase 1: Create bond instrument, then mint 3 bonds to Alice
+
+  let notional = 1000.0
+  instrumentCid <- submit charlie do
+    exerciseCmd bondFactoryCid BondFactory.CreateInstrument with
+      depository = charlie
+      notional = notional
+      couponRate = couponRate
+      couponFrequency = couponFrequency
+      maturityDate = maturityDate
 
   mintRequestCid <- submit alice do
     createCmd IssuerMintRequest.IssuerMintRequest with
-      bondFactoryCid = bondFactoryCid
+      instrumentCid = instrumentCid
       issuer = charlie
-      depository = charlie
       receiver = alice
       amount = 3.0
-      maturityDate = maturityDate
 
   mintResult <- submit charlie do
     exerciseCmd mintRequestCid IssuerMintRequest.Accept
@@ -152,18 +157,18 @@ testBondFullLifecycle = script do
   Some effect1 <- queryContractId @BondLifecycleEffect charlie effectCid1
   let couponPaymentDate1 = effect1.eventDate
 
-  bondFactoryDisclosure <- do
-    optDisc <- queryDisclosure @BondFactory charlie bondFactoryCid
+  bondInstrumentDisclosure <- do
+    optDisc <- queryDisclosure @BondInstrument.BondInstrument charlie instrumentCid
     case optDisc of
       Some d -> pure d
-      None -> fail "BondFactory disclosure not found"
+      None -> fail "BondInstrument disclosure not found"
 
   claimRequestCid1 <- submit alice do
     createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
       effectCid = effectCid1
       bondHoldingCid = aliceHolding
       bondRulesCid = rulesCid
-      bondFactoryCid = bondFactoryCid
+      bondInstrumentCid = instrumentCid
       currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
       issuerCurrencyHoldingCid = charlieCurrencyHoldingCid1
       holder = alice
@@ -178,7 +183,7 @@ testBondFullLifecycle = script do
 
   assertMsg "Coupon amount should be 75.0 (25.0 per bond * 3 bonds)" (couponAmount1 == 75.0)
 
-  processResult1 <- submitWithDisclosures alice [bondFactoryDisclosure] do
+  processResult1 <- submitWithDisclosures alice [bondInstrumentDisclosure] do
     exerciseCmd instructionCid1 BondLifecycleInstruction.Process
 
   let newBondCid1 = case processResult1 of
@@ -327,7 +332,7 @@ testBondFullLifecycle = script do
       effectCid = effectCid2
       bondHoldingCid = bobBondHolding
       bondRulesCid = rulesCid
-      bondFactoryCid = bondFactoryCid
+      bondInstrumentCid = instrumentCid
       currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
       issuerCurrencyHoldingCid = charlieCurrencyHoldingCid2
       holder = bob
@@ -393,7 +398,7 @@ testBondFullLifecycle = script do
       effectCid = effectCid2
       bondHoldingCid = aliceRemainingHolding
       bondRulesCid = rulesCid
-      bondFactoryCid = bondFactoryCid
+      bondInstrumentCid = instrumentCid
       currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
       issuerCurrencyHoldingCid = charlieCurrencyHoldingCid3
       holder = alice

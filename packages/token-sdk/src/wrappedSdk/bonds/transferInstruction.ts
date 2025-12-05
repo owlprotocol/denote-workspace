@@ -5,12 +5,9 @@ import { ExtraArgs } from "../transferRequest.js";
 import { UserKeyPair } from "../../types/UserKeyPair.js";
 import { v4 } from "uuid";
 import { Types } from "@canton-network/core-ledger-client";
-import {
-    bondTransferInstructionTemplateId,
-    lockedBondTemplateId,
-} from "../../constants/templateIds.js";
+import { bondTransferInstructionTemplateId } from "../../constants/templateIds.js";
 import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
-import { getContractDisclosure } from "../contractDisclosure.js";
+import { getLockedBondDisclosure } from "../disclosure.js";
 
 const TRANSFER_INSTRUCTION_INTERFACE_ID =
     "#splice-api-token-transfer-instruction-v1:Splice.Api.Token.TransferInstructionV1:TransferInstruction";
@@ -139,8 +136,5 @@ export async function getBondTransferInstructionDisclosure(
         instruction.contractEntry.JsActiveContract.createdEvent.createArgument
             .lockedBond;
 
-    return getContractDisclosure(adminLedger, {
-        templateId: lockedBondTemplateId,
-        contractId: lockedBondCid,
-    });
+    return getLockedBondDisclosure(adminLedger, lockedBondCid);
 }

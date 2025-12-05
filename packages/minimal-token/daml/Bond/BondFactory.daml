@@ -1,72 +1,37 @@
 module Bond.BondFactory where
 
-import Bond.Bond
-import Splice.Api.Token.MetadataV1 as MD
+import Bond.BondInstrument
 
 
 template BondFactory
   with
     issuer : Party
     instrumentId : Text -- e.g., show issuer <> "#Bond"
-    notional : Decimal
-    couponRate : Decimal
-    couponFrequency : Int
   where
     signatory issuer
 
-    ensure
-      notional > 0.0 &&
-      couponRate >= 0.0 &&
-      couponFrequency > 0
-
-    nonconsuming choice Mint : MintResult
+    -- | Create a bond instrument definition with all terms.
+    -- This is called once by the issuer to define the bond instrument.
+    nonconsuming choice CreateInstrument : ContractId BondInstrument
       with
         depository : Party  -- Trust anchor, can be same as issuer for simplified deployments
-        receiver : Party
-        amount : Decimal   -- Number of bond units to mint (e.g., 10.0 for 10 bonds)
-        maturityDate : Time
-      controller issuer, receiver
+        notional : Decimal  -- Face value per bond unit (e.g., 1000.0 USD per bond)
+        couponRate : Decimal  -- Annual coupon rate (e.g., 0.05 for 5%)
+        couponFrequency : Int  -- Payments per year (e.g., 2 for semi-annual)
+        maturityDate : Time  -- Maturity date for bonds created from this instrument
+      controller issuer
       do
-        assertMsg "Amount must be positive" (amount > 0.0)
-
         now <- getTime
         assertMsg "Maturity date must be in the future" (maturityDate > now)
 
-        bondCid <- create Bond with
+        instrumentCid <- create BondInstrument with
           issuer
           depository
-          owner = receiver
           instrumentId = instrumentId
-          version = "0"
-          notional = notional
-          amount
+          notional
+          couponRate
+          couponFrequency
           maturityDate
-          couponRate = couponRate
-          couponFrequency = couponFrequency
-          issueDate = now
-          lastEventTimestamp = now
 
-        pure MintResult with
-          bondCid
-          meta = MD.emptyMetadata
-
-    -- | Create a new version of a bond after a lifecycle event (e.g., coupon payment).
-    -- This creates a new bond with updated version and timestamp.
-    nonconsuming choice CreateNewVersion : ContractId Bond
-      with
-        oldBond : Bond
-        newVersion : Text
-        lastEventTimestamp : Time
-      controller issuer, oldBond.owner
-      do
-        assertMsg "Bond must belong to this factory" (oldBond.instrumentId == instrumentId)
-        create oldBond with
-          version = newVersion
-          lastEventTimestamp = lastEventTimestamp
-
--- | Result of minting bonds
-data MintResult = MintResult with
-    bondCid : ContractId Bond
-    meta : MD.Metadata
-  deriving (Show, Eq)
+        pure instrumentCid
 

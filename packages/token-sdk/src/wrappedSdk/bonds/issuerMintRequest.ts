@@ -9,12 +9,10 @@ import { UserKeyPair } from "../../types/UserKeyPair.js";
 import { getLatestContract } from "../../helpers/getLatestContract.js";
 
 export interface BondIssuerMintRequestParams {
-    bondFactoryCid: ContractId;
+    instrumentCid: ContractId;
     issuer: Party;
-    depository: Party;
     receiver: Party;
     amount: number;
-    maturityDate: string;
 }
 
 const getCreateBondIssuerMintRequestCommand = (

@@ -22,7 +22,7 @@ import Bond.Bond
 import Bond.BondRules
 import Bond.BondLifecycleEffect
 import Bond.BondLifecycleInstruction
-import Bond.BondFactory
+import Bond.BondInstrument
 import DA.Time
 
 -- | Result of creating a coupon payment instruction
@@ -56,7 +56,7 @@ template BondLifecycleClaimRequest
     effectCid : ContractId BondLifecycleEffect
     bondHoldingCid : ContractId H.Holding
     bondRulesCid : ContractId BondRules
-    bondFactoryCid : ContractId BondFactory
+    bondInstrumentCid : ContractId BondInstrument
     currencyTransferFactoryCid : ContractId TI.TransferFactory
     issuerCurrencyHoldingCid : ContractId H.Holding
     holder : Party
@@ -125,7 +125,7 @@ template BondLifecycleClaimRequest
             instructionCid <- create BondLifecycleInstruction with
               eventType = CouponPayment
               lockedBond = lockedBondCidTyped
-              bondFactoryCid = Some bondFactoryCid
+              bondInstrumentCid = Some bondInstrumentCid
               producedVersion = effect.producedVersion
               issuer = locked.bond.issuer
               holder = locked.bond.owner
@@ -185,7 +185,7 @@ template BondLifecycleClaimRequest
             instructionCid <- create BondLifecycleInstruction with
               eventType = Redemption
               lockedBond = lockedBondCidTyped
-              bondFactoryCid = None
+              bondInstrumentCid = None
               producedVersion = effect.producedVersion
               issuer = locked.bond.issuer
               holder = locked.bond.owner

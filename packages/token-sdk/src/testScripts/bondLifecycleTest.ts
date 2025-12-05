@@ -151,10 +151,7 @@ async function bondLifecycleTest() {
 
     const bondRulesCid = await charlieWrappedSdk.bonds.bondRules.getOrCreate();
     const bondFactoryCid = await charlieWrappedSdk.bonds.factory.getOrCreate(
-        bondInstrumentId,
-        1000.0, // notional
-        0.05, // couponRate (5% annual)
-        2 // couponFrequency (semi-annual)
+        bondInstrumentId
     );
     if (!bondFactoryCid) {
         throw new Error("Bond factory contract ID not found after getOrCreate");
@@ -199,18 +196,34 @@ async function bondLifecycleTest() {
     }
     console.info("Currency minted");
 
-    // Phase 1: Mint 3 bonds to Alice
-    console.info("Minting 3 bonds to Alice");
+    // Phase 1: Create bond instrument, then mint 3 bonds to Alice
+    console.info("Creating bond instrument");
     const now = new Date();
     const maturityDate = new Date(now.getTime() + 10 * 1000);
+    const notional = 1000.0;
+    const couponRate = 0.05; // 5% annual
+    const couponFrequency = 2; // semi-annual
 
+    const bondInstrumentCid =
+        await charlieWrappedSdk.bonds.factory.createInstrument(
+            bondFactoryCid,
+            bondInstrumentId,
+            {
+                depository: charlie.partyId,
+                notional,
+                couponRate,
+                couponFrequency,
+                maturityDate: maturityDate.toISOString(),
+            }
+        );
+    console.info(`Bond instrument created: ${bondInstrumentCid}`);
+
+    console.info("Minting 3 bonds to Alice");
     await aliceWrappedSdk.bonds.issuerMintRequest.create({
-        bondFactoryCid,
+        instrumentCid: bondInstrumentCid,
         issuer: charlie.partyId,
-        depository: charlie.partyId,
         receiver: alice.partyId,
         amount: 3.0, // Mint 3 bonds
-        maturityDate: maturityDate.toISOString(),
     });
     const bondMintCid = await aliceWrappedSdk.bonds.issuerMintRequest.getLatest(
         charlie.partyId
@@ -258,17 +271,26 @@ async function bondLifecycleTest() {
         throw new Error("Produced version not found");
     }
 
-    // Holder creates claim request
-    await aliceWrappedSdk.bonds.lifecycleClaimRequest.create({
-        effectCid: effectCid1,
-        bondHoldingCid: aliceBondCid,
-        bondRulesCid,
-        bondFactoryCid,
-        currencyTransferFactoryCid,
-        issuerCurrencyHoldingCid: currencyHolding1,
-        holder: alice.partyId,
-        issuer: charlie.partyId,
-    });
+    // Get bond instrument disclosure (Alice can't see it, but Charlie can)
+    const bondInstrumentDisclosure =
+        await charlieWrappedSdk.bonds.disclosure.getInstrumentDisclosure(
+            bondInstrumentCid
+        );
+
+    // Holder creates claim request (with disclosure so Alice can reference the instrument)
+    await aliceWrappedSdk.bonds.lifecycleClaimRequest.create(
+        {
+            effectCid: effectCid1,
+            bondHoldingCid: aliceBondCid,
+            bondRulesCid,
+            bondInstrumentCid,
+            currencyTransferFactoryCid,
+            issuerCurrencyHoldingCid: currencyHolding1,
+            holder: alice.partyId,
+            issuer: charlie.partyId,
+        },
+        [bondInstrumentDisclosure]
+    );
 
     // Issuer accepts claim request
     const claimCid1 =
@@ -283,14 +305,9 @@ async function bondLifecycleTest() {
         await charlieWrappedSdk.bonds.lifecycleInstruction.getLatest(
             charlie.partyId
         );
-    const bondFactoryDisclosure =
-        await charlieWrappedSdk.bonds.lifecycleInstruction.getDisclosure(
-            instructionCid1
-        );
-    await aliceWrappedSdk.bonds.lifecycleInstruction.process(
-        instructionCid1,
-        bondFactoryDisclosure ? [bondFactoryDisclosure] : undefined
-    );
+    await aliceWrappedSdk.bonds.lifecycleInstruction.process(instructionCid1, [
+        bondInstrumentDisclosure,
+    ]);
 
     // Holder accepts currency transfer if created
     const transferCid1 = await charlieWrappedSdk.transferInstruction.getLatest(
@@ -411,17 +428,26 @@ async function bondLifecycleTest() {
             charlie.partyId
         );
 
+    // Get bond instrument disclosure for Bob's claim request
+    const bondInstrumentDisclosure2 =
+        await charlieWrappedSdk.bonds.disclosure.getInstrumentDisclosure(
+            bondInstrumentCid
+        );
+
     // Holder creates claim request
-    await bobWrappedSdk.bonds.lifecycleClaimRequest.create({
-        effectCid: effectCid2,
-        bondHoldingCid: bobBondCid,
-        bondRulesCid,
-        bondFactoryCid,
-        currencyTransferFactoryCid,
-        issuerCurrencyHoldingCid: currencyHolding2,
-        holder: bob.partyId,
-        issuer: charlie.partyId,
-    });
+    await bobWrappedSdk.bonds.lifecycleClaimRequest.create(
+        {
+            effectCid: effectCid2,
+            bondHoldingCid: bobBondCid,
+            bondRulesCid,
+            bondInstrumentCid,
+            currencyTransferFactoryCid,
+            issuerCurrencyHoldingCid: currencyHolding2,
+            holder: bob.partyId,
+            issuer: charlie.partyId,
+        },
+        [bondInstrumentDisclosure2]
+    );
 
     // Issuer accepts claim request
     const claimCid2 = await bobWrappedSdk.bonds.lifecycleClaimRequest.getLatest(
@@ -454,16 +480,25 @@ async function bondLifecycleTest() {
 
     // Phase 5: Alice redeems her 2 remaining bonds
     console.info("Alice redeeming her 2 remaining bonds");
-    await aliceWrappedSdk.bonds.lifecycleClaimRequest.create({
-        effectCid: effectCid2,
-        bondHoldingCid: aliceRemainingBondCid,
-        bondRulesCid,
-        bondFactoryCid,
-        currencyTransferFactoryCid,
-        issuerCurrencyHoldingCid: currencyHolding3,
-        holder: alice.partyId,
-        issuer: charlie.partyId,
-    });
+    // Get bond instrument disclosure for Alice's redemption claim request
+    const bondInstrumentDisclosure3 =
+        await charlieWrappedSdk.bonds.disclosure.getInstrumentDisclosure(
+            bondInstrumentCid
+        );
+
+    await aliceWrappedSdk.bonds.lifecycleClaimRequest.create(
+        {
+            effectCid: effectCid2,
+            bondHoldingCid: aliceRemainingBondCid,
+            bondRulesCid,
+            bondInstrumentCid,
+            currencyTransferFactoryCid,
+            issuerCurrencyHoldingCid: currencyHolding3,
+            holder: alice.partyId,
+            issuer: charlie.partyId,
+        },
+        [bondInstrumentDisclosure3]
+    );
 
     const claimCid3 =
         await aliceWrappedSdk.bonds.lifecycleClaimRequest.getLatest(

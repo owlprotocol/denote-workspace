@@ -74,7 +74,11 @@ import {
     TransferInstructionAcceptParams,
     getLatestTokenTransferInstruction,
 } from "./transferInstruction.js";
-import { getTransferInstructionDisclosure } from "./disclosure.js";
+import {
+    getBondInstrumentDisclosure,
+    getLockedBondDisclosure,
+    getTransferInstructionDisclosure,
+} from "./disclosure.js";
 import { Types } from "@canton-network/core-ledger-client";
 import {
     acceptBondIssuerMintRequest,
@@ -99,6 +103,9 @@ import {
     createBondFactory,
     getLatestBondFactory,
     getOrCreateBondFactory,
+    createBondInstrument,
+    getLatestBondInstrument,
+    CreateBondInstrumentParams,
 } from "./bonds/factory.js";
 import {
     acceptBondLifecycleClaimRequest,
@@ -155,38 +162,37 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
     return {
         bonds: {
             factory: {
-                create: (
-                    userKeyPair: UserKeyPair,
-                    instrumentId: string,
-                    notional: number,
-                    couponRate: number,
-                    couponFrequency: number
-                ) =>
-                    createBondFactory(
-                        userLedger,
-                        userKeyPair,
-                        instrumentId,
-                        notional,
-                        couponRate,
-                        couponFrequency
-                    ),
+                create: (userKeyPair: UserKeyPair, instrumentId: string) =>
+                    createBondFactory(userLedger, userKeyPair, instrumentId),
                 getLatest: (instrumentId: string) =>
                     getLatestBondFactory(userLedger, instrumentId),
-                getOrCreate: (
-                    userKeyPair: UserKeyPair,
-                    instrumentId: string,
-                    notional: number,
-                    couponRate: number,
-                    couponFrequency: number
-                ) =>
+                getOrCreate: (userKeyPair: UserKeyPair, instrumentId: string) =>
                     getOrCreateBondFactory(
                         userLedger,
                         userKeyPair,
-                        instrumentId,
-                        notional,
-                        couponRate,
-                        couponFrequency
+                        instrumentId
                     ),
+                createInstrument: (
+                    userKeyPair: UserKeyPair,
+                    bondFactoryCid: ContractId,
+                    instrumentId: string,
+                    params: CreateBondInstrumentParams
+                ) =>
+                    createBondInstrument(
+                        userLedger,
+                        userKeyPair,
+                        bondFactoryCid,
+                        instrumentId,
+                        params
+                    ),
+                getLatestInstrument: (instrumentId: string) =>
+                    getLatestBondInstrument(userLedger, instrumentId),
+            },
+            disclosure: {
+                getInstrumentDisclosure: (bondInstrumentCid: ContractId) =>
+                    getBondInstrumentDisclosure(userLedger, bondInstrumentCid),
+                getLockedBondDisclosure: (lockedBondCid: ContractId) =>
+                    getLockedBondDisclosure(userLedger, lockedBondCid),
             },
             issuerMintRequest: {
                 create: (
@@ -263,12 +269,14 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             lifecycleClaimRequest: {
                 create: (
                     userKeyPair: UserKeyPair,
-                    params: BondLifecycleClaimRequestParams
+                    params: BondLifecycleClaimRequestParams,
+                    disclosedContracts?: Types["DisclosedContract"][]
                 ) =>
                     createBondLifecycleClaimRequest(
                         userLedger,
                         userKeyPair,
-                        params
+                        params,
+                        disclosedContracts
                     ),
                 getLatest: (issuer: Party) =>
                     getLatestBondLifecycleClaimRequest(userLedger, issuer),
@@ -599,36 +607,36 @@ export const getWrappedSdkWithKeyPair = (
     return {
         bonds: {
             factory: {
-                create: (
-                    instrumentId: string,
-                    notional: number,
-                    couponRate: number,
-                    couponFrequency: number
-                ) =>
-                    createBondFactory(
-                        userLedger,
-                        userKeyPair,
-                        instrumentId,
-                        notional,
-                        couponRate,
-                        couponFrequency
-                    ),
+                create: (instrumentId: string) =>
+                    createBondFactory(userLedger, userKeyPair, instrumentId),
                 getLatest: (instrumentId: string) =>
                     getLatestBondFactory(userLedger, instrumentId),
-                getOrCreate: (
-                    instrumentId: string,
-                    notional: number,
-                    couponRate: number,
-                    couponFrequency: number
-                ) =>
+                getOrCreate: (instrumentId: string) =>
                     getOrCreateBondFactory(
                         userLedger,
                         userKeyPair,
-                        instrumentId,
-                        notional,
-                        couponRate,
-                        couponFrequency
+                        instrumentId
                     ),
+                createInstrument: (
+                    bondFactoryCid: ContractId,
+                    instrumentId: string,
+                    params: CreateBondInstrumentParams
+                ) =>
+                    createBondInstrument(
+                        userLedger,
+                        userKeyPair,
+                        bondFactoryCid,
+                        instrumentId,
+                        params
+                    ),
+                getLatestInstrument: (instrumentId: string) =>
+                    getLatestBondInstrument(userLedger, instrumentId),
+            },
+            disclosure: {
+                getInstrumentDisclosure: (bondInstrumentCid: ContractId) =>
+                    getBondInstrumentDisclosure(userLedger, bondInstrumentCid),
+                getLockedBondDisclosure: (lockedBondCid: ContractId) =>
+                    getLockedBondDisclosure(userLedger, lockedBondCid),
             },
             issuerMintRequest: {
                 create: (params: BondIssuerMintRequestParams) =>
@@ -693,11 +701,15 @@ export const getWrappedSdkWithKeyPair = (
                     ),
             },
             lifecycleClaimRequest: {
-                create: (params: BondLifecycleClaimRequestParams) =>
+                create: (
+                    params: BondLifecycleClaimRequestParams,
+                    disclosedContracts?: Types["DisclosedContract"][]
+                ) =>
                     createBondLifecycleClaimRequest(
                         userLedger,
                         userKeyPair,
-                        params
+                        params,
+                        disclosedContracts
                     ),
                 getLatest: (issuer: Party) =>
                     getLatestBondLifecycleClaimRequest(userLedger, issuer),

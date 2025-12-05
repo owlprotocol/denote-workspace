@@ -1,69 +1,62 @@
 /**
  * BondFactory module for managing bond minting factories.
  *
- * Unlike token factories, BondFactory stores the bond's terms (notional, couponRate, couponFrequency).
- * All bonds minted from a specific factory share these terms - only the amount and maturityDate vary per mint.
+ * BondFactory creates bond instrument definitions. The factory itself only stores the issuer and instrumentId.
+ * Bond terms (notional, couponRate, couponFrequency, maturityDate) are specified when creating the instrument
+ * via the CreateInstrument choice, not when creating the factory.
  *
  */
 
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
-import { bondFactoryTemplateId } from "../../constants/templateIds.js";
+import {
+    bondFactoryTemplateId,
+    bondInstrumentTemplateId,
+} from "../../constants/templateIds.js";
 import { getCreateCommand } from "../../helpers/getCreateCommand.js";
+import { getExerciseCommand } from "../../helpers/getExerciseCommand.js";
 import { getLatestContract } from "../../helpers/getLatestContract.js";
-import { Party } from "../../types/daml.js";
+import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
+import { ContractId, Party } from "../../types/daml.js";
 import { UserKeyPair } from "../../types/UserKeyPair.js";
 
 /**
  * Parameters for creating a BondFactory contract.
  *
- * The factory stores bond terms that are shared by all bonds minted from it.
+ * The factory only stores the issuer and instrumentId. Bond terms are specified
+ * when creating the instrument via CreateInstrument choice.
  */
 export interface BondFactoryParams {
     /** The party issuing the bonds */
     issuer: Party;
     /** Unique identifier for the bond instrument (e.g., "party123#Bond") */
     instrumentId: string;
-    /** Face value per bond unit (e.g., 1000 means each bond has $1000 face value) */
-    notional: number;
-    /** Annual coupon rate as a decimal (e.g., 0.05 = 5% annual interest) */
-    couponRate: number;
-    /** Number of coupon payments per year (e.g., 2 = semi-annual, 4 = quarterly) */
-    couponFrequency: number;
 }
 
 const getCreateBondFactoryCommand = (params: BondFactoryParams) =>
     getCreateCommand({ templateId: bondFactoryTemplateId, params });
 
 /**
- * Creates a new BondFactory contract with specified bond terms.
+ * Creates a new BondFactory contract.
  *
- * The factory stores bond terms (notional, couponRate, couponFrequency) that are shared by all bonds
- * minted from this factory. Only the amount and maturityDate vary per individual bond mint.
+ * The factory only stores the issuer and instrumentId. Bond terms (notional, couponRate,
+ * couponFrequency, maturityDate) are specified later when creating the instrument via
+ * the createBondInstrument function.
  *
  * @param userLedger - Ledger controller for the issuer party
  * @param userKeyPair - Key pair for signing the transaction
  * @param instrumentId - Unique identifier for the bond instrument (e.g., "party123#Bond")
- * @param notional - Face value per bond unit (e.g., 1000 = $1000 face value per bond)
- * @param couponRate - Annual coupon rate as decimal (e.g., 0.05 = 5% annual)
- * @param couponFrequency - Coupon payments per year (e.g., 2 = semi-annual)
  */
 // TODO: do not pass userKeyPair here
 export async function createBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string,
-    notional: number,
-    couponRate: number,
-    couponFrequency: number
+    instrumentId: string
 ) {
     const issuer = userLedger.getPartyId();
     const createBondFactoryCommand = getCreateBondFactoryCommand({
         instrumentId,
         issuer,
-        notional,
-        couponRate,
-        couponFrequency,
     });
     await userLedger.prepareSignExecuteAndWaitFor(
         [createBondFactoryCommand],
@@ -109,29 +102,113 @@ export async function getLatestBondFactory(
  * @param userLedger - Ledger controller for the issuer party
  * @param userKeyPair - Key pair for signing the transaction (only used if creating)
  * @param instrumentId - Unique identifier for the bond instrument (e.g., "party123#Bond")
- * @param notional - Face value per bond unit (e.g., 1000 = $1000 face value per bond)
- * @param couponRate - Annual coupon rate as decimal (e.g., 0.05 = 5% annual)
- * @param couponFrequency - Coupon payments per year (e.g., 2 = semi-annual)
  * @returns The contract ID of the existing or newly created factory
  */
 export async function getOrCreateBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string,
-    notional: number,
-    couponRate: number,
-    couponFrequency: number
+    instrumentId: string
 ) {
     const contractId = await getLatestBondFactory(userLedger, instrumentId);
     if (contractId) return contractId;
 
-    await createBondFactory(
-        userLedger,
-        userKeyPair,
-        instrumentId,
-        notional,
-        couponRate,
-        couponFrequency
-    );
+    await createBondFactory(userLedger, userKeyPair, instrumentId);
     return (await getLatestBondFactory(userLedger, instrumentId))!;
+}
+
+export interface CreateBondInstrumentParams {
+    depository: Party;
+    notional: number;
+    couponRate: number;
+    couponFrequency: number;
+    maturityDate: string;
+}
+
+export interface BondInstrumentParams {
+    issuer: Party;
+    depository: Party;
+    instrumentId: string;
+    notional: number;
+    couponRate: number;
+    couponFrequency: number;
+    maturityDate: string;
+}
+
+/**
+ * Create a bond instrument via the factory.
+ * This creates the instrument definition with all bond terms.
+ * @param userLedger - The issuer's ledger controller
+ * @param userKeyPair - The issuer's key pair for signing
+ * @param bondFactoryCid - The bond factory contract ID
+ * @param instrumentId - The instrument ID (from the factory)
+ * @param params - Instrument creation parameters
+ */
+export async function createBondInstrument(
+    userLedger: LedgerController,
+    userKeyPair: UserKeyPair,
+    bondFactoryCid: ContractId,
+    instrumentId: string,
+    params: CreateBondInstrumentParams
+): Promise<ContractId> {
+    const createInstrumentCommand = getExerciseCommand({
+        templateId: bondFactoryTemplateId,
+        contractId: bondFactoryCid,
+        choice: "CreateInstrument",
+        params: {
+            depository: params.depository,
+            notional: params.notional,
+            couponRate: params.couponRate,
+            couponFrequency: params.couponFrequency,
+            maturityDate: params.maturityDate,
+        },
+    });
+
+    await userLedger.prepareSignExecuteAndWaitFor(
+        [createInstrumentCommand],
+        userKeyPair.privateKey,
+        v4()
+    );
+
+    // Query for the newly created instrument
+    const instrumentCid = await getLatestBondInstrument(
+        userLedger,
+        instrumentId
+    );
+    if (!instrumentCid) {
+        throw new Error(
+            "Failed to create bond instrument: instrument not found after creation"
+        );
+    }
+    return instrumentCid;
+}
+
+/**
+ * Get the latest bond instrument for a given instrument ID
+ */
+export async function getLatestBondInstrument(
+    userLedger: LedgerController,
+    instrumentId: string
+): Promise<ContractId | undefined> {
+    const issuer = userLedger.getPartyId();
+    const end = await userLedger.ledgerEnd();
+    const activeContracts = (await userLedger.activeContracts({
+        offset: end.offset,
+        filterByParty: true,
+        parties: [issuer],
+        templateIds: [bondInstrumentTemplateId],
+    })) as ActiveContractResponse<BondInstrumentParams>[];
+
+    // Filter by instrumentId
+    for (const contract of activeContracts) {
+        const jsActive = contract.contractEntry.JsActiveContract;
+        if (!jsActive) continue;
+        const { createArgument } = jsActive.createdEvent;
+        if (
+            createArgument.instrumentId === instrumentId &&
+            createArgument.issuer === issuer
+        ) {
+            return jsActive.createdEvent.contractId;
+        }
+    }
+    return undefined;
 }

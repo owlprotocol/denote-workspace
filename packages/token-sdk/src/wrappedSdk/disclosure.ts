@@ -3,7 +3,7 @@ import { LedgerController } from "@canton-network/wallet-sdk";
 import { ContractId, Party } from "../types/daml.js";
 import { getContractDisclosure } from "./contractDisclosure.js";
 import {
-    bondFactoryTemplateId,
+    bondInstrumentTemplateId,
     lockedBondTemplateId,
     lockedMyTokenTemplateId,
     tokenTemplateId,
@@ -85,13 +85,13 @@ export async function getMyTokenDisclosure(
     });
 }
 
-export async function getBondFactoryDisclosure(
+export async function getBondInstrumentDisclosure(
     ledger: LedgerController,
-    bondFactoryCid: ContractId
+    bondInstrumentCid: ContractId
 ): Promise<Types["DisclosedContract"]> {
     return getContractDisclosure(ledger, {
-        templateId: bondFactoryTemplateId,
-        contractId: bondFactoryCid,
+        templateId: bondInstrumentTemplateId,
+        contractId: bondInstrumentCid,
     });
 }
 
