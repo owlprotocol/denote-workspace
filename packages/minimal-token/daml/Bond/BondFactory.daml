@@ -7,9 +7,6 @@ template BondFactory
   with
     issuer : Party
     instrumentId : Text -- e.g., show issuer <> "#Bond"
-    notional : Decimal
-    couponRate : Decimal
-    couponFrequency : Int
   where
     signatory issuer
     -- | Create a bond instrument definition with all terms.
@@ -36,5 +33,4 @@ template BondFactory
           maturityDate
 
         pure instrumentCid
-
 

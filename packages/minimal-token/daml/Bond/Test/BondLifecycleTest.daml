@@ -47,9 +47,6 @@ testBondFullLifecycle = script do
     createCmd BondFactory with
       issuer = charlie
       instrumentId = instrumentId
-      notional = 1000.0
-      couponRate = couponRate
-      couponFrequency = couponFrequency
 
   let currencyInstrumentId = show charlie <> "#Currency"
   currencyRulesCid <- submit charlie do

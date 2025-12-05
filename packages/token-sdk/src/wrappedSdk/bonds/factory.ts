@@ -31,12 +31,6 @@ export interface BondFactoryParams {
     issuer: Party;
     /** Unique identifier for the bond instrument (e.g., "party123#Bond") */
     instrumentId: string;
-    /** Face value per bond unit (e.g., 1000 means each bond has $1000 face value) */
-    notional: number;
-    /** Annual coupon rate as a decimal (e.g., 0.05 = 5% annual interest) */
-    couponRate: number;
-    /** Number of coupon payments per year (e.g., 2 = semi-annual, 4 = quarterly) */
-    couponFrequency: number;
 }
 
 const getCreateBondFactoryCommand = (params: BondFactoryParams) =>
@@ -57,18 +51,12 @@ const getCreateBondFactoryCommand = (params: BondFactoryParams) =>
 export async function createBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string,
-    notional: number,
-    couponRate: number,
-    couponFrequency: number
+    instrumentId: string
 ) {
     const issuer = userLedger.getPartyId();
     const createBondFactoryCommand = getCreateBondFactoryCommand({
         instrumentId,
         issuer,
-        notional,
-        couponRate,
-        couponFrequency,
     });
     await userLedger.prepareSignExecuteAndWaitFor(
         [createBondFactoryCommand],
@@ -119,22 +107,12 @@ export async function getLatestBondFactory(
 export async function getOrCreateBondFactory(
     userLedger: LedgerController,
     userKeyPair: UserKeyPair,
-    instrumentId: string,
-    notional: number,
-    couponRate: number,
-    couponFrequency: number
+    instrumentId: string
 ) {
     const contractId = await getLatestBondFactory(userLedger, instrumentId);
     if (contractId) return contractId;
 
-    await createBondFactory(
-        userLedger,
-        userKeyPair,
-        instrumentId,
-        notional,
-        couponRate,
-        couponFrequency
-    );
+    await createBondFactory(userLedger, userKeyPair, instrumentId);
     return (await getLatestBondFactory(userLedger, instrumentId))!;
 }
 
