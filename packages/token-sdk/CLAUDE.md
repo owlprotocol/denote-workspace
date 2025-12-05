@@ -38,6 +38,7 @@ Before running this SDK:
 - `tsx src/hello.ts` - Basic demo script showing token operations
 - `tsx src/testScripts/threePartyTransfer.ts` - Comprehensive three-party transfer demonstration
 - `tsx src/testScripts/transferWithPreapproval.ts` - Transfer with preapproval pattern
+- `tsx src/testScripts/bondLifecycleTest.ts` - Complete bond lifecycle demonstration (mint, coupon, transfer, redemption)
 
 ### Other Commands
 - `pnpm clean` - Remove build artifacts
@@ -210,6 +211,350 @@ const disclosure = await getTransferInstructionDisclosure(
 - Requires lower-level LedgerClient API with disclosed contracts
 - See Multi-Party Transaction Workarounds below for implementation details
 
+### Bond Operations
+
+The SDK provides comprehensive support for bond instruments following CIP-0056 standards and daml-finance patterns. The bond implementation demonstrates:
+- Fungible bond architecture with lifecycle management
+- Coupon payment processing
+- Bond transfers with partial amount support
+- Redemption at maturity
+
+#### Bond Architecture Overview
+
+**Fungible Bond Model:**
+
+Bonds use a fungible design where a single contract can hold multiple bond units:
+- **notional**: Face value per bond unit (e.g., $1000 per bond)
+- **amount**: Number of bond units held (e.g., 3 bonds)
+- **Total face value**: `notional × amount` (e.g., $1000 × 3 = $3000)
+
+This allows efficient portfolio management - you can hold 100 bonds in a single contract rather than 100 separate contracts.
+
+**BondFactory Stores Bond Terms:**
+
+Unlike token factories, BondFactory stores the bond's terms (`notional`, `couponRate`, `couponFrequency`). All bonds minted from a specific factory share:
+- Same notional (face value per unit)
+- Same coupon rate (e.g., 5% annual)
+- Same coupon frequency (e.g., 2 = semi-annual payments)
+
+Only the maturity date varies per bond issuance.
+
+**Per-Unit Payment Calculations:**
+
+Lifecycle events (coupons, redemption) calculate payments on a per-unit basis:
+- **Coupon payment**: `(notional × couponRate / couponFrequency) × amount`
+  - Example: `(1000 × 0.05 / 2) × 3 = 25 × 3 = $75`
+- **Redemption payment**: `(notional × amount) + final coupon`
+  - Example: `(1000 × 3) + 75 = $3075`
+
+**Partial Transfer Support:**
+
+BondRules supports splitting bonds for partial transfers:
+- If you hold 3 bonds and transfer 1, the system automatically:
+  - Locks 1 bond for transfer
+  - Creates a "change" bond with the remaining 2 bonds
+  - Returns the change bond to you immediately
+
+#### Bond Wrapper Modules
+
+**`bonds/bondRules.ts`** - Centralized locking authority
+- `createBondRules()` - Create issuer-signed bond rules (required for all bond operations)
+- `getLatestBondRules()` - Query latest bond rules by issuer
+- `getOrCreateBondRules()` - Get existing or create new bond rules
+
+Pattern: Issuer-signed, owner-controlled. The issuer signs the rules, but the bond owner controls when to invoke locking operations.
+
+**`bonds/factory.ts`** - Bond minting factory
+- `createBondFactory(userLedger, userKeyPair, instrumentId, notional, couponRate, couponFrequency)` - Create factory with bond terms
+- `getLatestBondFactory()` - Query latest factory by instrument ID
+- `getOrCreateBondFactory()` - Get existing or create new factory
+
+**Important**: The factory stores `notional`, `couponRate`, and `couponFrequency`. These terms are shared by all bonds minted from this factory. Only `amount` and `maturityDate` vary per mint.
+
+**`bonds/issuerMintRequest.ts`** - Two-step bond minting
+- `createBondIssuerMintRequest(receiverLedger, receiverKeyPair, params)` - Receiver proposes bond mint
+  - `params.amount` - Number of bond units (NOT principal amount)
+  - `params.maturityDate` - ISO string date when bond matures
+- `getLatestBondIssuerMintRequest()` - Query latest mint request
+- `getAllBondIssuerMintRequests()` - Query all mint requests for issuer
+- `acceptBondIssuerMintRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer accepts, mints bonds
+- `declineBondIssuerMintRequest()` - Issuer declines request
+- `withdrawBondIssuerMintRequest()` - Receiver withdraws request
+
+**Pattern**: Receiver proposes → Issuer accepts → Bonds minted (avoids three-party signing: issuer, depository, owner)
+
+**`bonds/lifecycleRule.ts`** - Lifecycle event processing
+- `createBondLifecycleRule(userLedger, userKeyPair, params)` - Create lifecycle rule
+  - `params.depository` - Depository party (often same as issuer)
+  - `params.currencyInstrumentId` - Currency used for payments
+- `getLatestBondLifecycleRule()` - Query latest rule
+- `getOrCreateBondLifecycleRule()` - Get existing or create new rule
+- `processCouponPaymentEvent(userLedger, userKeyPair, contractId, params)` - Process coupon payment
+  - `params.targetInstrumentId` - Bond instrument ID
+  - `params.targetVersion` - Current bond version (for version tracking)
+  - `params.bondCid` - Sample bond contract (used to infer bond terms)
+- `processRedemptionEvent(userLedger, userKeyPair, contractId, params)` - Process redemption at maturity
+  - `params.bondCid` - Sample bond contract (used to infer bond terms)
+
+**Security**: Uses ledger time (`getTime`) directly instead of accepting dates as parameters. This prevents time manipulation attacks where an issuer could backdate or future-date lifecycle events.
+
+**Term Inference**: Lifecycle rules infer bond terms (`notional`, `couponRate`, `couponFrequency`) from a sample bond contract, ensuring consistency and reducing redundant parameters.
+
+**`bonds/lifecycleEffect.ts`** - Effect query helper
+- `getLatestBondLifecycleEffect(ledger, party)` - Query latest lifecycle effect
+  - Returns: `{ contractId, producedVersion }` where `producedVersion` is the new bond version after coupon payment (or `null` for redemption)
+
+**Pattern**: Lifecycle effects are single source of truth. The issuer creates one effect contract that all holders of the target bond version can claim.
+
+**`bonds/lifecycleClaimRequest.ts`** - Claim lifecycle events
+- `createBondLifecycleClaimRequest(holderLedger, holderKeyPair, params)` - Holder creates claim for coupon/redemption
+  - `params.effectCid` - Lifecycle effect contract to claim
+  - `params.bondHoldingCid` - Holder's bond contract
+  - `params.bondRulesCid` - Bond rules for locking
+  - `params.bondFactoryCid` - Bond factory (for creating new version after coupon)
+  - `params.currencyTransferFactoryCid` - Currency transfer factory (for payment)
+  - `params.issuerCurrencyHoldingCid` - Issuer's currency holding to use for payment
+- `getLatestBondLifecycleClaimRequest()` - Query latest claim request
+- `getAllBondLifecycleClaimRequests()` - Query all claim requests for issuer
+- `acceptBondLifecycleClaimRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer accepts claim
+  - Creates `BondLifecycleInstruction` for holder to process
+  - Creates currency `TransferInstruction` for payment
+- `declineBondLifecycleClaimRequest()` - Issuer declines claim
+- `withdrawBondLifecycleClaimRequest()` - Holder withdraws claim
+
+**Payment Calculation**: The system multiplies `effect.amount` (per-unit amount) by `bond.amount` (number of units) to calculate total payment. Example: If effect amount is $25 per bond and holder has 3 bonds, total payment is $75.
+
+**`bonds/lifecycleInstruction.ts`** - Execute lifecycle events
+- `processBondLifecycleInstruction(holderLedger, holderKeyPair, contractId, disclosures?)` - Process lifecycle instruction
+  - For coupon payments: Archives old bond, creates new bond version, updates `lastEventTimestamp`
+  - For redemption: Archives bond (no new version created)
+  - Requires BondFactory disclosure for coupon payments (to create new version)
+- `getBondLifecycleInstruction()` - Query lifecycle instruction
+- `getBondLifecycleInstructionDisclosure()` - Get BondFactory disclosure for coupon processing
+
+**Disclosure Requirements**:
+- **Coupon payments**: Requires BondFactory disclosure (holder needs to see factory to create new bond version)
+- **Redemption**: No disclosure required (bond is simply archived)
+
+**`bonds/transferFactory.ts`** - Bond transfer factory
+- `createBondTransferFactory(userLedger, userKeyPair, rulesCid)` - Create transfer factory with bond rules reference
+- `getLatestBondTransferFactory()` - Query latest factory
+- `getOrCreateBondTransferFactory()` - Get existing or create new factory
+
+**`bonds/transferRequest.ts`** - Bond transfer request/accept
+- `createBondTransferRequest(senderLedger, senderKeyPair, params)` - Sender creates transfer request
+  - `params.transfer.amount` - Number of bond units to transfer (can be partial)
+- `getLatestBondTransferRequest()` - Query latest transfer request
+- `acceptBondTransferRequest(adminLedger, adminKeyPair, contractId)` - Admin accepts request
+  - Locks bonds via BondRules (automatically creates change bond if partial transfer)
+  - Creates `BondTransferInstruction` in pending state
+- `declineBondTransferRequest()` - Admin declines request
+- `withdrawBondTransferRequest()` - Sender withdraws request
+
+**Partial Transfers**: If transferring less than total holdings, BondRules automatically splits the bond:
+- Locks the requested amount
+- Creates a change bond with the remainder
+- Returns change bond to sender immediately
+
+**`bonds/transferInstruction.ts`** - Bond transfer acceptance
+- `acceptBondTransferInstruction(receiverLedger, receiverKeyPair, contractId, disclosures, params?)` - Receiver accepts transfer
+  - Requires LockedBond disclosure (receiver needs to see locked bond)
+- `rejectBondTransferInstruction()` - Receiver rejects (returns locked bond to sender)
+- `withdrawBondTransferInstruction()` - Sender withdraws (unlocks bond back to sender)
+- `getLatestBondTransferInstruction()` - Query latest transfer instruction
+- `getBondTransferInstructionDisclosure(adminLedger, transferInstructionCid)` - Get LockedBond disclosure for receiver
+
+**Disclosure Requirements**: Receiver must obtain LockedBond disclosure from admin before accepting transfer (LockedBond is not visible to receiver by default).
+
+#### Complete Bond Lifecycle Flow
+
+**Phase 1: Infrastructure Setup (Issuer)**
+```typescript
+const bondRulesCid = await charlieWrappedSdk.bonds.bondRules.getOrCreate();
+const bondFactoryCid = await charlieWrappedSdk.bonds.factory.getOrCreate(
+    bondInstrumentId,
+    1000.0,  // notional (face value per bond)
+    0.05,    // couponRate (5% annual)
+    2        // couponFrequency (semi-annual)
+);
+const lifecycleRuleCid = await charlieWrappedSdk.bonds.lifecycleRule.getOrCreate({
+    depository: charlie.partyId,
+    currencyInstrumentId: { admin: charlie.partyId, id: currencyInstrumentId },
+});
+```
+
+**Phase 2: Bond Minting (Receiver proposes, Issuer accepts)**
+```typescript
+// Alice creates mint request for 3 bond units
+await aliceWrappedSdk.bonds.issuerMintRequest.create({
+    bondFactoryCid,
+    issuer: charlie.partyId,
+    depository: charlie.partyId,
+    receiver: alice.partyId,
+    amount: 3.0,  // 3 bonds, each with $1000 notional = $3000 total face value
+    maturityDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+});
+
+// Issuer accepts mint request
+const mintRequestCid = await aliceWrappedSdk.bonds.issuerMintRequest.getLatest(charlie.partyId);
+await charlieWrappedSdk.bonds.issuerMintRequest.accept(mintRequestCid);
+```
+
+**Phase 3: Coupon Payment (Issuer processes, Holder claims)**
+```typescript
+// Wait 6 months (for semi-annual coupon)
+
+// Issuer processes coupon event (uses ledger time)
+await charlieWrappedSdk.bonds.lifecycleRule.processCouponPaymentEvent(
+    lifecycleRuleCid,
+    {
+        targetInstrumentId: bondInstrumentId,
+        targetVersion: "0",  // Initial version
+        bondCid: aliceBondCid,  // Sample bond for term inference
+    }
+);
+
+// Get the effect and new version
+const { contractId: effectCid, producedVersion } =
+    await charlieWrappedSdk.bonds.lifecycleEffect.getLatest(charlie.partyId);
+
+// Holder creates claim request
+await aliceWrappedSdk.bonds.lifecycleClaimRequest.create({
+    effectCid,
+    bondHoldingCid: aliceBondCid,
+    bondRulesCid,
+    bondFactoryCid,
+    currencyTransferFactoryCid,
+    issuerCurrencyHoldingCid: currencyHolding1,
+    holder: alice.partyId,
+    issuer: charlie.partyId,
+});
+
+// Issuer accepts claim (creates instruction + currency transfer)
+const claimCid = await aliceWrappedSdk.bonds.lifecycleClaimRequest.getLatest(charlie.partyId);
+await charlieWrappedSdk.bonds.lifecycleClaimRequest.accept(claimCid);
+
+// Holder processes instruction (with BondFactory disclosure)
+const instructionCid = await charlieWrappedSdk.bonds.lifecycleInstruction.getLatest(charlie.partyId);
+const bondFactoryDisclosure = await charlieWrappedSdk.bonds.lifecycleInstruction.getDisclosure(instructionCid);
+await aliceWrappedSdk.bonds.lifecycleInstruction.process(
+    instructionCid,
+    bondFactoryDisclosure ? [bondFactoryDisclosure] : undefined
+);
+
+// Holder accepts currency transfer (with LockedToken disclosure)
+const transferCid = await charlieWrappedSdk.transferInstruction.getLatest(charlie.partyId);
+if (transferCid) {
+    const disclosure = await charlieWrappedSdk.transferInstruction.getDisclosure(transferCid);
+    await aliceWrappedSdk.transferInstruction.accept(transferCid, [disclosure.lockedTokenDisclosure]);
+}
+
+// Result: Alice receives coupon payment (3 bonds × $25 = $75) and has new bond version
+```
+
+**Phase 4: Bond Transfer (Sender proposes, Admin accepts, Receiver accepts)**
+```typescript
+// Alice transfers 1 bond out of 3 to Bob
+
+// Create bond transfer factory
+const bondTransferFactoryCid = await charlieWrappedSdk.bonds.transferFactory.getOrCreate(bondRulesCid);
+
+// Alice creates transfer request
+await aliceWrappedSdk.bonds.transferRequest.create({
+    transferFactoryCid: bondTransferFactoryCid,
+    expectedAdmin: charlie.partyId,
+    transfer: buildTransfer({
+        sender: alice.partyId,
+        receiver: bob.partyId,
+        amount: 1.0,  // Transfer 1 bond (out of 3)
+        instrumentId: { admin: charlie.partyId, id: bondInstrumentId },
+        requestedAt: new Date(Date.now() - 1000),
+        executeBefore: new Date(Date.now() + 400 * 24 * 60 * 60 * 1000),
+        inputHoldingCids: [aliceBondCid],
+    }),
+    extraArgs: emptyExtraArgs(),
+});
+
+// Admin accepts transfer request (locks 1 bond, creates change bond with 2 remaining)
+const transferRequestCid = await aliceWrappedSdk.bonds.transferRequest.getLatest(charlie.partyId);
+await charlieWrappedSdk.bonds.transferRequest.accept(transferRequestCid);
+
+// Receiver gets disclosure and accepts transfer
+const transferInstrCid = await charlieWrappedSdk.bonds.transferInstruction.getLatest(charlie.partyId);
+const disclosure = await charlieWrappedSdk.bonds.transferInstruction.getDisclosure(transferInstrCid);
+await bobWrappedSdk.bonds.transferInstruction.accept(transferInstrCid, [disclosure]);
+
+// Result: Bob has 1 bond, Alice has 2 bonds (as change)
+```
+
+**Phase 5: Redemption at Maturity (Issuer processes, Holder claims)**
+```typescript
+// Wait until maturity date
+
+// Issuer processes redemption event (uses ledger time)
+await charlieWrappedSdk.bonds.lifecycleRule.processRedemptionEvent(
+    lifecycleRuleCid,
+    {
+        targetInstrumentId: bondInstrumentId,
+        targetVersion: producedVersion,  // Current version after coupon
+        bondCid: bobBondCid,  // Sample bond for term inference
+    }
+);
+
+// Get the redemption effect
+const { contractId: effectCid2 } =
+    await charlieWrappedSdk.bonds.lifecycleEffect.getLatest(charlie.partyId);
+
+// Bob creates claim request
+await bobWrappedSdk.bonds.lifecycleClaimRequest.create({
+    effectCid: effectCid2,
+    bondHoldingCid: bobBondCid,
+    bondRulesCid,
+    bondFactoryCid,
+    currencyTransferFactoryCid,
+    issuerCurrencyHoldingCid: currencyHolding2,
+    holder: bob.partyId,
+    issuer: charlie.partyId,
+});
+
+// Issuer accepts claim
+const claimCid2 = await bobWrappedSdk.bonds.lifecycleClaimRequest.getLatest(charlie.partyId);
+await charlieWrappedSdk.bonds.lifecycleClaimRequest.accept(claimCid2);
+
+// Bob processes instruction (no disclosure needed for redemption)
+const instructionCid2 = await charlieWrappedSdk.bonds.lifecycleInstruction.getLatest(charlie.partyId);
+await bobWrappedSdk.bonds.lifecycleInstruction.process(instructionCid2);
+
+// Bob accepts currency transfer (principal + final coupon: 1 bond × $1025 = $1025)
+const transferCid2 = await charlieWrappedSdk.transferInstruction.getLatest(charlie.partyId);
+if (transferCid2) {
+    const disclosure2 = await charlieWrappedSdk.transferInstruction.getDisclosure(transferCid2);
+    await bobWrappedSdk.transferInstruction.accept(transferCid2, [disclosure2.lockedTokenDisclosure]);
+}
+
+// Result: Bob receives redemption payment ($1000 principal + $25 final coupon = $1025), bond is archived
+```
+
+#### Key Differences from Token Operations
+
+1. **Three-Party Authorization**: Bonds require `issuer`, `depository`, and `owner` signatures (tokens only require `issuer` and `owner`)
+
+2. **Lifecycle Events**: Bonds have lifecycle events (coupons, redemption) that create effects claimable by all holders
+
+3. **Fungible Architecture**: A single bond contract can hold multiple bond units, enabling efficient portfolio management
+
+4. **Term Storage**: BondFactory stores bond terms (`notional`, `couponRate`, `couponFrequency`) shared by all bonds from that factory
+
+5. **Per-Unit Payments**: Payment calculations are per-unit and multiplied by the number of bonds held
+
+6. **Partial Transfers**: BondRules automatically splits bonds for partial transfers, creating change bonds
+
+7. **Version Tracking**: Bonds have version strings that increment with each coupon payment, preventing double-claiming of lifecycle events
+
+8. **Ledger Time Security**: Lifecycle events use ledger time directly to prevent time manipulation attacks
+
+9. **Term Inference**: Lifecycle rules infer bond terms from sample bond contracts, ensuring consistency
+
 ### Known Issues and Multi-Party Authorization
 
 #### Multi-Party Signing Challenge
@@ -368,6 +713,12 @@ Tests are located in `src/index.test.ts` and use Vitest. The test setup is in `v
 - Demonstrates transfer preapproval workflow
 - Shows proposal/accept pattern for transfers
 - Run with: `tsx src/testScripts/transferWithPreapproval.ts`
+
+**`src/testScripts/bondLifecycleTest.ts`** - Complete bond lifecycle demonstration
+- Demonstrates fungible bond architecture (mint 3 bonds, transfer 1, redeem separately)
+- Covers: infrastructure setup, bond minting, coupon payment, partial transfer, redemption
+- Shows bond-specific patterns: version tracking, term inference, per-unit payments, disclosure requirements
+- Run with: `tsx src/testScripts/bondLifecycleTest.ts`
 
 **`src/hello.ts`** - Basic token operations
 - Simple demo of token factory creation and minting

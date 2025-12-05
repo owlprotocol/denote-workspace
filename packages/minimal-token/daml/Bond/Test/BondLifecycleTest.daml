@@ -1,0 +1,455 @@
+module Bond.Test.BondLifecycleTest where
+
+import Daml.Script
+import DA.Time
+
+import Bond.Bond (Bond, LockedBond)
+import Bond.BondFactory as BondFactory
+import Bond.BondInstrument as BondInstrument
+import Bond.BondRules as BondRules
+import Bond.IssuerMintRequest as IssuerMintRequest
+import Bond.TransferRequest as TransferRequest
+import Bond.BondLifecycleClaimRequest as BondLifecycleClaimRequest
+import Bond.BondLifecycleEffect
+import Bond.BondLifecycleInstruction as BondLifecycleInstruction
+import Bond.BondLifecycleRule as BondLifecycleRule
+import Bond.BondTransferInstruction
+import Bond.BondTransferFactory
+import Splice.Api.Token.HoldingV1 as H
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+import MyTokenRules
+import MyTransferFactory
+import MyTokenFactory
+import MyToken
+import MyToken.IssuerMintRequest as CurrencyMintRequest
+import MyTokenTransferInstruction
+
+-- | End-to-end test: mint 3 bonds → coupon payment (Alice) → transfer 1 bond to Bob → redemption (Bob, 1 bond) → redemption (Alice, 2 bonds)
+testBondFullLifecycle : Script ()
+testBondFullLifecycle = script do
+  charlie <- allocatePartyByHint (PartyIdHint "Charlie")
+  alice   <- allocatePartyByHint (PartyIdHint "Alice")
+  bob     <- allocatePartyByHint (PartyIdHint "Bob")
+
+  now <- getTime
+  let instrumentId = show charlie <> "#Bond"
+  let maturityDate = addRelTime now (days 365)  -- 1 year maturity
+  let couponRate = 0.05  -- 5% annual
+  let couponFrequency = 2  -- Semi-annual (2 payments per year)
+
+  -- Setup: Charlie creates infrastructure
+
+  rulesCid <- submit charlie do
+    createCmd BondRules with issuer = charlie
+
+  bondFactoryCid <- submit charlie do
+    createCmd BondFactory with
+      issuer = charlie
+      instrumentId = instrumentId
+
+  let currencyInstrumentId = show charlie <> "#Currency"
+  currencyRulesCid <- submit charlie do
+    createCmd MyTokenRules with issuer = charlie
+
+  currencyTransferFactoryCid <- submit charlie do
+    createCmd MyTransferFactory with
+      registry = charlie
+      rulesCid = currencyRulesCid
+
+  currencyTokenFactoryCid <- submit charlie do
+    createCmd MyTokenFactory with
+      issuer = charlie
+      instrumentId = currencyInstrumentId
+
+  let currencyTransferFactoryInterfaceCid : ContractId TI.TransferFactory = toInterfaceContractId @TI.TransferFactory currencyTransferFactoryCid
+
+  let currencyInstrumentIdHolding = H.InstrumentId with
+        admin = charlie
+        id = currencyInstrumentId
+  lifecycleRuleCid <- submit charlie do
+    createCmd BondLifecycleRule with
+      issuer = charlie
+      depository = charlie  -- Same as issuer for simplified test setup
+      currencyInstrumentId = currencyInstrumentIdHolding
+
+  -- Mint currency tokens for payments
+  -- Need 75.0 for 3 bonds' coupon payment (25.0 per bond * 3)
+  -- Need 1025.0 for Bob's 1 bond redemption (notional + final coupon)
+  -- Need 2050.0 for Alice's 2 bonds redemption (2 * (notional + final coupon))
+  currencyMintRequestCid1 <- submit charlie do
+    createCmd CurrencyMintRequest.IssuerMintRequest with
+      tokenFactoryCid = currencyTokenFactoryCid
+      issuer = charlie
+      receiver = charlie
+      amount = 75.0
+
+  currencyMintResult1 <- submit charlie do
+    exerciseCmd currencyMintRequestCid1 CurrencyMintRequest.Accept
+
+  currencyMintRequestCid2 <- submit charlie do
+    createCmd CurrencyMintRequest.IssuerMintRequest with
+      tokenFactoryCid = currencyTokenFactoryCid
+      issuer = charlie
+      receiver = charlie
+      amount = 1025.0
+
+  currencyMintResult2 <- submit charlie do
+    exerciseCmd currencyMintRequestCid2 CurrencyMintRequest.Accept
+
+  currencyMintRequestCid3 <- submit charlie do
+    createCmd CurrencyMintRequest.IssuerMintRequest with
+      tokenFactoryCid = currencyTokenFactoryCid
+      issuer = charlie
+      receiver = charlie
+      amount = 2050.0
+
+  currencyMintResult3 <- submit charlie do
+    exerciseCmd currencyMintRequestCid3 CurrencyMintRequest.Accept
+
+  let charlieCurrencyHoldingCid1 : ContractId H.Holding = toInterfaceContractId @H.Holding currencyMintResult1.tokenCid
+  let charlieCurrencyHoldingCid2 : ContractId H.Holding = toInterfaceContractId @H.Holding currencyMintResult2.tokenCid
+  let charlieCurrencyHoldingCid3 : ContractId H.Holding = toInterfaceContractId @H.Holding currencyMintResult3.tokenCid
+
+  -- Phase 1: Create bond instrument, then mint 3 bonds to Alice
+
+  let notional = 1000.0
+  instrumentCid <- submit charlie do
+    exerciseCmd bondFactoryCid BondFactory.CreateInstrument with
+      depository = charlie
+      notional = notional
+      couponRate = couponRate
+      couponFrequency = couponFrequency
+      maturityDate = maturityDate
+
+  mintRequestCid <- submit alice do
+    createCmd IssuerMintRequest.IssuerMintRequest with
+      instrumentCid = instrumentCid
+      issuer = charlie
+      receiver = alice
+      amount = 3.0
+
+  mintResult <- submit charlie do
+    exerciseCmd mintRequestCid IssuerMintRequest.Accept
+
+  let aliceBondCid = mintResult.bondCid
+  let aliceHolding : ContractId H.Holding = toInterfaceContractId @H.Holding aliceBondCid
+
+  aliceBond <- queryContractId alice aliceBondCid
+  initialVersion <- case aliceBond of
+        Some bond -> do
+          assertMsg "Initial version should be 0" (bond.version == "0")
+          assertMsg "Notional should be 1000" (bond.notional == 1000.0)
+          assertMsg "Amount should be 3.0 (3 bonds)" (bond.amount == 3.0)
+          assertMsg "Alice should be owner" (bond.owner == alice)
+          pure bond.version
+        None -> error "Alice's bond not found"
+
+  -- Phase 2: First coupon payment to Alice (6 months)
+  passTime (days 182)
+
+  effectCid1 <- submit charlie do
+    exerciseCmd lifecycleRuleCid BondLifecycleRule.ProcessCouponPaymentEvent with
+      targetInstrumentId = instrumentId
+      targetVersion = initialVersion
+      bondCid = aliceBondCid  -- Use Alice's bond to infer notional, couponRate, couponFrequency
+
+  Some effect1 <- queryContractId @BondLifecycleEffect charlie effectCid1
+  let couponPaymentDate1 = effect1.eventDate
+
+  bondInstrumentDisclosure <- do
+    optDisc <- queryDisclosure @BondInstrument.BondInstrument charlie instrumentCid
+    case optDisc of
+      Some d -> pure d
+      None -> fail "BondInstrument disclosure not found"
+
+  claimRequestCid1 <- submit alice do
+    createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
+      effectCid = effectCid1
+      bondHoldingCid = aliceHolding
+      bondRulesCid = rulesCid
+      bondInstrumentCid = instrumentCid
+      currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
+      issuerCurrencyHoldingCid = charlieCurrencyHoldingCid1
+      holder = alice
+      issuer = charlie
+
+  claimResult1 <- submit charlie do
+    exerciseCmd claimRequestCid1 BondLifecycleClaimRequest.Accept
+
+  let (instructionCid1, couponAmount1, currencyTransferCidOpt1) = case claimResult1 of
+        ClaimResult_CouponPayment result -> (result.instructionCid, result.couponAmount, result.currencyTransferInstructionCid)
+        ClaimResult_Redemption _ -> error "Expected coupon payment result, got redemption result"
+
+  assertMsg "Coupon amount should be 75.0 (25.0 per bond * 3 bonds)" (couponAmount1 == 75.0)
+
+  processResult1 <- submitWithDisclosures alice [bondInstrumentDisclosure] do
+    exerciseCmd instructionCid1 BondLifecycleInstruction.Process
+
+  let newBondCid1 = case processResult1 of
+        CouponPaymentResult_ result -> result.newBondCid
+        RedemptionResult_ _ -> error "Expected coupon payment result, got redemption result"
+  newBond1 <- queryContractId alice newBondCid1
+  versionAfterCoupon1 <- case newBond1 of
+        Some bond -> do
+          assertMsg "Version should change after first coupon" (bond.version /= initialVersion)
+          assertMsg "Notional should still be 1000" (bond.notional == 1000.0)
+          assertMsg "Amount should still be 3.0 (3 bonds)" (bond.amount == 3.0)
+          assertMsg "lastEventTimestamp should be updated" (bond.lastEventTimestamp == couponPaymentDate1)
+          pure bond.version
+        None -> error "New bond after first coupon not found"
+
+  case currencyTransferCidOpt1 of
+    Some currencyTransferCid1 -> do
+      Some currencyInstr1 <- queryContractId @MyTransferInstruction charlie (coerceContractId currencyTransferCid1)
+      lockedTokenDisclosure1 <- do
+        optDisc <- queryDisclosure @MyToken.LockedMyToken charlie currencyInstr1.lockedMyToken
+        case optDisc of
+          Some d -> pure d
+          None -> fail "Locked token disclosure not found"
+
+      currencyTransferResult1 <- submitWithDisclosures alice [lockedTokenDisclosure1] do
+        exerciseCmd currencyTransferCid1 TI.TransferInstruction_Accept with
+          extraArgs = MD.ExtraArgs with
+            context = MD.emptyChoiceContext
+            meta = MD.emptyMetadata
+
+      case currencyTransferResult1.output of
+        TI.TransferInstructionResult_Completed { receiverHoldingCids } -> do
+          case receiverHoldingCids of
+            [aliceCurrencyHoldingCid1] -> do
+              let aliceCurrencyTokenCid1 : ContractId MyToken = fromInterfaceContractId aliceCurrencyHoldingCid1
+              aliceCurrencyToken1 <- queryContractId alice aliceCurrencyTokenCid1
+              case aliceCurrencyToken1 of
+                Some token -> assertMsg "Alice should receive 75.0 currency tokens (25.0 per bond * 3 bonds)" (token.amount == 75.0 && token.owner == alice)
+                None -> error "Alice's currency token not found"
+            _ -> error "Expected exactly one currency holding"
+        _ -> error "Currency transfer should be completed"
+    None -> error "Currency transfer instruction should be created"
+
+  -- Phase 3: Alice transfers 1 of 3 bonds to Bob
+  passTime (days 1)
+
+  rulesDisclosure <- do
+    optDisc <- queryDisclosure @BondRules charlie rulesCid
+    case optDisc of
+      Some d -> pure d
+      None -> fail "BondRules disclosure not found"
+
+  bondTransferFactoryCid <- submit charlie do
+    createCmd BondTransferFactory with
+      registry = charlie
+      rulesCid = rulesCid
+
+  let transferBefore = addRelTime now (days 400)
+  let aliceHoldingAfterCoupon1 : ContractId H.Holding = toInterfaceContractId @H.Holding newBondCid1
+  let transfer = TI.Transfer with
+        sender = alice
+        receiver = bob
+        amount = 1.0  -- Transfer 1 bond (out of 3)
+        instrumentId = H.InstrumentId with admin = charlie; id = instrumentId
+        requestedAt = addRelTime now (seconds (-1))
+        executeBefore = transferBefore
+        inputHoldingCids = [aliceHoldingAfterCoupon1]
+        meta = MD.emptyMetadata
+
+  transferRequestCid <- submit alice do
+    createCmd TransferRequest.TransferRequest with
+      transferFactoryCid = bondTransferFactoryCid
+      expectedAdmin = charlie
+      transfer = transfer
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  transferResult <- submit charlie do
+    exerciseCmd transferRequestCid TransferRequest.Accept
+
+  let transferInstructionCid = case transferResult.output of
+        TI.TransferInstructionResult_Pending { transferInstructionCid } -> transferInstructionCid
+        _ -> error "Transfer instruction should be pending"
+
+  -- Alice should get change back (2 bonds remaining)
+  assertMsg "Alice should get change back (2 bonds remaining)" (length transferResult.senderChangeCids == 1)
+
+  Some instr <- queryContractId @BondTransferInstruction charlie (coerceContractId transferInstructionCid)
+  Some transferDisclosure <- queryDisclosure @LockedBond charlie instr.lockedBond
+
+  transferCompleteResult <- submitWithDisclosures bob [transferDisclosure] do
+    exerciseCmd transferInstructionCid TI.TransferInstruction_Accept with
+      extraArgs = MD.ExtraArgs with
+        context = MD.emptyChoiceContext
+        meta = MD.emptyMetadata
+
+  (bobBondHolding, bobBondCid) <- case transferCompleteResult.output of
+        TI.TransferInstructionResult_Completed { receiverHoldingCids } -> do
+          assertMsg "Bob should receive one bond holding" (length receiverHoldingCids == 1)
+          case receiverHoldingCids of
+            [bobHolding] -> do
+              let bobBondCid : ContractId Bond = fromInterfaceContractId bobHolding
+              bobBond <- queryContractId bob bobBondCid
+              case bobBond of
+                Some bond -> do
+                  assertMsg "Bob's bond should have 1000 notional" (bond.notional == 1000.0)
+                  assertMsg "Bob's bond should have amount 1.0 (1 bond)" (bond.amount == 1.0)
+                  assertMsg "Bob should be owner" (bond.owner == bob)
+                  assertMsg "Version should be preserved from transfer" (bond.version == versionAfterCoupon1)
+                None -> error "Bob's bond not found"
+              pure (bobHolding, bobBondCid)
+            _ -> error "Expected exactly one bond holding for Bob"
+        _ -> error "Transfer should be completed"
+
+  -- Check Alice still has 2 bonds remaining
+  (aliceRemainingBondCid, aliceRemainingHolding) <- case transferResult.senderChangeCids of
+    [aliceChangeHolding] -> do
+      let aliceChangeBondCid : ContractId Bond = fromInterfaceContractId aliceChangeHolding
+      aliceChangeBond <- queryContractId alice aliceChangeBondCid
+      case aliceChangeBond of
+        Some bond -> do
+          assertMsg "Alice should have 2 bonds remaining" (bond.amount == 2.0)
+          assertMsg "Alice should still be owner" (bond.owner == alice)
+          assertMsg "Notional should still be 1000" (bond.notional == 1000.0)
+          pure (aliceChangeBondCid, aliceChangeHolding)
+        None -> error "Alice's remaining bond not found"
+    _ -> error "Expected exactly one change holding for Alice"
+
+  -- Phase 4: Redemption at maturity (includes final coupon)
+  passTime (days 183)
+
+  effectCid2 <- submit charlie do
+    exerciseCmd lifecycleRuleCid BondLifecycleRule.ProcessRedemptionEvent with
+      targetInstrumentId = instrumentId
+      targetVersion = versionAfterCoupon1
+      bondCid = bobBondCid  -- Use Bob's bond to infer notional, couponRate, couponFrequency
+
+  Some effect2 <- queryContractId @BondLifecycleEffect charlie effectCid2
+  let redemptionDate = effect2.eventDate
+  -- Verify effect amount: should be 1025 per bond (notional 1000 + final coupon 25)
+  assertMsg "Effect amount should be 1025.0 per bond" (effect2.amount == 1025.0)
+
+  claimRequestCid2 <- submit bob do
+    createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
+      effectCid = effectCid2
+      bondHoldingCid = bobBondHolding
+      bondRulesCid = rulesCid
+      bondInstrumentCid = instrumentCid
+      currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
+      issuerCurrencyHoldingCid = charlieCurrencyHoldingCid2
+      holder = bob
+      issuer = charlie
+
+  -- Note: Bob redeems 1 bond, Alice still has 2 bonds that could be redeemed separately
+
+  claimResult2 <- submit charlie do
+    exerciseCmd claimRequestCid2 BondLifecycleClaimRequest.Accept
+
+  let (instructionCid2, redemptionAmount2, currencyTransferCidOpt2) = case claimResult2 of
+        ClaimResult_Redemption result -> (result.instructionCid, result.principalAmount, result.currencyTransferInstructionCid)
+        ClaimResult_CouponPayment _ -> error "Expected redemption result, got coupon payment result"
+
+  assertMsg "Redemption amount should be 1025.0 (notional + final coupon)" (redemptionAmount2 == 1025.0)
+
+  processResult2 <- submit bob do
+    exerciseCmd instructionCid2 BondLifecycleInstruction.Process
+
+
+  oldBond <- queryContractId bob bobBondCid
+  case oldBond of
+    Some _ -> error "Bond should be archived after redemption"
+    None -> pure ()
+
+  case currencyTransferCidOpt2 of
+    Some currencyTransferCid2 -> do
+      Some currencyInstr2 <- queryContractId @MyTransferInstruction charlie (coerceContractId currencyTransferCid2)
+      lockedTokenDisclosure2 <- do
+        optDisc <- queryDisclosure @MyToken.LockedMyToken charlie currencyInstr2.lockedMyToken
+        case optDisc of
+          Some d -> pure d
+          None -> fail "Locked token disclosure not found"
+
+      currencyTransferResult2 <- submitWithDisclosures bob [lockedTokenDisclosure2] do
+        exerciseCmd currencyTransferCid2 TI.TransferInstruction_Accept with
+          extraArgs = MD.ExtraArgs with
+            context = MD.emptyChoiceContext
+            meta = MD.emptyMetadata
+
+      case currencyTransferResult2.output of
+        TI.TransferInstructionResult_Completed { receiverHoldingCids } -> do
+          case receiverHoldingCids of
+            [bobCurrencyHoldingCid2] -> do
+              let bobCurrencyTokenCid2 : ContractId MyToken = fromInterfaceContractId bobCurrencyHoldingCid2
+              bobCurrencyToken2 <- queryContractId bob bobCurrencyTokenCid2
+              case bobCurrencyToken2 of
+                Some token -> assertMsg "Bob should receive 1025.0 currency tokens (notional + final coupon)" (token.amount == 1025.0 && token.owner == bob)
+                None -> error "Bob's currency token not found"
+            _ -> error "Expected exactly one currency holding"
+        _ -> error "Currency transfer should be completed"
+    None -> error "Currency transfer instruction should be created"
+
+  -- Phase 5: Alice redeems her 2 remaining bonds
+  -- Verify Alice's bond before redemption
+  aliceBondBeforeRedemption <- queryContractId alice aliceRemainingBondCid
+  case aliceBondBeforeRedemption of
+    Some bond -> assertMsg "Alice should have 2 bonds before redemption" (bond.amount == 2.0)
+    None -> error "Alice's bond not found before redemption"
+
+  claimRequestCid3 <- submit alice do
+    createCmd BondLifecycleClaimRequest.BondLifecycleClaimRequest with
+      effectCid = effectCid2
+      bondHoldingCid = aliceRemainingHolding
+      bondRulesCid = rulesCid
+      bondInstrumentCid = instrumentCid
+      currencyTransferFactoryCid = currencyTransferFactoryInterfaceCid
+      issuerCurrencyHoldingCid = charlieCurrencyHoldingCid3
+      holder = alice
+      issuer = charlie
+
+  claimResult3 <- submit charlie do
+    exerciseCmd claimRequestCid3 BondLifecycleClaimRequest.Accept
+
+  let (instructionCid3, redemptionAmount3, currencyTransferCidOpt3) = case claimResult3 of
+        ClaimResult_Redemption result -> (result.instructionCid, result.principalAmount, result.currencyTransferInstructionCid)
+        ClaimResult_CouponPayment _ -> error "Expected redemption result, got coupon payment result"
+
+  -- Verify redemption amount: effect.amount (1025 per bond) * locked.bond.amount (2 bonds) = 2050
+  -- effect.amount = notional (1000) + finalCoupon (1000 * 0.05 / 2 = 25) = 1025
+  assertMsg "Redemption amount should be 2050.0 (effect.amount 1025 * 2 bonds)" (redemptionAmount3 == 2050.0)
+
+  processResult3 <- submit alice do
+    exerciseCmd instructionCid3 BondLifecycleInstruction.Process
+
+  aliceBondAfterRedemption <- queryContractId alice aliceRemainingBondCid
+  case aliceBondAfterRedemption of
+    Some _ -> error "Alice's bond should be archived after redemption"
+    None -> pure ()
+
+  case currencyTransferCidOpt3 of
+    Some currencyTransferCid3 -> do
+      Some currencyInstr3 <- queryContractId @MyTransferInstruction charlie (coerceContractId currencyTransferCid3)
+      lockedTokenDisclosure3 <- do
+        optDisc <- queryDisclosure @MyToken.LockedMyToken charlie currencyInstr3.lockedMyToken
+        case optDisc of
+          Some d -> pure d
+          None -> fail "Locked token disclosure not found"
+
+      currencyTransferResult3 <- submitWithDisclosures alice [lockedTokenDisclosure3] do
+        exerciseCmd currencyTransferCid3 TI.TransferInstruction_Accept with
+          extraArgs = MD.ExtraArgs with
+            context = MD.emptyChoiceContext
+            meta = MD.emptyMetadata
+
+      case currencyTransferResult3.output of
+        TI.TransferInstructionResult_Completed { receiverHoldingCids } -> do
+          case receiverHoldingCids of
+            [aliceCurrencyHoldingCid3] -> do
+              let aliceCurrencyTokenCid3 : ContractId MyToken = fromInterfaceContractId aliceCurrencyHoldingCid3
+              aliceCurrencyToken3 <- queryContractId alice aliceCurrencyTokenCid3
+              case aliceCurrencyToken3 of
+                Some token -> assertMsg "Alice should receive 2050.0 currency tokens (2 bonds * (notional + final coupon))" (token.amount == 2050.0 && token.owner == alice)
+                None -> error "Alice's currency token not found"
+            _ -> error "Expected exactly one currency holding"
+        _ -> error "Currency transfer should be completed"
+    None -> error "Currency transfer instruction should be created"
+
+  pure ()
+

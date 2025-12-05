@@ -17,6 +17,10 @@
                 "_types/**"
             ]
         },
+        "@denotecapital/minimal-token#build": {
+          "dependsOn": ["^build"],
+          "outputs": [".daml/**"]
+        },
         "@denotecapital/token-app#build": {
           "dependsOn": ["^build"],
           "outputs": [".next/**"]

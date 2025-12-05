@@ -24,7 +24,7 @@ template IssuerMintRequest
       do
           exercise tokenFactoryCid MyTokenFactory.Mint with
             receiver = receiver
-            amount = amount 
+            amount = amount
 
     choice Decline : ()
       -- ^ Decline the request.
@@ -34,7 +34,7 @@ template IssuerMintRequest
 
     choice Withdraw : ()
       -- ^ Withdraw the request.
-      controller issuer
+      controller receiver
       do
         pure ()
 

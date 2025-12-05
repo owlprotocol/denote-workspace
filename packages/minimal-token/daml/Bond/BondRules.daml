@@ -1,0 +1,209 @@
+module Bond.BondRules where
+
+import DA.Time
+import Splice.Api.Token.MetadataV1 as MD
+import Splice.Api.Token.HoldingV1 as H
+import Bond.Bond
+
+-- | Minimal rules contract to assist with preparing two-step transfers by locking bond holdings.
+template BondRules
+  with
+    issuer : Party
+  where
+    signatory issuer
+
+    -- | Lock a single bond holding for a transfer.
+    -- Following Amulet pattern: creates LockedBond directly, not via Lock choice.
+    -- Requires both issuer (rules signatory) and the sender (owner) to authorize.
+    -- Supports partial transfers - if desiredAmount < bond.amount, creates a change bond for the remainder.
+    -- Returns: (locked bond CID, Optional change bond CID if partial transfer, metadata)
+    nonconsuming choice BondRules_LockForTransfer : (ContractId LockedBond, Optional (ContractId H.Holding), MD.Metadata)
+      with
+        sender : Party
+        inputHoldingCid : ContractId H.Holding
+        desiredAmount : Decimal
+        transferBefore : Time
+        contextText : Text
+      controller sender
+      do
+        -- Treat input as an unlocked Bond (downcast from Holding)
+        let bondCid : ContractId Bond = fromInterfaceContractId inputHoldingCid
+        bond <- fetch bondCid
+        assertMsg "Sender must be owner" (bond.owner == sender)
+        assertMsg "desired amount must be positive" (desiredAmount > 0.0)
+        assertMsg "Insufficient bonds to transfer" (desiredAmount <= bond.amount)
+
+        if bond.amount == desiredAmount then do
+
+          archive bondCid
+
+
+          let lockedBond = Bond with
+                issuer = bond.issuer
+                depository = bond.depository
+                owner = bond.owner
+                instrumentId = bond.instrumentId
+                version = bond.version
+                notional = bond.notional
+                amount = desiredAmount
+                maturityDate = bond.maturityDate
+                couponRate = bond.couponRate
+                couponFrequency = bond.couponFrequency
+                issueDate = bond.issueDate
+                lastEventTimestamp = bond.lastEventTimestamp
+          let lock = TimeLock with
+                holders = [issuer]
+                expiresAt = transferBefore
+                lockContext = Some contextText
+          lockedCid <- create LockedBond with
+            bond = lockedBond
+            lock = lock
+          pure (lockedCid, None, MD.emptyMetadata)
+        else if bond.amount > desiredAmount then do
+
+          let changeAmount = bond.amount - desiredAmount
+
+
+          changeCid : ContractId Bond <- create Bond with
+            issuer = bond.issuer
+            depository = bond.depository
+            owner = bond.owner
+            instrumentId = bond.instrumentId
+            version = bond.version
+            notional = bond.notional
+            amount = changeAmount
+            maturityDate = bond.maturityDate
+            couponRate = bond.couponRate
+            couponFrequency = bond.couponFrequency
+            issueDate = bond.issueDate
+            lastEventTimestamp = bond.lastEventTimestamp
+
+          -- Archive original input
+          archive bondCid
+
+          let lockedBond = Bond with
+                issuer = bond.issuer
+                depository = bond.depository
+                owner = bond.owner
+                instrumentId = bond.instrumentId
+                version = bond.version
+                notional = bond.notional
+                amount = desiredAmount
+                maturityDate = bond.maturityDate
+                couponRate = bond.couponRate
+                couponFrequency = bond.couponFrequency
+                issueDate = bond.issueDate
+                lastEventTimestamp = bond.lastEventTimestamp
+          let lock = TimeLock with
+                holders = [issuer]
+                expiresAt = transferBefore
+                lockContext = Some contextText
+          lockedCid <- create LockedBond with
+            bond = lockedBond
+            lock = lock
+          let changeHoldingCid : ContractId H.Holding = toInterfaceContractId @H.Holding changeCid
+          pure (lockedCid, Some changeHoldingCid, MD.emptyMetadata)
+        else
+          fail "Insufficient amount to lock the desired amount"
+
+    -- | Lock a bond for coupon payment processing.
+    -- Controlled by holder (owner)
+    -- When holder exercises this choice, issuer is in transaction as signatory of BondRules.
+    -- Returns: (locked bond CID, None since we lock the full bond, metadata)
+    nonconsuming choice BondRules_LockForCoupon : (ContractId LockedBond, Optional (ContractId H.Holding), MD.Metadata)
+      with
+        holder : Party
+        inputBondCid : ContractId H.Holding
+        couponPaymentDate : Time
+        contextText : Text
+      controller holder
+      do
+        -- Treat input as an unlocked Bond (downcast from Holding)
+        let bondCid : ContractId Bond = fromInterfaceContractId inputBondCid
+        bond <- fetch bondCid
+        assertMsg "Holder must be owner" (bond.owner == holder)
+
+        now <- getTime
+        assertMsg "Coupon payment date must be in the past or present" (couponPaymentDate <= now)
+        assertMsg "Coupon payment date must be after issue date" (couponPaymentDate >= bond.issueDate)
+        assertMsg "Coupon payment date must be after last event timestamp" (couponPaymentDate > bond.lastEventTimestamp)
+        assertMsg "Coupon payment date must be before maturity date" (couponPaymentDate < bond.maturityDate)
+
+        -- Archive original input
+        -- Requires issuer, depository, and owner signatures (all signatories of bond).
+        -- Issuer and holder authorize via controller, depository must also be in transaction.
+        archive bondCid
+
+        -- Create locked bond with coupon payment context
+        -- Lock the full bond contract (all units) for coupon payment
+        let lockedBond = Bond with
+              issuer = bond.issuer
+              depository = bond.depository
+              owner = bond.owner
+              instrumentId = bond.instrumentId
+              version = bond.version
+              notional = bond.notional
+              amount = bond.amount
+              maturityDate = bond.maturityDate
+              couponRate = bond.couponRate
+              couponFrequency = bond.couponFrequency
+              issueDate = bond.issueDate
+              lastEventTimestamp = bond.lastEventTimestamp
+        let lock = TimeLock with
+              holders = [issuer]
+              -- TODO: 30-day expiry is arbitrary - can be adjusted based on business requirements
+              expiresAt = addRelTime now (days 30)  -- Lock expires 30 days from now
+              lockContext = Some contextText
+        lockedCid <- create LockedBond with
+          bond = lockedBond
+          lock = lock
+        pure (lockedCid, None, MD.emptyMetadata)
+
+    -- | Lock a bond for principal redemption processing.
+    -- Controlled by holder (owner)
+    -- When holder exercises this choice, issuer is in transaction as signatory of BondRules.
+    -- Returns: (locked bond CID, None since we lock the full bond, metadata)
+    nonconsuming choice BondRules_LockForRedemption : (ContractId LockedBond, Optional (ContractId H.Holding), MD.Metadata)
+      with
+        holder : Party
+        inputBondCid : ContractId H.Holding
+        redemptionDate : Time
+        contextText : Text
+      controller holder
+      do
+        let bondCid : ContractId Bond = fromInterfaceContractId inputBondCid
+        bond <- fetch bondCid
+        assertMsg "Holder must be owner" (bond.owner == holder)
+
+        now <- getTime
+        assertMsg "Redemption date must be on or after maturity date" (redemptionDate >= bond.maturityDate)
+        assertMsg "Redemption date must be in the past or present" (redemptionDate <= now)
+
+        -- Archive original input
+        -- Requires issuer, depository, and owner signatures (all signatories of bond).
+        -- Issuer and holder authorize via controller, depository must also be in transaction.
+        archive bondCid
+
+        let lockedBond = Bond with
+              issuer = bond.issuer
+              depository = bond.depository
+              owner = bond.owner
+              instrumentId = bond.instrumentId
+              version = bond.version
+              notional = bond.notional
+              amount = bond.amount
+              maturityDate = bond.maturityDate
+              couponRate = bond.couponRate
+              couponFrequency = bond.couponFrequency
+              issueDate = bond.issueDate
+              lastEventTimestamp = bond.lastEventTimestamp
+        let lock = TimeLock with
+              holders = [issuer]
+              -- TODO: 30-day expiry is arbitrary - can be adjusted based on business requirements
+              expiresAt = addRelTime now (days 30)  -- Lock expires 30 days from now
+              lockContext = Some contextText
+        lockedCid <- create LockedBond with
+          bond = lockedBond
+          lock = lock
+        pure (lockedCid, None, MD.emptyMetadata)
+

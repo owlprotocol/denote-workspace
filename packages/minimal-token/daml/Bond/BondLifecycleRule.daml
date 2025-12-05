@@ -1,0 +1,118 @@
+-- | Centralized lifecycle rule for processing bond lifecycle events.
+--
+-- This module implements the centralized lifecycle rule pattern from Daml-Finance, where
+-- a single rule contract processes all bonds of an instrument at once, creating effect contracts
+-- that holders can claim. This provides a single source of truth for lifecycle events.
+--
+-- Daml-Finance Reference:
+-- https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Interface/Lifecycle/V4/Rule/Lifecycle.daml
+--
+-- Key differences from Daml-Finance:
+-- - Simplified to process specific bond events (coupon payment, redemption) instead of generic
+--   time-based evolution with claim trees
+-- - Uses SHA256 hashing for version generation (matching Daml-Finance's opaque version approach)
+-- - Directly creates BondLifecycleEffect contracts instead of using generic Effect interface
+module Bond.BondLifecycleRule where
+
+import Splice.Api.Token.HoldingV1 as H
+import Bond.BondLifecycleEffect
+import Bond.Bond
+import DA.Time()
+import DA.Text (sha256)
+
+-- | Centralized lifecycle rule for processing bond lifecycle events.
+-- Processes coupon payment events and redemption events, creating corresponding effect contracts.
+template BondLifecycleRule
+  with
+    issuer : Party
+    depository : Party
+    currencyInstrumentId : H.InstrumentId
+  where
+    signatory issuer, depository
+
+    -- | Process a coupon payment event.
+    -- Creates a BondLifecycleEffect using the current ledger time as the event date.
+    -- All holders of bonds with the target version can claim this effect.
+    -- The effect amount is per bond unit
+    --
+    -- NOTE: For production use, we would likely need a DateClock pattern
+    -- (see https://github.com/digital-asset/daml-finance/blob/main/src/main/daml/Daml/Finance/Data/V4/Time/DateClock.daml)
+    -- for retroactive processing and time zone flexibility. We use ledger time directly here for simplicity.
+    --
+    -- The maturity date validation is performed in BondLifecycleClaimRequest.Accept when holders claim the effect,
+    -- ensuring that coupon payments can only be processed before bond maturity.
+    nonconsuming choice ProcessCouponPaymentEvent : ContractId BondLifecycleEffect
+      with
+        targetInstrumentId : Text
+        targetVersion : Text
+        bondCid : ContractId Bond
+      controller issuer
+      do
+        eventTime <- getTime
+
+
+        bond <- fetch bondCid
+        assertMsg "Bond must belong to this issuer" (bond.issuer == issuer)
+        assertMsg "Bond must match target instrument ID" (bond.instrumentId == targetInstrumentId)
+        assertMsg "Bond must match target version" (bond.version == targetVersion)
+
+
+        let couponAmount = bond.notional * bond.couponRate / intToDecimal bond.couponFrequency
+        assertMsg "Coupon amount must be positive" (couponAmount > 0.0)
+
+        let newVersion = sha256 $ show targetVersion <> show eventTime <> show CouponPayment <> show couponAmount
+
+        effectCid <- create BondLifecycleEffect with
+          issuer
+          depository
+          eventType = CouponPayment
+          targetInstrumentId
+          targetVersion
+          producedVersion = Some newVersion
+          eventDate = eventTime
+          settlementTime = Some eventTime
+          amount = couponAmount
+          currencyInstrumentId
+
+        pure effectCid
+
+    -- | Process a redemption event.
+    -- Creates a BondLifecycleEffect using the current ledger time as the event date.
+    nonconsuming choice ProcessRedemptionEvent : ContractId BondLifecycleEffect
+      with
+        targetInstrumentId : Text
+        targetVersion : Text
+        bondCid : ContractId Bond
+      controller issuer
+      do
+        eventTime <- getTime
+
+
+        bond <- fetch bondCid
+        assertMsg "Bond must belong to this issuer" (bond.issuer == issuer)
+        assertMsg "Bond must match target instrument ID" (bond.instrumentId == targetInstrumentId)
+        assertMsg "Bond must match target version" (bond.version == targetVersion)
+        assertMsg "Notional must be positive" (bond.notional > 0.0)
+
+
+        let finalCouponAmount = bond.notional * bond.couponRate / intToDecimal bond.couponFrequency
+        assertMsg "Final coupon amount must be positive" (finalCouponAmount > 0.0)
+
+
+        let totalRedemptionAmount = bond.notional + finalCouponAmount
+
+
+        effectCid <- create BondLifecycleEffect with
+          issuer
+          depository
+          eventType = Redemption
+          targetInstrumentId
+          targetVersion
+          producedVersion = None
+          eventDate = eventTime
+          settlementTime = Some eventTime
+          amount = totalRedemptionAmount
+          currencyInstrumentId
+
+        pure effectCid
+

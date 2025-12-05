@@ -1,10 +1,10 @@
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { v4 } from "uuid";
 import { UserKeyPair } from "../types/UserKeyPair.js";
-import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { ContractId, Party } from "../types/daml.js";
 import { getCreateCommand } from "../helpers/getCreateCommand.js";
 import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
+import { getLatestContract } from "../helpers/getLatestContract.js";
 
 export interface TokenFactoryParams {
     issuer: Party;
@@ -69,40 +69,23 @@ export async function createTokenFactory(
     );
 }
 
+const tokenFactoriesEqual = (a: TokenFactoryParams, b: TokenFactoryParams) =>
+    a.instrumentId === b.instrumentId && a.issuer === b.issuer;
+
 // Assumes owner is also the party
 export async function getLatestTokenFactory(
     userLedger: LedgerController,
     instrumentId: string
 ) {
     const issuer = userLedger.getPartyId();
-    const end = await userLedger.ledgerEnd();
-    const activeContracts = (await userLedger.activeContracts({
-        offset: end.offset,
-        filterByParty: true,
-        parties: [issuer],
-        templateIds: [tokenFactoryTemplateId],
-    })) as ActiveContractResponse<TokenFactoryParams>[];
 
-    if (activeContracts.length === 0) {
-        return;
-    }
-
-    const filteredEntries = activeContracts.filter(({ contractEntry }) => {
-        const jsActive = contractEntry.JsActiveContract;
-        if (!jsActive) return false;
-        const { createArgument } = jsActive.createdEvent;
-        return (
-            createArgument.instrumentId === instrumentId &&
-            createArgument.issuer === issuer
-        );
-    });
-
-    if (filteredEntries.length === 0) {
-        return;
-    }
-    const contract = filteredEntries[filteredEntries.length - 1];
-
-    return contract.contractEntry.JsActiveContract!.createdEvent.contractId;
+    const contractParamsToCompare = { instrumentId, issuer };
+    return getLatestContract(
+        userLedger,
+        tokenFactoryTemplateId,
+        contractParamsToCompare,
+        tokenFactoriesEqual
+    );
 }
 
 export async function getOrCreateTokenFactory(

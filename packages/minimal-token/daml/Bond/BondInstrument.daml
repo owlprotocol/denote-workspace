@@ -1,0 +1,71 @@
+module Bond.BondInstrument where
+
+import Bond.Bond
+import Splice.Api.Token.MetadataV1 as MD
+
+-- | Bond instrument definition containing the terms of a bond.
+-- This is created once by the issuer and referenced when minting bond holdings.
+template BondInstrument
+  with
+    issuer : Party
+    depository : Party
+    instrumentId : Text
+    notional : Decimal
+    couponRate : Decimal
+    couponFrequency : Int
+    maturityDate : Time
+  where
+    signatory issuer, depository
+
+    ensure
+      notional > 0.0 &&
+      couponRate >= 0.0 &&
+      couponFrequency > 0
+
+    nonconsuming choice Mint : MintResult
+      with
+        receiver : Party
+        amount : Decimal
+      controller issuer, receiver
+      do
+        assertMsg "Amount must be positive" (amount > 0.0)
+
+        now <- getTime
+
+        bondCid <- create Bond with
+          issuer = issuer
+          depository = depository
+          owner = receiver
+          instrumentId = instrumentId
+          version = "0"
+          notional = notional
+          amount
+          maturityDate = maturityDate
+          couponRate = couponRate
+          couponFrequency = couponFrequency
+          issueDate = now
+          lastEventTimestamp = now
+
+        pure MintResult with
+          bondCid
+          meta = MD.emptyMetadata
+
+    nonconsuming choice CreateNewVersion : ContractId Bond
+      with
+        oldBond : Bond
+        newVersion : Text
+        lastEventTimestamp : Time
+      controller issuer, oldBond.owner
+      do
+        assertMsg "Bond must belong to this instrument" (oldBond.instrumentId == instrumentId)
+        assertMsg "Bond issuer must match instrument issuer" (oldBond.issuer == issuer)
+        create oldBond with
+          version = newVersion
+          lastEventTimestamp = lastEventTimestamp
+
+
+data MintResult = MintResult with
+    bondCid : ContractId Bond
+    meta : MD.Metadata
+  deriving (Show, Eq)
+

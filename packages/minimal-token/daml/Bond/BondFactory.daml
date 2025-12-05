@@ -1,0 +1,37 @@
+module Bond.BondFactory where
+
+import Bond.BondInstrument
+
+
+template BondFactory
+  with
+    issuer : Party
+    instrumentId : Text -- e.g., show issuer <> "#Bond"
+  where
+    signatory issuer
+
+    -- | Create a bond instrument definition with all terms.
+    -- This is called once by the issuer to define the bond instrument.
+    nonconsuming choice CreateInstrument : ContractId BondInstrument
+      with
+        depository : Party  -- Trust anchor, can be same as issuer for simplified deployments
+        notional : Decimal  -- Face value per bond unit (e.g., 1000.0 USD per bond)
+        couponRate : Decimal  -- Annual coupon rate (e.g., 0.05 for 5%)
+        couponFrequency : Int  -- Payments per year (e.g., 2 for semi-annual)
+        maturityDate : Time  -- Maturity date for bonds created from this instrument
+      controller issuer
+      do
+        now <- getTime
+        assertMsg "Maturity date must be in the future" (maturityDate > now)
+
+        instrumentCid <- create BondInstrument with
+          issuer
+          depository
+          instrumentId = instrumentId
+          notional
+          couponRate
+          couponFrequency
+          maturityDate
+
+        pure instrumentCid
+

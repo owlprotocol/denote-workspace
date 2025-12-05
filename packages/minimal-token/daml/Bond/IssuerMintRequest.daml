@@ -1,0 +1,43 @@
+module Bond.IssuerMintRequest where
+
+import Bond.BondInstrument as BondInstrument
+
+template IssuerMintRequest
+  with
+    instrumentCid: ContractId BondInstrument
+    -- ^ The bond instrument contract
+    issuer: Party
+    -- ^ The issuer of the bonds to be minted
+    receiver: Party
+    -- ^ The party to receive the minted bonds
+    amount: Decimal
+    -- ^ The number of bond units to mint (e.g., 10.0 for 10 bonds)
+  where
+    signatory receiver
+    observer issuer
+
+    ensure
+      amount > 0.0
+
+    choice Accept : BondInstrument.MintResult
+      -- ^ Accept the request.
+      controller issuer
+      do
+          instrument <- fetch instrumentCid
+          assertMsg "Issuer must match instrument issuer" (issuer == instrument.issuer)
+          exercise instrumentCid BondInstrument.Mint with
+            receiver = receiver
+            amount = amount
+
+    choice Decline : ()
+      -- ^ Decline the request.
+      controller issuer
+      do
+        pure ()
+
+    choice Withdraw : ()
+      -- ^ Withdraw the request.
+      controller receiver
+      do
+        pure ()
+
