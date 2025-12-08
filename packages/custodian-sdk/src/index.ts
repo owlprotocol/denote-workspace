@@ -21,7 +21,7 @@ import {
 } from "@denotecapital/token-sdk";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
-import { encodeBase64 } from "tweetnacl-util";
+import { decodeBase64, encodeBase64 } from "tweetnacl-util";
 import { custodianApi } from "./custodianApi.js";
 import { Request } from "./types/Request.js";
 
@@ -33,6 +33,7 @@ const POLLING_FREQUENCY_MS = 60000; // 1 minute
 export const API_MOCK_DELAY_MS = 1000; // 1 second
 
 // Validate environment variables
+// NOTE: CUSTODIAN_PRIVATE_KEY should be a base64-encoded string
 const CUSTODIAN_PRIVATE_KEY = process.env.CUSTODIAN_PRIVATE_KEY;
 if (!CUSTODIAN_PRIVATE_KEY) {
     throw new Error("CUSTODIAN_PRIVATE_KEY environment variable is required");
@@ -56,11 +57,12 @@ async function initializeCustodian() {
     const sdk = await getDefaultSdkAndConnect();
 
     // Derive public key from private key using tweetnacl
-    const secretKey = Buffer.from(CUSTODIAN_PRIVATE_KEY!, "hex");
+    const secretKeyBase64 = CUSTODIAN_PRIVATE_KEY!;
+    const secretKey = decodeBase64(secretKeyBase64);
     const keyPairDerived = nacl.box.keyPair.fromSecretKey(secretKey);
 
     const keyPair: UserKeyPair = {
-        privateKey: encodeBase64(secretKey),
+        privateKey: secretKeyBase64,
         publicKey: encodeBase64(keyPairDerived.publicKey),
     };
 
