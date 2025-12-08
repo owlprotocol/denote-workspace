@@ -14,7 +14,7 @@ The custodian-sdk is an automated service that polls the Canton ledger for pendi
 - Single-file functional approach (no classes)
 - Polls Canton ledger every 60 seconds using `activeContracts()`
 - Tracks processed contracts in-memory using a `Set`
-- Handles 6 different request types via switch statement
+- Handles 6 different request types via handler map pattern
 - Uses async/await polling loop instead of setInterval
 
 **Custodian API Mock (`src/custodianApi.ts`)**
@@ -26,7 +26,7 @@ The custodian-sdk is an automated service that polls the Canton ledger for pendi
 **Type Definitions (`src/types/Request.ts`)**
 - Generic `Request<ContractParams>` interface
 - Typed contract parameters from `@denotecapital/token-sdk`
-- Type-safe request handling with proper casting in switch cases
+- Handler map pattern with typed request handlers for each template ID
 
 ### Request Types Handled
 
@@ -55,10 +55,10 @@ The service automatically approves 6 request types:
    - **Important**: Includes comment about future Canton Participant Query Store (PQS) integration
 
 3. **Request Handling** (`handleRequest`)
-   - Switch on `request.templateId` to determine request type
-   - Cast request to appropriate typed `Request<T>` for each case
-   - Call corresponding `custodianApi.approve*()` method (mock external API)
-   - Call `wrappedSdk.*.accept()` to accept on ledger
+   - Lookup handler from `REQUEST_HANDLER` map using `templateId`
+   - Each handler is properly typed for its specific request type
+   - Handler calls corresponding `custodianApi.approve*()` method (mock external API)
+   - Handler calls `wrappedSdk.*.accept()` to accept on ledger
    - Mark contract as processed in `processedContracts` Set
 
 4. **Main Loop** (`startCustodianService`)
@@ -72,7 +72,7 @@ The service automatically approves 6 request types:
 ### Environment Variables
 
 **Required:**
-- `CUSTODIAN_PRIVATE_KEY` - Custodian's Ed25519 private key (64-char hex string)
+- `CUSTODIAN_PRIVATE_KEY` - Custodian's Ed25519 private key (base64-encoded string)
 
 **Loading:**
 ```typescript
@@ -136,7 +136,7 @@ The `src/index.ts` file follows a consistent import organization pattern for bet
    ```typescript
    import dotenv from "dotenv";
    import nacl from "tweetnacl";
-   import { encodeBase64 } from "tweetnacl-util";
+   import { decodeBase64, encodeBase64 } from "tweetnacl-util";
    ```
 
 5. **Local imports** - Project-specific modules
@@ -212,29 +212,51 @@ async function startPollingLoop() {
 - Easier to add delays between operations
 - Natural async/await flow
 
-### 4. Type-Safe Request Handling
+### 4. Handler Map Pattern for Type-Safe Request Handling
 
-Each switch case casts the generic `Request` to the specific typed request:
+Uses a handler map pattern where each `templateId` maps to a typed handler function:
 
 ```typescript
+// Type for a handler function
+type RequestHandler<T extends Record<string, unknown>> = (
+  request: Request<T>,
+  wrappedSdk: WrappedSdkWithKeyPair
+) => Promise<void>;
+
+// Handler map with proper types for each request type
+const REQUEST_HANDLER = {
+  [issuerMintRequestTemplateId]: async (
+    request: Request<IssuerMintRequestParams>,
+    wrappedSdk: WrappedSdkWithKeyPair
+  ) => {
+    await custodianApi.approveMint(request);
+    await wrappedSdk.issuerMintRequest.accept(request.contractId);
+    console.log(`[CUSTODIAN] ✓ Accepted IssuerMintRequest`);
+  },
+  // ... 5 more handlers
+} satisfies Record<string, RequestHandler<any>>;
+
+// Simplified handleRequest - just lookup and invoke
 async function handleRequest(request: Request, wrappedSdk: WrappedSdkWithKeyPair) {
-  const { contractId, templateId } = request; // Destructure at start
+  const { contractId, templateId } = request;
 
-  console.log(`[CUSTODIAN] Processing ${templateId}`);
-  console.log(`[CUSTODIAN]   Contract ID: ${contractId}`);
-
-  switch (templateId) {
-    case issuerMintRequestTemplateId:
-      await custodianApi.approveMint(
-        request as unknown as Request<IssuerMintRequestParams>
-      );
-      await wrappedSdk.issuerMintRequest.accept(contractId);
-      break;
+  if (!(templateId in REQUEST_HANDLER)) {
+    console.warn(`[CUSTODIAN] No handler for template ID: ${templateId}`);
+    return;
   }
+
+  const handler = REQUEST_HANDLER[templateId as keyof typeof REQUEST_HANDLER];
+  await handler(request as Request<any>, wrappedSdk);
+  processedContracts.add(contractId);
 }
 ```
 
-This provides type safety while maintaining a generic polling interface. The function uses early destructuring of `contractId` and `templateId` for cleaner code.
+**Benefits:**
+- Each handler has proper types built-in (no `as unknown as` double cast needed)
+- Handler map is more concise than switch statement
+- Single `as Request<any>` cast at invocation point (contained in one place)
+- Easy to add new request types (just add to map)
+- Uses `satisfies` for type checking the handler map structure
 
 ### 5. In-Memory State Tracking
 
@@ -352,16 +374,21 @@ pnpm clean
 The service uses `tweetnacl` for key derivation:
 
 ```typescript
-const secretKey = Buffer.from(CUSTODIAN_PRIVATE_KEY!, "hex");
+// CUSTODIAN_PRIVATE_KEY should be a base64-encoded string
+const secretKeyBase64 = CUSTODIAN_PRIVATE_KEY!;
+const secretKey = decodeBase64(secretKeyBase64);
 const keyPairDerived = nacl.box.keyPair.fromSecretKey(secretKey);
 
 const keyPair: UserKeyPair = {
-  privateKey: encodeBase64(secretKey),
+  privateKey: secretKeyBase64,
   publicKey: encodeBase64(keyPairDerived.publicKey),
 };
 ```
 
-**Important:** Both keys must be base64-encoded for Canton SDK compatibility.
+**Important:**
+- `CUSTODIAN_PRIVATE_KEY` must be base64-encoded (not hex)
+- Private key is used directly as base64 string (no re-encoding needed)
+- Public key is derived and base64-encoded for Canton SDK compatibility
 
 ### Party Allocation
 
@@ -527,17 +554,21 @@ curl http://localhost:7575/health
 3. Wait up to 60 seconds for next poll cycle
 4. Check custodian logs for errors
 
-### Type errors in switch cases
+### Type errors in handler map
 
-**Cause:** Missing type casts for generic `Request` type
+**Cause:** Missing or incorrect handler function type annotations
 
-**Solution:** Cast each request in switch cases:
+**Solution:** Ensure each handler in `REQUEST_HANDLER` has proper type annotations:
 ```typescript
-case issuerMintRequestTemplateId:
-  await custodianApi.approveMint(
-    request as unknown as Request<IssuerMintRequestParams>
-  );
-  break;
+const REQUEST_HANDLER = {
+  [issuerMintRequestTemplateId]: async (
+    request: Request<IssuerMintRequestParams>,  // Type the request parameter
+    wrappedSdk: WrappedSdkWithKeyPair
+  ) => {
+    await custodianApi.approveMint(request);
+    await wrappedSdk.issuerMintRequest.accept(request.contractId);
+  },
+} satisfies Record<string, RequestHandler<any>>;
 ```
 
 ## Dependencies
@@ -564,8 +595,9 @@ case issuerMintRequestTemplateId:
 
 ## Key Files
 
-- `src/index.ts` - Main service implementation (265 lines)
+- `src/index.ts` - Main service implementation (286 lines)
   - Well-organized imports (Canton SDK → Token SDK → External libs → Local)
+  - Handler map pattern for type-safe request processing
   - Clean function decomposition with early destructuring
   - Direct imports for better performance
 - `src/custodianApi.ts` - Mock external API SDK (119 lines)
@@ -586,10 +618,11 @@ When modifying the custodian service:
    - Token SDK imports (alphabetically)
    - External libraries
    - Local imports
-4. **Type safety** - Proper casting in switch cases
-5. **Code style** - Use early destructuring for cleaner code
-6. **Avoid dynamic imports** - Import directly at top for better tree-shaking
-7. **Mock API** - Keep external API calls in `custodianApi.ts`
-8. **Logging** - Use `[CUSTODIAN]` and `[CUSTODIAN_API]` prefixes
-9. **Error handling** - Log errors, don't crash, retry on next poll
-10. **Documentation** - Update README.md and CLAUDE.md for significant changes
+4. **Handler map pattern** - Add new request types to `REQUEST_HANDLER` map with proper type annotations
+5. **Type safety** - Use `RequestHandler<T>` type for new handlers, include `satisfies` clause
+6. **Code style** - Use early destructuring for cleaner code
+7. **Avoid dynamic imports** - Import directly at top for better tree-shaking
+8. **Mock API** - Keep external API calls in `custodianApi.ts`
+9. **Logging** - Use `[CUSTODIAN]` and `[CUSTODIAN_API]` prefixes
+10. **Error handling** - Log errors, don't crash, retry on next poll
+11. **Documentation** - Update README.md and CLAUDE.md for significant changes

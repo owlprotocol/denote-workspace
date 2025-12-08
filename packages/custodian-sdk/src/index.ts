@@ -131,6 +131,71 @@ async function pollForRequests(sdk: WalletSDK, custodianPartyId: string) {
     return newRequests;
 }
 
+// Type for a handler function
+type RequestHandler<T extends Record<string, unknown>> = (
+    request: Request<T>,
+    wrappedSdk: WrappedSdkWithKeyPair
+) => Promise<void>;
+
+const REQUEST_HANDLER = {
+    [issuerMintRequestTemplateId]: async (
+        request: Request<IssuerMintRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        // Call external API for approval
+        await custodianApi.approveMint(request);
+        // Accept on ledger
+        await wrappedSdk.issuerMintRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted IssuerMintRequest`);
+    },
+
+    [transferRequestTemplateId]: async (
+        request: Request<TransferRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        await custodianApi.approveTransfer(request);
+        await wrappedSdk.transferRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted TransferRequest`);
+    },
+
+    [issuerBurnRequestTemplateId]: async (
+        request: Request<IssuerBurnRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        await custodianApi.approveBurn(request);
+        await wrappedSdk.issuerBurnRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted IssuerBurnRequest`);
+    },
+
+    [bondIssuerMintRequestTemplateId]: async (
+        request: Request<BondIssuerMintRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        await custodianApi.approveBondMint(request);
+        await wrappedSdk.bonds.issuerMintRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted BondIssuerMintRequest`);
+    },
+
+    [bondTransferRequestTemplateId]: async (
+        request: Request<BondTransferRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        await custodianApi.approveBondTransfer(request);
+        await wrappedSdk.bonds.transferRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted BondTransferRequest`);
+    },
+
+    [bondLifecycleClaimRequestTemplateId]: async (
+        request: Request<BondLifecycleClaimRequestParams>,
+        wrappedSdk: WrappedSdkWithKeyPair
+    ) => {
+        await custodianApi.approveBondLifecycleClaim(request);
+        await wrappedSdk.bonds.lifecycleClaimRequest.accept(request.contractId);
+        console.log(`[CUSTODIAN] ✓ Accepted BondLifecycleClaimRequest`);
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} satisfies Record<string, RequestHandler<any>>;
+
 // Handle request based on template ID
 async function handleRequest(
     request: Request,
@@ -142,60 +207,15 @@ async function handleRequest(
     console.log(`[CUSTODIAN]   Contract ID: ${contractId}`);
 
     // Switch on template ID to determine which handler to use
-    switch (templateId) {
-        case issuerMintRequestTemplateId:
-            // Call external API for approval
-            await custodianApi.approveMint(
-                request as unknown as Request<IssuerMintRequestParams>
-            );
-            // Accept on ledger
-            await wrappedSdk.issuerMintRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted IssuerMintRequest`);
-            break;
-
-        case transferRequestTemplateId:
-            await custodianApi.approveTransfer(
-                request as unknown as Request<TransferRequestParams>
-            );
-            await wrappedSdk.transferRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted TransferRequest`);
-            break;
-
-        case issuerBurnRequestTemplateId:
-            await custodianApi.approveBurn(
-                request as unknown as Request<IssuerBurnRequestParams>
-            );
-            await wrappedSdk.issuerBurnRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted IssuerBurnRequest`);
-            break;
-
-        case bondIssuerMintRequestTemplateId:
-            await custodianApi.approveBondMint(
-                request as unknown as Request<BondIssuerMintRequestParams>
-            );
-            await wrappedSdk.bonds.issuerMintRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted BondIssuerMintRequest`);
-            break;
-
-        case bondTransferRequestTemplateId:
-            await custodianApi.approveBondTransfer(
-                request as unknown as Request<BondTransferRequestParams>
-            );
-            await wrappedSdk.bonds.transferRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted BondTransferRequest`);
-            break;
-
-        case bondLifecycleClaimRequestTemplateId:
-            await custodianApi.approveBondLifecycleClaim(
-                request as unknown as Request<BondLifecycleClaimRequestParams>
-            );
-            await wrappedSdk.bonds.lifecycleClaimRequest.accept(contractId);
-            console.log(`[CUSTODIAN] ✓ Accepted BondLifecycleClaimRequest`);
-            break;
-
-        default:
-            console.warn(`[CUSTODIAN] Unknown template ID: ${templateId}`);
+    if (!(templateId in REQUEST_HANDLER)) {
+        console.warn(`[CUSTODIAN] No handler for template ID: ${templateId}`);
+        return;
     }
+
+    const handler = REQUEST_HANDLER[templateId as keyof typeof REQUEST_HANDLER];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await handler(request as Request<any>, wrappedSdk);
 
     // Mark as processed
     processedContracts.add(contractId);
