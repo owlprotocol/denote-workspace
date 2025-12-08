@@ -40,16 +40,6 @@ if (!CUSTODIAN_PRIVATE_KEY) {
     throw new Error("CUSTODIAN_PRIVATE_KEY environment variable is required");
 }
 
-// Watched template IDs
-const WATCHED_TEMPLATE_IDS = [
-    issuerMintRequestTemplateId,
-    transferRequestTemplateId,
-    issuerBurnRequestTemplateId,
-    bondIssuerMintRequestTemplateId,
-    bondTransferRequestTemplateId,
-    bondLifecycleClaimRequestTemplateId,
-];
-
 // In-memory set to track processed contracts
 const processedContracts = new Set<string>();
 
@@ -115,7 +105,7 @@ async function pollForRequests(sdk: WalletSDK, custodianPartyId: string) {
 
     // Query all watched template IDs in a single call
     const response = (await sdk.userLedger!.activeContracts({
-        templateIds: WATCHED_TEMPLATE_IDS,
+        // templateIds: WATCHED_TEMPLATE_IDS,
         filterByParty: true,
         parties: [custodianPartyId],
         offset,
@@ -205,6 +195,9 @@ const REQUEST_HANDLER = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } satisfies Record<string, RequestHandler<any>>;
 
+// NOTE: We assume that any template IDs not listed in REQUEST_HANDLER are ignored
+// const WATCHED_TEMPLATE_IDS = Object.keys(REQUEST_HANDLER);
+
 // Handle request based on template ID
 async function handleRequest(
     request: Request,
@@ -223,6 +216,7 @@ async function handleRequest(
     // Switch on template ID to determine which handler to use
     if (!(templateIdFormatted in REQUEST_HANDLER)) {
         console.warn(`[CUSTODIAN] No handler for template ID: ${templateId}`);
+        processedContracts.add(contractId);
         return;
     }
 
