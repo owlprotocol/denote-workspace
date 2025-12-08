@@ -14,6 +14,7 @@ import {
     issuerBurnRequestTemplateId,
     IssuerMintRequestParams,
     issuerMintRequestTemplateId,
+    MINIMAL_TOKEN_PACKAGE_ID,
     TransferRequestParams,
     transferRequestTemplateId,
     WrappedSdkWithKeyPair,
@@ -29,7 +30,7 @@ import { Request } from "./types/Request.js";
 dotenv.config();
 
 // Hard-coded configuration constants
-const POLLING_FREQUENCY_MS = 60000; // 1 minute
+const POLLING_FREQUENCY_MS = 10000; // 10 seconds
 export const API_MOCK_DELAY_MS = 1000; // 1 second
 
 // Validate environment variables
@@ -56,8 +57,12 @@ const processedContracts = new Set<string>();
 async function initializeCustodian() {
     const sdk = await getDefaultSdkAndConnect();
 
+    // Optional party hint from env
+    const custodianPartyHint = process.env.CUSTODIAN_PARTY_HINT;
+
     // Derive public key from private key using tweetnacl
     const secretKeyBase64 = CUSTODIAN_PRIVATE_KEY!;
+
     const secretKey = naclUtil.decodeBase64(secretKeyBase64);
     const keyPairDerived = nacl.sign.keyPair.fromSecretKey(secretKey);
 
@@ -68,8 +73,10 @@ async function initializeCustodian() {
 
     // Allocate custodian party
     const custodianParty = await sdk.userLedger!.generateExternalParty(
-        keyPair.publicKey
+        keyPair.publicKey,
+        custodianPartyHint
     );
+
     if (!custodianParty) throw new Error("Failed to generate custodian party");
 
     // Sign and allocate party
@@ -81,6 +88,8 @@ async function initializeCustodian() {
         signedHash,
         custodianParty
     );
+
+    console.log("[CUSTODIAN] Allocated party ID: ", allocatedParty.partyId);
 
     // Set party ID on SDK
     await sdk.setPartyId(allocatedParty.partyId);
@@ -206,13 +215,19 @@ async function handleRequest(
     console.log(`[CUSTODIAN] Processing ${templateId}`);
     console.log(`[CUSTODIAN]   Contract ID: ${contractId}`);
 
+    const templateIdFormatted = templateId.replace(
+        MINIMAL_TOKEN_PACKAGE_ID as string,
+        "#minimal-token"
+    );
+
     // Switch on template ID to determine which handler to use
-    if (!(templateId in REQUEST_HANDLER)) {
+    if (!(templateIdFormatted in REQUEST_HANDLER)) {
         console.warn(`[CUSTODIAN] No handler for template ID: ${templateId}`);
         return;
     }
 
-    const handler = REQUEST_HANDLER[templateId as keyof typeof REQUEST_HANDLER];
+    const handler =
+        REQUEST_HANDLER[templateIdFormatted as keyof typeof REQUEST_HANDLER];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await handler(request as Request<any>, wrappedSdk);

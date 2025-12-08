@@ -6,6 +6,7 @@ import {
 } from "@canton-network/wallet-sdk";
 import fs from "fs/promises";
 import path from "path";
+import { MINIMAL_TOKEN_PACKAGE_ID } from "./constants/MINIMAL_TOKEN_PACKAGE_ID.js";
 
 const sdk = new WalletSDKImpl().configure({
     logger: console,
@@ -18,11 +19,6 @@ export async function uploadDars() {
     await sdk.connect();
     await sdk.connectAdmin();
     await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
-
-    // Obtained from runnning:
-    // `pnpm get:minimal-token-id`
-    const MINIMAL_TOKEN_PACKAGE_ID =
-        "ad9c5643bbcc725d457dfca291a50fbca0c00c2ba6a7d4e8a8c89e8693550889";
 
     const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
         MINIMAL_TOKEN_PACKAGE_ID
