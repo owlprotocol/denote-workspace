@@ -21,7 +21,7 @@ import {
 } from "@denotecapital/token-sdk";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
-import { decodeBase64, encodeBase64 } from "tweetnacl-util";
+import naclUtil from "tweetnacl-util";
 import { custodianApi } from "./custodianApi.js";
 import { Request } from "./types/Request.js";
 
@@ -58,12 +58,12 @@ async function initializeCustodian() {
 
     // Derive public key from private key using tweetnacl
     const secretKeyBase64 = CUSTODIAN_PRIVATE_KEY!;
-    const secretKey = decodeBase64(secretKeyBase64);
-    const keyPairDerived = nacl.box.keyPair.fromSecretKey(secretKey);
+    const secretKey = naclUtil.decodeBase64(secretKeyBase64);
+    const keyPairDerived = nacl.sign.keyPair.fromSecretKey(secretKey);
 
     const keyPair: UserKeyPair = {
         privateKey: secretKeyBase64,
-        publicKey: encodeBase64(keyPairDerived.publicKey),
+        publicKey: naclUtil.encodeBase64(keyPairDerived.publicKey),
     };
 
     // Allocate custodian party
