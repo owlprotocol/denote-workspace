@@ -77,6 +77,55 @@ importers:
         specifier: ^1.4.7
         version: 1.4.7
 
+  packages/custodian-sdk:
+    dependencies:
+      '@canton-network/wallet-sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
+      '@denotecapital/token-sdk':
+        specifier: workspace:*
+        version: link:../token-sdk
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
+      tweetnacl-util:
+        specifier: ^0.15.1
+        version: 0.15.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.19.1
+      '@veraswap/esbuild-config':
+        specifier: latest
+        version: 0.1.2(@esbuild-plugins/node-resolve@0.2.2(esbuild@0.27.0))(esbuild@0.27.0)(glob@13.0.0)
+      '@veraswap/eslint-config':
+        specifier: latest
+        version: 0.1.4(@eslint/js@9.39.1)(eslint-config-prettier@10.1.8(eslint@9.39.1(jiti@2.6.1)))(eslint-plugin-prettier@5.5.4(eslint-config-prettier@10.1.8(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))(prettier@2.8.8))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(prettier@2.8.8)(typescript-eslint@8.48.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.8.2))
+      '@veraswap/tsconfig':
+        specifier: latest
+        version: 0.1.1
+      depcheck:
+        specifier: ^1.4.7
+        version: 1.4.7
+      madge:
+        specifier: ^8.0.0
+        version: 8.0.0(typescript@5.8.2)
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.2
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: 5.8.2
+        version: 5.8.2
+
   packages/minimal-token: {}
 
   packages/token-app:
@@ -209,6 +258,9 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.1.2
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
       typescript:
         specifier: 5.8.2
         version: 5.8.2
@@ -10419,7 +10471,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.19.1
+      '@types/node': 24.10.1
       long: 5.3.2
 
   proxy-agent@6.4.0:
