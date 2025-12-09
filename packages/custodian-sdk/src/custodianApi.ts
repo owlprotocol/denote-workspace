@@ -7,7 +7,7 @@ import {
     TransferRequestParams,
 } from "@denotecapital/token-sdk";
 import { Request } from "./types/Request.js";
-import { API_MOCK_DELAY_MS } from "./index.js";
+import { API_MOCK_DELAY_MS } from "./constants.js";
 
 // Mock external custodian API SDK
 export const custodianApi = {

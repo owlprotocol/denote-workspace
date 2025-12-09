@@ -71,7 +71,7 @@
   },
   "funding": "https://denote.capital",
   "engines": {
-    "node": "^20.0.0"
+    "node": "^22.0.0"
   },
   "dependencies": {
     "@canton-network/wallet-sdk": "^0.16.0",

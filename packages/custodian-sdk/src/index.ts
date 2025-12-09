@@ -25,13 +25,10 @@ import nacl from "tweetnacl";
 import naclUtil from "tweetnacl-util";
 import { custodianApi } from "./custodianApi.js";
 import { Request } from "./types/Request.js";
+import { POLLING_FREQUENCY_MS } from "./constants.js";
 
 // Load environment variables
 dotenv.config();
-
-// Hard-coded configuration constants
-const POLLING_FREQUENCY_MS = 10000; // 10 seconds
-export const API_MOCK_DELAY_MS = 1000; // 1 second
 
 // Validate environment variables
 // NOTE: CUSTODIAN_PRIVATE_KEY should be a base64-encoded string

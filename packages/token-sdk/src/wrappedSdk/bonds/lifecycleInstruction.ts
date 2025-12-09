@@ -10,6 +10,35 @@ import {
 } from "../../constants/templateIds.js";
 import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
 import { getContractDisclosure } from "../contractDisclosure.js";
+import { InstrumentId } from "../../types/InstrumentId.js";
+import { CreatedEvent } from "../../types/CreatedEvent.js";
+
+export type LifecycleEventType = "CouponPayment" | "Redemption";
+
+export interface BondLifecycleEffect {
+    issuer: Party;
+    depository: Party;
+    eventType: LifecycleEventType;
+    targetInstrumentId: string;
+    targetVersion: string;
+    producedVersion?: string;
+    eventDate: number;
+    settlementTime?: number;
+    amount: number;
+    currencyInstrumentId: InstrumentId;
+}
+
+export interface BondLifecycleInstructionParams {
+    eventType: LifecycleEventType;
+    lockedBond: ContractId;
+    bondInstrumentCid?: ContractId;
+    producedVersion?: string;
+    issuer: Party;
+    holder: Party;
+    eventDate: string;
+    amount: number;
+    currencyInstrumentId: InstrumentId;
+}
 
 export async function processBondLifecycleInstruction(
     ledger: LedgerController,
@@ -80,24 +109,14 @@ export async function getLatestBondLifecycleInstruction(
 export async function getBondLifecycleInstruction(
     ledger: LedgerController,
     contractId: ContractId
-) {
+): Promise<CreatedEvent<BondLifecycleInstructionParams> | undefined> {
     const end = await ledger.ledgerEnd();
     const instructions = (await ledger.activeContracts({
         offset: end.offset,
         templateIds: [bondLifecycleInstructionTemplateId],
         filterByParty: true,
         parties: [ledger.getPartyId()],
-    })) as ActiveContractResponse<{
-        eventType: unknown;
-        lockedBond: ContractId;
-        bondInstrumentCid: ContractId | null;
-        producedVersion: string | null;
-        issuer: string;
-        holder: string;
-        eventDate: string;
-        amount: number;
-        currencyInstrumentId: unknown;
-    }>[];
+    })) as ActiveContractResponse<BondLifecycleInstructionParams>[];
 
     const instruction = instructions.find(
         (inst) =>
