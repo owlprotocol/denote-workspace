@@ -6,6 +6,8 @@ export const transferPreapprovalTemplateId =
 export const tokenTransferInstructionTemplateId =
     "#minimal-token:MyTokenTransferInstruction:MyTransferInstruction";
 export const lockedMyTokenTemplateId = "#minimal-token:MyToken:LockedMyToken";
+export const transferRequestTemplateId =
+    "#minimal-token:MyToken.TransferRequest:TransferRequest";
 
 export const bondIssuerMintRequestTemplateId =
     "#minimal-token:Bond.IssuerMintRequest:IssuerMintRequest";
@@ -29,3 +31,4 @@ export const bondLifecycleInstructionTemplateId =
 export const bondLifecycleEffectTemplateId =
     "#minimal-token:Bond.BondLifecycleEffect:BondLifecycleEffect";
 export const lockedBondTemplateId = "#minimal-token:Bond.Bond:LockedBond";
+export const bondTemplateId = "#minimal-token:Bond.Bond:Bond";

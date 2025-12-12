@@ -142,7 +142,6 @@ template BondLifecycleClaimRequest
           Redemption -> do
             now <- getTime
 
-
             (lockedBondCid, _, _) <- exercise bondRulesCid BondRules_LockForRedemption with
               holder = bond.owner
               inputBondCid = bondHoldingCid

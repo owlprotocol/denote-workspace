@@ -6,6 +6,7 @@ import { ContractId, Party } from "../types/daml.js";
 import { getCreateCommand } from "../helpers/getCreateCommand.js";
 import { getExerciseCommand } from "../helpers/getExerciseCommand.js";
 import { InstrumentId } from "../types/InstrumentId.js";
+import { transferRequestTemplateId } from "../constants/templateIds.js";
 
 export type Metadata = Record<string, unknown>;
 
@@ -33,9 +34,6 @@ export interface TransferRequestParams {
     transfer: Transfer;
     extraArgs: ExtraArgs;
 }
-
-export const transferRequestTemplateId =
-    "#minimal-token:MyToken.TransferRequest:TransferRequest";
 
 const getCreateTransferRequestCommand = (params: TransferRequestParams) =>
     getCreateCommand({ templateId: transferRequestTemplateId, params });

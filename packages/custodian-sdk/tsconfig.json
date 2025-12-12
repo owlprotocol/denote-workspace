@@ -1,0 +1,6 @@
+{
+  "include": [
+    "src"
+  ],
+  "extends": "@veraswap/tsconfig"
+}
