@@ -31,3 +31,4 @@ export const bondLifecycleInstructionTemplateId =
 export const bondLifecycleEffectTemplateId =
     "#minimal-token:Bond.BondLifecycleEffect:BondLifecycleEffect";
 export const lockedBondTemplateId = "#minimal-token:Bond.Bond:LockedBond";
+export const bondTemplateId = "#minimal-token:Bond.Bond:Bond";

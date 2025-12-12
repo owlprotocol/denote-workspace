@@ -148,9 +148,14 @@ import {
     getBondLifecycleInstruction,
     getBondLifecycleInstructionDisclosure,
     getLatestBondLifecycleInstruction,
+    getAllBondLifecycleInstructions,
     processBondLifecycleInstruction,
 } from "./bonds/lifecycleInstruction.js";
-import { getLatestBondLifecycleEffect } from "./bonds/lifecycleEffect.js";
+import {
+    getLatestBondLifecycleEffect,
+    getAllBondLifecycleEffects,
+} from "./bonds/lifecycleEffect.js";
+import { getBondContract } from "./bonds/bond.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -420,6 +425,8 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                     getBondLifecycleInstruction(userLedger, contractId),
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleInstruction(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleInstructions(userLedger, party),
                 getDisclosure: (contractId: ContractId) =>
                     getBondLifecycleInstructionDisclosure(
                         userLedger,
@@ -429,6 +436,12 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             lifecycleEffect: {
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleEffect(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleEffects(userLedger, party),
+            },
+            bond: {
+                get: (contractId: ContractId) =>
+                    getBondContract(userLedger, contractId),
             },
         },
         tokenFactory: {
@@ -846,6 +859,8 @@ export const getWrappedSdkWithKeyPair = (
                     getBondLifecycleInstruction(userLedger, contractId),
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleInstruction(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleInstructions(userLedger, party),
                 getDisclosure: (contractId: ContractId) =>
                     getBondLifecycleInstructionDisclosure(
                         userLedger,
@@ -855,6 +870,12 @@ export const getWrappedSdkWithKeyPair = (
             lifecycleEffect: {
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleEffect(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleEffects(userLedger, party),
+            },
+            bond: {
+                get: (contractId: ContractId) =>
+                    getBondContract(userLedger, contractId),
             },
         },
         tokenFactory: {

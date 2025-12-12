@@ -112,6 +112,66 @@ export async function getBondLifecycleInstruction(
     return instruction.contractEntry.JsActiveContract.createdEvent;
 }
 
+export interface BondLifecycleInstruction {
+    contractId: ContractId;
+    eventType: string;
+    lockedBond: ContractId;
+    bondInstrumentCid: ContractId | null;
+    producedVersion: string | null;
+    issuer: string;
+    holder: string;
+    eventDate: string;
+    amount: number;
+}
+
+export async function getAllBondLifecycleInstructions(
+    ledger: LedgerController,
+    party: Party
+): Promise<BondLifecycleInstruction[]> {
+    const end = await ledger.ledgerEnd();
+    const instructions = (await ledger.activeContracts({
+        offset: end.offset,
+        templateIds: [bondLifecycleInstructionTemplateId],
+        filterByParty: true,
+        parties: [party],
+    })) as ActiveContractResponse<{
+        eventType: unknown;
+        lockedBond: ContractId;
+        bondInstrumentCid: ContractId | null;
+        producedVersion: string | null;
+        issuer: string;
+        holder: string;
+        eventDate: string;
+        amount: number;
+        currencyInstrumentId: unknown;
+    }>[];
+
+    return instructions
+        .map((contract) => {
+            const jsActive = contract.contractEntry.JsActiveContract;
+            if (!jsActive) return null;
+
+            const createArg = jsActive.createdEvent.createArgument;
+            const contractId = jsActive.createdEvent.contractId;
+
+            return {
+                contractId,
+                eventType: createArg.eventType as string,
+                lockedBond: createArg.lockedBond,
+                bondInstrumentCid: createArg.bondInstrumentCid,
+                producedVersion: createArg.producedVersion,
+                issuer: createArg.issuer,
+                holder: createArg.holder,
+                eventDate: createArg.eventDate,
+                amount: createArg.amount,
+            };
+        })
+        .filter(
+            (instruction): instruction is NonNullable<typeof instruction> =>
+                instruction !== null
+        );
+}
+
 export async function getBondLifecycleInstructionDisclosure(
     issuerLedger: LedgerController,
     lifecycleInstructionCid: ContractId
