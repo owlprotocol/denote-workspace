@@ -40,9 +40,9 @@ export function useTransferRequest(
             );
 
             if (!response.ok) {
-                const error = await response.json();
+                const error = (await response.json()) as { error?: string };
                 throw new Error(
-                    error.error || "Failed to get transfer requests"
+                    error.error ?? "Failed to get transfer requests"
                 );
             }
 
@@ -106,13 +106,11 @@ export function useTransferRequest(
             );
 
             if (!response.ok) {
-                const error = await response.json();
+                const error = (await response.json()) as { error?: string };
                 throw new Error(
-                    error.error || "Failed to accept transfer request"
+                    error.error ?? "Failed to accept transfer request"
                 );
             }
-
-            return response.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -143,13 +141,11 @@ export function useTransferRequest(
             );
 
             if (!response.ok) {
-                const error = await response.json();
+                const error = (await response.json()) as { error?: string };
                 throw new Error(
-                    error.error || "Failed to decline transfer request"
+                    error.error ?? "Failed to decline transfer request"
                 );
             }
-
-            return response.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -174,13 +170,11 @@ export function useTransferRequest(
             );
 
             if (!response.ok) {
-                const error = await response.json();
+                const error = (await response.json()) as { error?: string };
                 throw new Error(
-                    error.error || "Failed to withdraw transfer request"
+                    error.error ?? "Failed to withdraw transfer request"
                 );
             }
-
-            return response.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({
