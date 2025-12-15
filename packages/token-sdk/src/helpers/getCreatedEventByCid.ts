@@ -1,7 +1,6 @@
 import { LedgerController } from "@canton-network/wallet-sdk";
 import { ActiveContractResponse } from "../types/ActiveContractResponse.js";
 import { ContractId } from "../types/daml.js";
-
 export async function getCreatedEventByCid<
     ContractParams = Record<string, unknown>
 >(ledger: LedgerController, contractId: ContractId, templateId: string) {

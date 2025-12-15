@@ -1011,3 +1011,6 @@ export const getWrappedSdkWithKeyPairForParty = async (
     const sdk = await getSdkForParty(partyId);
     return getWrappedSdkWithKeyPair(sdk, userKeyPair);
 };
+
+export type WrappedSdk = ReturnType<typeof getWrappedSdk>;
+export type WrappedSdkWithKeyPair = ReturnType<typeof getWrappedSdkWithKeyPair>;
