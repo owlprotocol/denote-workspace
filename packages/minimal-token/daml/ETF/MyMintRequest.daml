@@ -1,0 +1,25 @@
+module ETF.MyMintRequest where
+
+import MyToken
+import ETF.MyMintRecipe as MyMintRecipe
+import Splice.Api.Token.TransferInstructionV1 as TI
+
+template MyMintRequest
+  with
+    mintRecipeCid : ContractId MyMintRecipe
+    requester : Party
+    amount : Decimal
+    transferInstructionCids: [ContractId TI.TransferInstruction]
+
+  where
+    signatory requester
+
+    choice MintRequest_Accept : ContractId MyToken
+      with
+        issuer : Party
+      controller issuer
+      do
+        -- TODO: validate transfer instructions match portfolio composition
+        exercise mintRecipeCid MyMintRecipe.MyMintRecipe_Mint with
+          receiver = requester
+          amount = amount

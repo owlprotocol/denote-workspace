@@ -1,4 +1,4 @@
-module PortfolioComposition where
+module ETF.PortfolioComposition where
 
 data PortfolioItem = PortfolioItem
   with

@@ -44,6 +44,11 @@ data TokenInfrastructure = TokenInfrastructure with
 setupTokenInfrastructure : Party -> Script TokenInfrastructure
 setupTokenInfrastructure issuer = script do
     let instrumentId = show issuer <> "#MyToken"
+    setupTokenInfrastructureWithInstrumentId issuer instrumentId
+
+-- | Setup complete token infrastructure for an issuer
+setupTokenInfrastructureWithInstrumentId : Party -> Text -> Script TokenInfrastructure
+setupTokenInfrastructureWithInstrumentId issuer instrumentId = script do
 
     -- Create rules for locking tokens
     rulesCid <- submit issuer do

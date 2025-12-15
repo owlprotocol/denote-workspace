@@ -1,8 +1,8 @@
-module MyMintRecipe where
+module ETF.MyMintRecipe where
 
 import MyToken
 import MyTokenFactory
-import PortfolioComposition
+import ETF.PortfolioComposition
 
 -- | MyMintRecipe defines how to mint MyToken tokens based on a portfolio composition.
 -- It allows an issuer to authorize multiple parties to mint tokens according to the defined composition.
