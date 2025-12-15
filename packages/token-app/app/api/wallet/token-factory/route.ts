@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
                 const contractId = jsActive.createdEvent.contractId;
 
                 const instrumentId = createArg.instrumentId;
-                const nameMatch = instrumentId.match(/^[^#]+#(.+)$/);
+                const nameMatch = /^[^#]+#(.+)$/.exec(instrumentId);
                 const name = nameMatch ? nameMatch[1] : instrumentId;
 
                 return {

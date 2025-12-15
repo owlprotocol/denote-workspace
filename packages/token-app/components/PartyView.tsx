@@ -132,7 +132,7 @@ export function PartyView({
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => copyToClipboard(partyId!)}
+                            onClick={() => copyToClipboard(partyId)}
                             className="shrink-0"
                         >
                             <Copy className="h-4 w-4" />
