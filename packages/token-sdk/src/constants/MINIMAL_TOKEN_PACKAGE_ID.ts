@@ -1,4 +1,4 @@
 // Obtained from runnning:
 // `pnpm get:minimal-token-id`
 export const MINIMAL_TOKEN_PACKAGE_ID =
-    "ad9c5643bbcc725d457dfca291a50fbca0c00c2ba6a7d4e8a8c89e8693550889";
+    "e2037d891555c6675e2c7a951fcbbf31894f5540a74da7c5d6f4a719c1bae6d4";
