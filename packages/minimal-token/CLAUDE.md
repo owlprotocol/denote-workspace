@@ -102,6 +102,55 @@ This pattern is used by both:
 - Orchestrates atomic execution of multiple allocation legs
 - ExecuteAll choice exercises all legs atomically (requires all senders + receivers + executor)
 
+### ETF Components
+
+The implementation includes Exchange-Traded Fund (ETF) contracts that enable minting composite tokens backed by underlying assets:
+
+**PortfolioComposition** (`daml/ETF/PortfolioComposition.daml`)
+- Defines a named collection of assets with weights for ETF composition
+- Contains `owner`, `name`, and `items` (list of PortfolioItem)
+- PortfolioItem specifies `instrumentId` and `weight` (proportion) for each underlying asset
+- Reusable across multiple ETF mint recipes
+
+**MyMintRecipe** (`daml/ETF/MyMintRecipe.daml`)
+- Defines how to mint ETF tokens based on a portfolio composition
+- References a `PortfolioComposition` contract and `MyTokenFactory`
+- Maintains list of `authorizedMinters` who can request ETF minting
+- Issuer can update composition and manage authorized minters
+- Choices:
+  - `MyMintRecipe_Mint` - Mint ETF tokens (called by MyMintRequest after validation)
+  - `MyMintRecipe_CreateAndUpdateComposition` - Create new composition, optionally archive old
+  - `MyMintRecipe_UpdateComposition` - Update composition reference
+  - `MyMintRecipe_AddAuthorizedMinter` / `MyMintRecipe_RemoveAuthorizedMinter` - Manage minters
+
+**MyMintRequest** (`daml/ETF/MyMintRequest.daml`)
+- Request contract for minting ETF tokens with backing assets
+- Requester provides transfer instructions for all underlying assets
+- Follows request/accept pattern for authorization
+- Validation ensures:
+  - Transfer instruction count matches portfolio composition items
+  - Each transfer sender is the requester, receiver is the issuer
+  - InstrumentId matches portfolio item
+  - Transfer amount equals `portfolioItem.weight × ETF amount`
+- Choices:
+  - `MintRequest_Accept` - Validates transfers, accepts all transfer instructions (transferring underlying assets to issuer custody), mints ETF tokens
+  - `MintRequest_Decline` - Issuer declines request
+  - `MintRequest_Withdraw` - Requester withdraws request
+
+**ETF Minting Workflow:**
+1. Issuer creates `PortfolioComposition` defining underlying assets and weights
+2. Issuer creates `MyMintRecipe` referencing the portfolio and authorizing minters
+3. Authorized party acquires underlying tokens (via minting or transfer)
+4. Authorized party creates transfer requests for each underlying asset (sender → issuer)
+5. Issuer accepts transfer requests, creating transfer instructions
+6. Authorized party creates `MyMintRequest` with all transfer instruction CIDs
+7. Issuer accepts `MyMintRequest`, which:
+   - Validates transfer instructions match portfolio composition
+   - Executes all transfer instructions (custody of underlying assets to issuer)
+   - Mints ETF tokens to requester
+
+This pattern ensures ETF tokens are always backed by the correct underlying assets in issuer custody.
+
 ### Request/Accept Pattern
 
 The codebase uses a consistent request/accept authorization pattern:
@@ -111,9 +160,10 @@ The codebase uses a consistent request/accept authorization pattern:
 3. This ensures both sender and admin authorize the operation
 
 Examples:
-- `MyToken.IssuerMintRequest` -> Issuer accepts -> Mints token
-- `MyToken.TransferRequest` -> Issuer accepts -> Creates `MyTransferInstruction`
-- `MyToken.AllocationRequest` -> Admin accepts -> Creates `MyAllocation`
+- `MyToken.IssuerMintRequest` → Issuer accepts → Mints token
+- `MyToken.TransferRequest` → Issuer accepts → Creates `MyTransferInstruction`
+- `MyToken.AllocationRequest` → Admin accepts → Creates `MyAllocation`
+- `ETF.MyMintRequest` → Issuer accepts → Validates transfers, executes transfer instructions, mints ETF token
 
 ### Registry API Pattern
 
@@ -163,7 +213,7 @@ CIP-0056 interfaces use `ExtraArgs` and `Metadata` extensively for extensibility
 
 ## Test Organization
 
-The test suite is organized by feature area for clarity and maintainability (**17 tests total, all passing**):
+The test suite is organized by feature area for clarity and maintainability (**20 tests total, all passing**):
 
 ### `Test/TestUtils.daml`
 Common helpers to reduce test duplication:
@@ -196,6 +246,13 @@ Common helpers to reduce test duplication:
 
 ### `Test/TransferPreapproval.daml`
 - `testTransferPreapproval` - Transfer preapproval pattern
+
+### `ETF/Test/ETFTest.daml`
+- `mintToSelfTokenETF` - ETF minting where issuer mints underlying tokens to themselves, creates transfer instructions, and mints ETF
+- `mintToOtherTokenETF` - ETF minting where Alice acquires underlying tokens, transfers to issuer, and mints ETF (demonstrates authorized minter pattern)
+
+### `Bond/Test/BondLifecycleTest.daml`
+- `testBondFullLifecycle` - Complete bond lifecycle including minting, coupon payments, transfers, and redemption
 
 ### `Scripts/Holding.daml`
 - `setupHolding` - Utility function for setting up holdings
