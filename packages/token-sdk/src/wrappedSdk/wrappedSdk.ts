@@ -151,6 +151,36 @@ import {
     processBondLifecycleInstruction,
 } from "./bonds/lifecycleInstruction.js";
 import { getLatestBondLifecycleEffect } from "./bonds/lifecycleEffect.js";
+import {
+    createPortfolioComposition,
+    getLatestPortfolioComposition,
+    getAllPortfolioCompositions,
+    getPortfolioComposition,
+    PortfolioCompositionParams,
+} from "./etf/portfolioComposition.js";
+import {
+    createMintRecipe,
+    getLatestMintRecipe,
+    getOrCreateMintRecipe,
+    addAuthorizedMinter,
+    removeAuthorizedMinter,
+    updateComposition,
+    createAndUpdateComposition,
+    MintRecipeParams,
+    AddAuthorizedMinterParams,
+    RemoveAuthorizedMinterParams,
+    UpdateCompositionParams,
+    CreateAndUpdateCompositionParams,
+} from "./etf/mintRecipe.js";
+import {
+    createEtfMintRequest,
+    getLatestEtfMintRequest,
+    getAllEtfMintRequests,
+    acceptEtfMintRequest,
+    declineEtfMintRequest,
+    withdrawEtfMintRequest,
+    EtfMintRequestParams,
+} from "./etf/mintRequest.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -591,6 +621,90 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                     params
                 ),
         },
+        etf: {
+            portfolioComposition: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: PortfolioCompositionParams
+                ) =>
+                    createPortfolioComposition(userLedger, userKeyPair, params),
+                getLatest: (name?: string) =>
+                    getLatestPortfolioComposition(userLedger, name),
+                getAll: () => getAllPortfolioCompositions(userLedger),
+                get: (contractId: ContractId) =>
+                    getPortfolioComposition(userLedger, contractId),
+            },
+            mintRecipe: {
+                create: (userKeyPair: UserKeyPair, params: MintRecipeParams) =>
+                    createMintRecipe(userLedger, userKeyPair, params),
+                getLatest: (instrumentId: string) =>
+                    getLatestMintRecipe(userLedger, instrumentId),
+                getOrCreate: (
+                    userKeyPair: UserKeyPair,
+                    params: MintRecipeParams
+                ) => getOrCreateMintRecipe(userLedger, userKeyPair, params),
+                addAuthorizedMinter: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: AddAuthorizedMinterParams
+                ) =>
+                    addAuthorizedMinter(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                removeAuthorizedMinter: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: RemoveAuthorizedMinterParams
+                ) =>
+                    removeAuthorizedMinter(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                updateComposition: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: UpdateCompositionParams
+                ) =>
+                    updateComposition(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                createAndUpdateComposition: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    params: CreateAndUpdateCompositionParams
+                ) =>
+                    createAndUpdateComposition(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            mintRequest: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: EtfMintRequestParams
+                ) => createEtfMintRequest(userLedger, userKeyPair, params),
+                getLatest: (issuer: Party) =>
+                    getLatestEtfMintRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllEtfMintRequests(userLedger, issuer),
+                accept: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    acceptEtfMintRequest(userLedger, userKeyPair, contractId),
+                decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    declineEtfMintRequest(userLedger, userKeyPair, contractId),
+                withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    withdrawEtfMintRequest(userLedger, userKeyPair, contractId),
+            },
+        },
     };
 };
 
@@ -995,6 +1109,79 @@ export const getWrappedSdkWithKeyPair = (
                     disclosedContracts,
                     params
                 ),
+        },
+        etf: {
+            portfolioComposition: {
+                create: (params: PortfolioCompositionParams) =>
+                    createPortfolioComposition(userLedger, userKeyPair, params),
+                getLatest: (name?: string) =>
+                    getLatestPortfolioComposition(userLedger, name),
+                getAll: () => getAllPortfolioCompositions(userLedger),
+                get: (contractId: ContractId) =>
+                    getPortfolioComposition(userLedger, contractId),
+            },
+            mintRecipe: {
+                create: (params: MintRecipeParams) =>
+                    createMintRecipe(userLedger, userKeyPair, params),
+                getLatest: (instrumentId: string) =>
+                    getLatestMintRecipe(userLedger, instrumentId),
+                getOrCreate: (params: MintRecipeParams) =>
+                    getOrCreateMintRecipe(userLedger, userKeyPair, params),
+                addAuthorizedMinter: (
+                    contractId: ContractId,
+                    params: AddAuthorizedMinterParams
+                ) =>
+                    addAuthorizedMinter(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                removeAuthorizedMinter: (
+                    contractId: ContractId,
+                    params: RemoveAuthorizedMinterParams
+                ) =>
+                    removeAuthorizedMinter(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                updateComposition: (
+                    contractId: ContractId,
+                    params: UpdateCompositionParams
+                ) =>
+                    updateComposition(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+                createAndUpdateComposition: (
+                    contractId: ContractId,
+                    params: CreateAndUpdateCompositionParams
+                ) =>
+                    createAndUpdateComposition(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        params
+                    ),
+            },
+            mintRequest: {
+                create: (params: EtfMintRequestParams) =>
+                    createEtfMintRequest(userLedger, userKeyPair, params),
+                getLatest: (issuer: Party) =>
+                    getLatestEtfMintRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllEtfMintRequests(userLedger, issuer),
+                accept: (contractId: ContractId) =>
+                    acceptEtfMintRequest(userLedger, userKeyPair, contractId),
+                decline: (contractId: ContractId) =>
+                    declineEtfMintRequest(userLedger, userKeyPair, contractId),
+                withdraw: (contractId: ContractId) =>
+                    withdrawEtfMintRequest(userLedger, userKeyPair, contractId),
+            },
         },
     };
 };

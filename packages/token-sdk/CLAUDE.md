@@ -39,6 +39,7 @@ Before running this SDK:
 - `tsx src/testScripts/threePartyTransfer.ts` - Comprehensive three-party transfer demonstration
 - `tsx src/testScripts/transferWithPreapproval.ts` - Transfer with preapproval pattern
 - `tsx src/testScripts/bondLifecycleTest.ts` - Complete bond lifecycle demonstration (mint, coupon, transfer, redemption)
+- `tsx src/testScripts/etfMint.ts` - ETF minting demonstration following mintToOtherTokenETF pattern
 
 ### Other Commands
 - `pnpm clean` - Remove build artifacts
@@ -110,6 +111,14 @@ All helpers follow a consistent pattern with single-party perspective and templa
 **`transferPreapproval.ts` / `transferPreapprovalProposal.ts`** - Transfer preapproval patterns
 - Support for preapproved transfer workflows
 
+**Bond Operations (`src/wrappedSdk/bonds/`)**
+- Comprehensive bond instrument support with 8 wrapper modules
+- See dedicated Bond Operations section below for complete documentation
+
+**ETF Operations (`src/wrappedSdk/etf/`)**
+- Exchange-Traded Fund token support with 3 wrapper modules (portfolioComposition, mintRecipe, mintRequest)
+- See dedicated ETF Operations section below for complete documentation
+
 **`wrappedSdk.ts`** - SDK wrapper convenience functions
 - `getWrappedSdkWithKeyPair()` - Create wrapped SDK with key pair
 
@@ -121,6 +130,10 @@ All helpers follow a consistent pattern with single-party perspective and templa
 **Template ID Constants (`src/constants/templateIds.ts`)**
 - Centralized template ID definitions
 - Template IDs are prefixed with `#minimal-token:` (e.g., `#minimal-token:MyTokenFactory:MyTokenFactory`)
+- **ETF Template IDs** (added for ETF support):
+  - `portfolioCompositionTemplateId`: `#minimal-token:ETF.PortfolioComposition:PortfolioComposition`
+  - `mintRecipeTemplateId`: `#minimal-token:ETF.MyMintRecipe:MyMintRecipe`
+  - `etfMintRequestTemplateId`: `#minimal-token:ETF.MyMintRequest:MyMintRequest`
 
 ### Canton Ledger Interaction Pattern
 
@@ -555,6 +568,292 @@ if (transferCid2) {
 
 9. **Term Inference**: Lifecycle rules infer bond terms from sample bond contracts, ensuring consistency
 
+### ETF Operations
+
+The SDK provides comprehensive support for Exchange-Traded Fund (ETF) tokens backed by underlying assets. The ETF implementation demonstrates composite token creation with atomic asset backing validation.
+
+#### ETF Architecture Overview
+
+**Purpose**: ETFs are composite tokens backed by a basket of underlying assets held in issuer custody.
+
+**Three-Contract Structure**:
+1. **PortfolioComposition** - Defines the basket of underlying assets with weights
+2. **MyMintRecipe** - Defines minting rules and authorized minters
+3. **MyMintRequest** - Request/accept pattern for ETF minting with validation
+
+**Validation Pattern**: ETF minting validates that all underlying assets are transferred to issuer custody before minting the ETF token, ensuring proper backing.
+
+#### ETF Components
+
+**PortfolioComposition** (`etf/portfolioComposition.ts`):
+- Data-only contract defining asset basket
+- Fields: `owner: Party`, `name: string`, `items: PortfolioItem[]`
+- PortfolioItem: `instrumentId: { admin, id }`, `weight: number`
+- Reusable across multiple ETF mint recipes
+- No choices (pure data contract)
+
+**MyMintRecipe** (`etf/mintRecipe.ts`):
+- Defines ETF minting rules and authorization
+- Fields: `issuer`, `instrumentId`, `tokenFactory`, `authorizedMinters: Party[]`, `composition: ContractId`
+- Choices:
+  - `MyMintRecipe_AddAuthorizedMinter(newMinter)` - Add minter to authorized list
+  - `MyMintRecipe_RemoveAuthorizedMinter(minterToRemove)` - Remove minter from authorized list
+  - `MyMintRecipe_UpdateComposition(newComposition)` - Update portfolio reference
+  - `MyMintRecipe_CreateAndUpdateComposition(newCompositionItems, compositionName, archiveOld)` - Create new portfolio and update reference
+  - `MyMintRecipe_Mint(receiver, amount)` - Internal mint choice (called by MintRequest_Accept)
+- Observers: authorizedMinters (allows authorized parties to create mint requests)
+
+**MyMintRequest** (`etf/mintRequest.ts`):
+- Request pattern for ETF minting
+- Fields: `mintRecipeCid`, `requester`, `amount`, `transferInstructionCids: ContractId[]`, `issuer`
+- Validation ensures:
+  - Transfer instruction count matches portfolio item count
+  - Each transfer sender matches requester
+  - Each transfer receiver matches issuer
+  - Each transfer instrumentId matches portfolio item
+  - Each transfer amount equals `portfolioItem.weight × ETF amount`
+- Choices:
+  - `MintRequest_Accept` - Validates transfers, executes all transfer instructions, mints ETF
+  - `MintRequest_Decline` - Issuer declines the request
+  - `MintRequest_Withdraw` - Requester withdraws the request
+
+#### ETF Minting Workflow
+
+**Phase 1: Infrastructure Setup** (Issuer)
+```typescript
+// Create underlying token factories (one per asset in portfolio)
+const tokenFactory1Cid = await issuerWrappedSdk.tokenFactory.getOrCreate(instrumentId1);
+const tokenFactory2Cid = await issuerWrappedSdk.tokenFactory.getOrCreate(instrumentId2);
+const tokenFactory3Cid = await issuerWrappedSdk.tokenFactory.getOrCreate(instrumentId3);
+
+// Create ETF token factory
+const etfTokenFactoryCid = await issuerWrappedSdk.tokenFactory.getOrCreate(etfInstrumentId);
+
+// Create token rules and transfer factories (for transferring underlying assets)
+const rulesCid = await issuerWrappedSdk.tokenRules.getOrCreate();
+const transferFactoryCid = await issuerWrappedSdk.transferFactory.getOrCreate(rulesCid);
+```
+
+**Phase 2: Portfolio Composition Creation** (Issuer)
+```typescript
+await issuerWrappedSdk.etf.portfolioComposition.create({
+    owner: issuer.partyId,
+    name: "Three Token ETF",
+    items: [
+        { instrumentId: { admin: issuer.partyId, id: instrumentId1 }, weight: 1.0 },
+        { instrumentId: { admin: issuer.partyId, id: instrumentId2 }, weight: 1.0 },
+        { instrumentId: { admin: issuer.partyId, id: instrumentId3 }, weight: 1.0 },
+    ],
+});
+
+const portfolioCid = await issuerWrappedSdk.etf.portfolioComposition.getLatest("Three Token ETF");
+```
+
+**Phase 3: Mint Recipe Creation** (Issuer)
+```typescript
+await issuerWrappedSdk.etf.mintRecipe.create({
+    issuer: issuer.partyId,
+    instrumentId: etfInstrumentId,
+    tokenFactory: etfTokenFactoryCid,
+    authorizedMinters: [issuer.partyId, alice.partyId],
+    composition: portfolioCid,
+});
+
+const mintRecipeCid = await issuerWrappedSdk.etf.mintRecipe.getLatest(etfInstrumentId);
+```
+
+**Phase 4: Acquire Underlying Tokens** (Authorized Minter)
+```typescript
+// Alice creates mint requests for each underlying token
+await aliceWrappedSdk.issuerMintRequest.create({
+    tokenFactoryCid: tokenFactory1Cid,
+    issuer: issuer.partyId,
+    receiver: alice.partyId,
+    amount: 1.0,
+});
+// ... repeat for token 2 and 3
+
+// Issuer accepts all mint requests
+const mintRequestCid = await aliceWrappedSdk.issuerMintRequest.getLatest(issuer.partyId);
+await issuerWrappedSdk.issuerMintRequest.accept(mintRequestCid);
+// ... repeat for token 2 and 3
+
+// Alice now owns 3 underlying tokens
+```
+
+**Phase 5: Transfer Underlying Tokens to Issuer** (Authorized Minter)
+```typescript
+// Alice creates transfer request 1 (alice → issuer, 1.0)
+const transfer1 = buildTransfer({
+    sender: alice.partyId,
+    receiver: issuer.partyId,
+    amount: 1.0,
+    instrumentId: { admin: issuer.partyId, id: instrumentId1 },
+    requestedAt: new Date(Date.now() - 1000),
+    executeBefore: new Date(Date.now() + 3600000),
+    inputHoldingCids: [token1Cid],
+});
+
+await aliceWrappedSdk.transferRequest.create({
+    transferFactoryCid,
+    expectedAdmin: issuer.partyId,
+    transfer: transfer1,
+    extraArgs: emptyExtraArgs(),
+});
+
+const transferRequestCid1 = await aliceWrappedSdk.transferRequest.getLatest(issuer.partyId);
+await issuerWrappedSdk.transferRequest.accept(transferRequestCid1);
+
+// IMPORTANT: Get transfer instruction CID immediately after accepting
+const transferInstructionCid1 = await issuerWrappedSdk.transferInstruction.getLatest(issuer.partyId);
+
+// Repeat pattern for token 2
+// ... create transfer2, accept, get instruction CID 2 immediately
+
+// Repeat pattern for token 3
+// ... create transfer3, accept, get instruction CID 3 immediately
+
+// Result: Three distinct transfer instruction CIDs in correct order
+```
+
+**⚠️ Critical Pattern**: You must capture each transfer instruction CID **immediately** after accepting each transfer request. If you wait until all transfers are accepted and then call `getLatest()` three times, you'll get the same CID three times, causing ETF minting validation to fail.
+
+**Phase 6: Create ETF Mint Request** (Authorized Minter)
+```typescript
+await aliceWrappedSdk.etf.mintRequest.create({
+    mintRecipeCid,
+    requester: alice.partyId,
+    amount: 1.0,
+    transferInstructionCids: [transferInstructionCid1, transferInstructionCid2, transferInstructionCid3],
+    issuer: issuer.partyId,
+});
+
+const etfMintRequestCid = await aliceWrappedSdk.etf.mintRequest.getLatest(issuer.partyId);
+```
+
+**Phase 7: Accept ETF Mint** (Issuer)
+```typescript
+await issuerWrappedSdk.etf.mintRequest.accept(etfMintRequestCid);
+
+// Result:
+// - Validates all 3 transfer instructions match portfolio composition
+// - Executes all 3 transfer instructions (underlying assets → issuer custody)
+// - Mints 1.0 ETF tokens to Alice
+```
+
+#### ETF Wrapper Modules
+
+**`etf/portfolioComposition.ts`** - Portfolio basket management
+- `createPortfolioComposition(userLedger, userKeyPair, params)` - Create portfolio
+- `getLatestPortfolioComposition(userLedger, name?)` - Query latest by owner
+- `getAllPortfolioCompositions(userLedger)` - Query all by owner
+- `getPortfolioComposition(userLedger, contractId)` - Fetch specific portfolio details
+
+**`etf/mintRecipe.ts`** - Mint recipe management
+- `createMintRecipe(userLedger, userKeyPair, params)` - Create recipe
+- `getLatestMintRecipe(userLedger, instrumentId)` - Query by issuer and instrumentId
+- `getOrCreateMintRecipe(userLedger, userKeyPair, params)` - Convenience function
+- `addAuthorizedMinter(userLedger, userKeyPair, contractId, params)` - Add minter to authorized list
+- `removeAuthorizedMinter(userLedger, userKeyPair, contractId, params)` - Remove minter
+- `updateComposition(userLedger, userKeyPair, contractId, params)` - Update portfolio reference
+- `createAndUpdateComposition(userLedger, userKeyPair, contractId, params)` - Create new portfolio and update
+
+**`etf/mintRequest.ts`** - ETF mint request/accept pattern
+- `createEtfMintRequest(requesterLedger, requesterKeyPair, params)` - Requester creates request
+- `getLatestEtfMintRequest(userLedger, issuer)` - Query latest
+- `getAllEtfMintRequests(userLedger, issuer)` - Query all for issuer
+- `acceptEtfMintRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer validates and mints
+- `declineEtfMintRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer declines
+- `withdrawEtfMintRequest(requesterLedger, requesterKeyPair, contractId)` - Requester withdraws
+
+#### Key ETF Patterns
+
+1. **Authorization via authorizedMinters List**: MyMintRecipe maintains a list of parties authorized to create mint requests, enabling flexible minting access control
+
+2. **Atomic Validation and Execution**: The `MintRequest_Accept` choice validates all transfer instructions before executing any of them, ensuring ETF tokens are only minted when properly backed
+
+3. **Weight-Based Amount Calculation**: For each underlying asset, the transfer amount must equal `portfolioItem.weight × ETF amount`, ensuring correct proportional backing
+
+4. **Issuer Custody Model**: All underlying assets are transferred to the issuer during minting, establishing clear custody and backing for the ETF
+
+5. **Array Ordering Requirement**: Transfer instruction CIDs must be provided in the same order as portfolio composition items for validation to succeed
+
+6. **Critical Timing Pattern**: When collecting transfer instruction CIDs, you must capture each CID **immediately** after accepting each transfer request. Calling `getLatest()` multiple times after all transfers are accepted will return the same CID, causing validation failure. Pattern: `accept transfer 1 → get CID 1 → accept transfer 2 → get CID 2 → accept transfer 3 → get CID 3`
+
+7. **No Disclosure Required**: ETF minting doesn't require additional disclosure beyond the transfer instructions (issuer can see all transfer instructions they accepted)
+
+#### Key Differences from Token and Bond Operations
+
+1. **Composite Structure**: ETFs are backed by a portfolio of underlying assets, not standalone tokens
+
+2. **Multi-Asset Validation**: Minting validates multiple transfer instructions atomically
+
+3. **Authorized Minter Pattern**: Only parties in the authorizedMinters list can create mint requests
+
+4. **Custody Transfer**: ETF minting requires transferring underlying assets to issuer custody
+
+5. **Portfolio Management**: Issuers can update portfolio compositions and authorized minters dynamically
+
+#### ETF Implementation Notes
+
+**Relationship to Daml Contracts** (`packages/minimal-token/daml/ETF/`)
+
+The TypeScript SDK wrappers map directly to Daml contracts in the minimal-token package:
+- `portfolioComposition.ts` → `ETF.PortfolioComposition.daml` - Pure data contract with no choices
+- `mintRecipe.ts` → `ETF.MyMintRecipe.daml` - Factory contract with 5 choices (AddAuthorizedMinter, RemoveAuthorizedMinter, UpdateComposition, CreateAndUpdateComposition, Mint)
+- `mintRequest.ts` → `ETF.MyMintRequest.daml` - Request contract with 3 choices (MintRequest_Accept, MintRequest_Decline, MintRequest_Withdraw)
+
+**Key Design Decisions:**
+
+1. **Request/Accept Pattern**: ETF minting uses a two-step pattern (requester creates, issuer accepts) to avoid multi-party signing complexity. This mirrors the `IssuerMintRequest` pattern used for basic token minting.
+
+2. **Observers on MyMintRecipe**: The `authorizedMinters` list is part of the contract's observers, allowing authorized parties to see the mint recipe and create mint requests. This is how authorization is enforced at the Daml level.
+
+3. **Validation in Daml**: All critical validation (transfer instruction count, instrumentId matching, amount calculation) happens in the Daml `MintRequest_Accept` choice, not in TypeScript. The SDK simply prepares the data and submits the command.
+
+4. **Array Ordering Enforcement**: The Daml validation iterates through transfer instructions and portfolio items in parallel using `zip`, requiring exact ordering. The SDK must preserve this order when collecting CIDs.
+
+**Common Pitfalls and Solutions:**
+
+1. **Issue**: Transfer instruction validation fails with "instrumentId does not match"
+   - **Cause**: Collected CIDs in wrong order or collected duplicate CIDs
+   - **Solution**: Capture each transfer instruction CID immediately after accepting each transfer request (see Pattern #6 above)
+
+2. **Issue**: ETF mint request creation fails with "contract not found"
+   - **Cause**: Transfer instructions have already been executed or withdrawn
+   - **Solution**: Transfer instructions are consumed when executed. Create the ETF mint request before accepting any transfer instructions on behalf of the receiver.
+
+3. **Issue**: Cannot create mint request - "party not authorized"
+   - **Cause**: Requester is not in the `authorizedMinters` list on MyMintRecipe
+   - **Solution**: Issuer must add the party using `addAuthorizedMinter()` before they can create mint requests
+
+4. **Issue**: Amount calculation mismatch
+   - **Cause**: Transfer amounts don't equal `portfolioItem.weight × ETF amount`
+   - **Solution**: Use the exact formula for each transfer. Example: If ETF amount is 2.0 and weight is 1.5, transfer amount must be exactly 3.0
+
+**Implementation Pattern Consistency:**
+
+The ETF SDK implementation follows the same patterns as Token and Bond operations:
+- All functions take `(userLedger, userKeyPair, params)` for single-party perspective
+- Template IDs defined in `constants/templateIds.ts` with format `#minimal-token:ETF.{Contract}:{Contract}`
+- Query functions use `activeContracts()` filtered by party and template ID
+- Choice execution uses `getExerciseCommand()` helper
+- Two wrapper versions: `getWrappedSdk()` (userKeyPair per call) and `getWrappedSdkWithKeyPair()` (pre-bound)
+
+**Testing Approach:**
+
+The `etfMint.ts` test script follows the `mintToOtherTokenETF` Daml test pattern exactly, providing a reference implementation:
+1. Uses Charlie (issuer) and Alice (authorized minter) as parties
+2. Creates 3 underlying token factories and 1 ETF token factory
+3. Creates portfolio composition with 3 items (weight 1.0 each)
+4. Alice acquires underlying tokens via IssuerMintRequest pattern
+5. Alice transfers underlying tokens to Charlie (issuer custody)
+6. Alice creates ETF mint request with transfer instruction CIDs
+7. Charlie accepts, validating and executing atomically
+8. Verifies Alice receives ETF token and Charlie holds underlying assets
+
+Run `tsx src/testScripts/etfMint.ts` to see the complete workflow in action.
+
 ### Known Issues and Multi-Party Authorization
 
 #### Multi-Party Signing Challenge
@@ -690,6 +989,89 @@ When creating new SDK wrapper functions, follow these patterns:
 - Define parameter interfaces for each contract/choice
 - Use `Party` and `ContractId` types from `src/types/daml.js`
 - Export types for use in other modules
+- Separate param interfaces from contract field interfaces where needed
+
+### Two Wrapper Versions
+
+The SDK provides two versions of the wrapped SDK to accommodate different usage patterns:
+
+**`getWrappedSdk(sdk: WalletSDK)`** - Takes userKeyPair for each call
+```typescript
+const wrappedSdk = getWrappedSdk(sdk);
+
+// userKeyPair must be passed to each operation
+await wrappedSdk.tokenFactory.create(userKeyPair, { issuer, instrumentId });
+await wrappedSdk.issuerMintRequest.accept(userKeyPair, contractId);
+```
+
+**`getWrappedSdkWithKeyPair(sdk: WalletSDK, userKeyPair: UserKeyPair)`** - Pre-bound keyPair
+```typescript
+const wrappedSdk = getWrappedSdkWithKeyPair(sdk, userKeyPair);
+
+// userKeyPair is pre-bound, omitted from method signatures
+await wrappedSdk.tokenFactory.create({ issuer, instrumentId });
+await wrappedSdk.issuerMintRequest.accept(contractId);
+```
+
+**When to Use Each**:
+- Use `getWrappedSdk` when a single SDK instance needs to perform operations with multiple key pairs
+- Use `getWrappedSdkWithKeyPair` (recommended) when all operations use the same key pair - cleaner API, less repetition
+
+### Nested Structure
+
+Group related contracts in subdirectories and organize methods by operation type:
+
+```typescript
+{
+    bonds: {
+        factory: { create, getLatest, getOrCreate, createInstrument, getLatestInstrument },
+        bondRules: { create, getLatest, getOrCreate },
+        issuerMintRequest: { create, getLatest, getAll, accept, decline, withdraw },
+        lifecycleRule: { create, getLatest, getOrCreate, processCouponPaymentEvent, processRedemptionEvent },
+        // ... more subsections
+    },
+    etf: {
+        portfolioComposition: { create, getLatest, getAll, get },
+        mintRecipe: { create, getLatest, getOrCreate, addAuthorizedMinter, removeAuthorizedMinter, updateComposition, createAndUpdateComposition },
+        mintRequest: { create, getLatest, getAll, accept, decline, withdraw },
+    },
+    tokenFactory: { create, getLatest, getOrCreate, mintToken },
+    // ... more top-level sections
+}
+```
+
+**Organization Principles**:
+1. **Top-level instrument type** (e.g., `bonds`, `etf`) for complex instruments with multiple related contracts
+2. **Sub-sections for component contracts** (e.g., `factory`, `rules`, `mintRequest`, `lifecycle`)
+3. **Methods grouped by operation type** (create, getLatest, getOrCreate, accept, decline, withdraw)
+4. **Consistent method ordering** within each subsection for predictability
+
+### Module Organization
+
+**File Structure**:
+- One module per contract type (e.g., `tokenFactory.ts`, `issuerMintRequest.ts`)
+- Group related contracts in subdirectories (e.g., `bonds/`, `etf/`)
+- Index files (`index.ts`) for re-exporting from subdirectories
+- Clear separation of concerns - each module handles a single contract type
+
+**Import/Export Strategy**:
+```typescript
+// In subdirectory: bonds/index.ts or etf/index.ts
+export * from "./factory.js";
+export * from "./issuerMintRequest.js";
+export * from "./lifecycleRule.js";
+// ... more exports
+
+// In main wrappedSdk/index.ts
+export * from "./bonds/index.js";
+export * from "./etf/index.js";
+```
+
+**Integration Pattern** (`wrappedSdk.ts`):
+1. Import all functions and types from subdirectory modules
+2. Create nested object structure in `getWrappedSdk()` return object
+3. Duplicate structure in `getWrappedSdkWithKeyPair()` with userKeyPair pre-bound
+4. Ensure consistent ordering between both wrapper versions
 
 #### Other TODOs
 
@@ -719,6 +1101,13 @@ Tests are located in `src/index.test.ts` and use Vitest. The test setup is in `v
 - Covers: infrastructure setup, bond minting, coupon payment, partial transfer, redemption
 - Shows bond-specific patterns: version tracking, term inference, per-unit payments, disclosure requirements
 - Run with: `tsx src/testScripts/bondLifecycleTest.ts`
+
+**`src/testScripts/etfMint.ts`** - ETF minting demonstration (mintToOtherTokenETF pattern)
+- Demonstrates complete ETF minting workflow: Charlie (issuer) and Alice (authorized minter)
+- Covers: 3 underlying token factories, portfolio composition, mint recipe, authorized minters
+- Shows ETF-specific patterns: atomic multi-asset backing, weight-based validation, issuer custody
+- 8-phase workflow: infrastructure → portfolio → recipe → mint underlying → transfer → ETF mint request → accept
+- Run with: `tsx src/testScripts/etfMint.ts`
 
 **`src/hello.ts`** - Basic token operations
 - Simple demo of token factory creation and minting
