@@ -1,3 +1,4 @@
+{-# LANGUAGE ApplicativeDo #-}
 module Test.TestUtils where
 
 import Daml.Script
@@ -111,12 +112,15 @@ createTransferRequest
     -> ContractId H.Holding          -- input holding
     -> Script (ContractId TransferRequest)
 createTransferRequest sender receiver issuer amount requestedAt executeBefore factoryCid inputHoldingCid = script do
-    let instrumentId = show issuer <> "#MyToken"
+    Some holding <- queryInterfaceContractId @H.Holding sender inputHoldingCid
+
+    -- let instrumentId = show issuer <> "#MyToken"
+    let instrumentId = holding.instrumentId
     let transfer = TI.Transfer with
             sender
             receiver
             amount
-            instrumentId = H.InstrumentId with admin = issuer, id = instrumentId
+            instrumentId
             requestedAt
             executeBefore
             inputHoldingCids = [inputHoldingCid]

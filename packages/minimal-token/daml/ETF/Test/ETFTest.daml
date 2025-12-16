@@ -1,3 +1,4 @@
+{-# LANGUAGE ApplicativeDo #-}
 module ETF.Test.ETFTest where
 
 import Daml.Script
@@ -7,7 +8,6 @@ import Test.TestUtils (createTransferRequest, setupTokenInfrastructureWithInstru
 import MyTokenFactory
 import ETF.PortfolioComposition as PortfolioComposition
 import ETF.MyMintRecipe as MyMintRecipe
-import MyTokenTransferInstruction
 import MyToken.TransferRequest as TransferRequest
 import ETF.MyMintRequest as MyMintRequest
 import Splice.Api.Token.HoldingV1 as H
@@ -18,8 +18,13 @@ mintToSelfTokenETF = script do
   issuer <- allocatePartyByHint (PartyIdHint "Issuer")
 
   let instrumentId1 = show issuer <> "#MyToken1"
+  let instrumentIdFull1 = H.InstrumentId with admin = issuer, id = instrumentId1
+
   let instrumentId2 = show issuer <> "#MyToken2"
+  let instrumentIdFull2 = H.InstrumentId with admin = issuer, id = instrumentId2
+
   let instrumentId3 = show issuer <> "#MyToken3"
+  let instrumentIdFull3 = H.InstrumentId with admin = issuer, id = instrumentId3
 
   let etfInstrumentId = show issuer <> "#ThreeTokenETF"
 
@@ -36,9 +41,9 @@ mintToSelfTokenETF = script do
 
   -- Issuer creates portfolio composition
   let portfolioItems =
-        [ PortfolioItem with instrumentId = instrumentId1; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentId2; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentId3; weight = 1.0
+        [ PortfolioItem with instrumentId = instrumentIdFull1; weight = 1.0
+        , PortfolioItem with instrumentId = instrumentIdFull2; weight = 1.0
+        , PortfolioItem with instrumentId = instrumentIdFull3; weight = 1.0
         ]
 
   portfolioCid <- submit issuer do
@@ -57,7 +62,6 @@ mintToSelfTokenETF = script do
 
   -- Mint all three tokens
   token1Cid <- submit issuer do
-    -- TODO: FIXME: how do I get the tokenCid?
     mintResult <- exerciseCmd infra1.tokenFactoryCid MyTokenFactory.Mint with
       receiver = issuer
       amount = 1.0
@@ -80,34 +84,35 @@ mintToSelfTokenETF = script do
 
   -- create a transfer instruction of each portfolio item to the etf owner (issuer)
   now <- getTime
+  let requestedAtPast = addRelTime now (seconds (-1))
   let future = addRelTime now (hours 1)
 
-  token1TransferRequestCid <- createTransferRequest
-    issuer issuer issuer 1.0 now future
+  tokenTransferRequest1Cid <- createTransferRequest
+    issuer issuer issuer 1.0 requestedAtPast future
     infra1.transferFactoryCid token1Cid
 
-  token1TransferResult <- submit issuer do
-    exerciseCmd token1TransferRequestCid TransferRequest.Accept
+  tokenTransferResult1 <- submit issuer do
+    exerciseCmd tokenTransferRequest1Cid TransferRequest.Accept
 
-  let transferInstruction1Cid = token1TransferResult.output.transferInstructionCid
+  let transferInstruction1Cid = tokenTransferResult1.output.transferInstructionCid
 
-  token2TransferRequestCid <- createTransferRequest
-    issuer issuer issuer 1.0 now future
+  tokenTransferRequest2Cid <- createTransferRequest
+    issuer issuer issuer 1.0 requestedAtPast future
     infra2.transferFactoryCid token2Cid
 
-  token2TransferResult <- submit issuer do
-    exerciseCmd token1TransferRequestCid TransferRequest.Accept
+  tokenTransferResult2 <- submit issuer do
+    exerciseCmd tokenTransferRequest2Cid TransferRequest.Accept
 
-  let transferInstruction2Cid = token2TransferResult.output.transferInstructionCid
+  let transferInstruction2Cid = tokenTransferResult2.output.transferInstructionCid
 
-  token3TransferRequestCid <- createTransferRequest
-    issuer issuer issuer 1.0 now future
+  tokenTransferRequest3Cid <- createTransferRequest
+    issuer issuer issuer 1.0 requestedAtPast future
     infra3.transferFactoryCid token3Cid
 
-  token3TransferResult <- submit issuer do
-    exerciseCmd token1TransferRequestCid TransferRequest.Accept
+  tokenTransferResult3 <- submit issuer do
+    exerciseCmd tokenTransferRequest3Cid TransferRequest.Accept
 
-  let transferInstruction3Cid = token3TransferResult.output.transferInstructionCid
+  let transferInstruction3Cid = tokenTransferResult3.output.transferInstructionCid
 
  -- ETF mint should check that there is a transfer instruction for each underlying asset, then accept each transfer instruction, and finally mint the ETF token
   etfMintRequestCid <- submit issuer do
@@ -116,9 +121,10 @@ mintToSelfTokenETF = script do
       requester = issuer
       amount = 1.0
       transferInstructionCids = [transferInstruction1Cid, transferInstruction2Cid, transferInstruction3Cid]
+      issuer
 
   etfCid <- submit issuer do
-    exerciseCmd mintRecipeCid MyMintRequest.MintRequest_Accept
+    exerciseCmd etfMintRequestCid MyMintRequest.MintRequest_Accept
 
   pure ()
 

@@ -1,8 +1,10 @@
 module ETF.PortfolioComposition where
 
+import Splice.Api.Token.HoldingV1 (InstrumentId)
+
 data PortfolioItem = PortfolioItem
   with
-    instrumentId: Text
+    instrumentId: InstrumentId
     weight: Decimal
   deriving (Eq, Show)
 
