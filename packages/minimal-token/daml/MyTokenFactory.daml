@@ -59,7 +59,8 @@ template MyTokenFactory
           -- Exact match: archive the entire token
           archive inputHoldingCid
           pure BurnResult with
-            burnedCids = [inputHoldingCid]
+            burnedCid = inputHoldingCid
+            leftoverCid = None
             meta = MD.emptyMetadata
         else do
           transferResult <- exercise inputHoldingCid MyToken_Transfer with
@@ -68,7 +69,8 @@ template MyTokenFactory
           -- Archive the newly created token (the transferred portion to be burned)
           archive transferResult.transferredCid
           pure BurnResult with
-            burnedCids = [transferResult.transferredCid]
+            burnedCid = transferResult.transferredCid
+            leftoverCid = transferResult.remainderCid
             meta = MD.emptyMetadata
 
 -- | Result of minting tokens
@@ -79,7 +81,8 @@ data MintResult = MintResult with
 
 -- | Result of burning tokens
 data BurnResult = BurnResult with
-    burnedCids : [ContractId MyToken]
+    burnedCid : ContractId MyToken
+    leftoverCid : Optional (ContractId MyToken)
     meta : MD.Metadata
   deriving (Show, Eq)
 
