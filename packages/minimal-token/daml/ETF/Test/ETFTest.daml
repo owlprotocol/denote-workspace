@@ -19,20 +19,18 @@ mintToSelfTokenETF = script do
   issuer <- allocatePartyByHint (PartyIdHint "Issuer")
 
   let instrumentId1 = show issuer <> "#MyToken1"
-  let instrumentIdFull1 = H.InstrumentId with admin = issuer, id = instrumentId1
-
   let instrumentId2 = show issuer <> "#MyToken2"
-  let instrumentIdFull2 = H.InstrumentId with admin = issuer, id = instrumentId2
-
   let instrumentId3 = show issuer <> "#MyToken3"
-  let instrumentIdFull3 = H.InstrumentId with admin = issuer, id = instrumentId3
+  let
+    [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3] =
+      map (\id -> H.InstrumentId with admin = issuer, id = id)
+        [instrumentId1, instrumentId2, instrumentId3]
 
   let etfInstrumentId = show issuer <> "#ThreeTokenETF"
 
   -- Issuer creates token factories (for minting tokens)
-  infra1 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId1
-  infra2 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId2
-  infra3 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId3
+  infras <- forA [instrumentId1, instrumentId2, instrumentId3]
+    $ \instId -> setupTokenInfrastructureWithInstrumentId issuer instId
 
   -- NOTE: maybe we shouldn't use a factory for the ETF since you should only mint via the mint recipe
   etfFactoryCid <- submit issuer do
@@ -41,11 +39,8 @@ mintToSelfTokenETF = script do
       instrumentId = etfInstrumentId
 
   -- Issuer creates portfolio composition
-  let portfolioItems =
-        [ PortfolioItem with instrumentId = instrumentIdFull1; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentIdFull2; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentIdFull3; weight = 1.0
-        ]
+  let portfolioItems = map (\id -> PortfolioItem with instrumentId = id; weight = 1.0)
+        [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3]
 
   portfolioCid <- submit issuer do
     createCmd PortfolioComposition.PortfolioComposition with
@@ -62,58 +57,30 @@ mintToSelfTokenETF = script do
       composition = portfolioCid
 
   -- Mint all three tokens
-  token1Cid <- submit issuer do
-    mintResult <- exerciseCmd infra1.tokenFactoryCid MyTokenFactory.Mint with
-      receiver = issuer
-      amount = 1.0
+  tokenCids <- submit issuer do
+    forA infras $ \infra -> do
+      mintResult <- exerciseCmd infra.tokenFactoryCid MyTokenFactory.Mint with
+        receiver = issuer
+        amount = 1.0
 
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
-
-  token2Cid <- submit issuer do
-    mintResult <- exerciseCmd infra2.tokenFactoryCid MyTokenFactory.Mint with
-      receiver = issuer
-      amount = 1.0
-
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
-
-  token3Cid <- submit issuer do
-    mintResult <- exerciseCmd infra3.tokenFactoryCid MyTokenFactory.Mint with
-      receiver = issuer
-      amount = 1.0
-
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
+      pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
 
   -- create a transfer instruction of each portfolio item to the etf owner (issuer)
   now <- getTime
   let requestedAtPast = addRelTime now (seconds (-1))
   let future = addRelTime now (hours 1)
 
-  tokenTransferRequest1Cid <- createTransferRequest
-    issuer issuer issuer 1.0 requestedAtPast future
-    infra1.transferFactoryCid token1Cid
+  tokenTransferRequests <- forA
+    (zip infras tokenCids)
+    \(infra, tokenCid) -> createTransferRequest
+      issuer issuer issuer 1.0 requestedAtPast future
+      infra.transferFactoryCid tokenCid
 
-  tokenTransferResult1 <- submit issuer do
-    exerciseCmd tokenTransferRequest1Cid TransferRequest.Accept
+  tokenTransferResults <- submit issuer do
+    forA tokenTransferRequests $ \tokenTransferRequestCid -> do
+      exerciseCmd tokenTransferRequestCid TransferRequest.Accept
 
-  let transferInstruction1Cid = tokenTransferResult1.output.transferInstructionCid
-
-  tokenTransferRequest2Cid <- createTransferRequest
-    issuer issuer issuer 1.0 requestedAtPast future
-    infra2.transferFactoryCid token2Cid
-
-  tokenTransferResult2 <- submit issuer do
-    exerciseCmd tokenTransferRequest2Cid TransferRequest.Accept
-
-  let transferInstruction2Cid = tokenTransferResult2.output.transferInstructionCid
-
-  tokenTransferRequest3Cid <- createTransferRequest
-    issuer issuer issuer 1.0 requestedAtPast future
-    infra3.transferFactoryCid token3Cid
-
-  tokenTransferResult3 <- submit issuer do
-    exerciseCmd tokenTransferRequest3Cid TransferRequest.Accept
-
-  let transferInstruction3Cid = tokenTransferResult3.output.transferInstructionCid
+  let transferInstructionCids = map (\result ->  result.output.transferInstructionCid) tokenTransferResults
 
  -- ETF mint should check that there is a transfer instruction for each underlying asset, then accept each transfer instruction, and finally mint the ETF token
   etfMintRequestCid <- submit issuer do
@@ -121,7 +88,7 @@ mintToSelfTokenETF = script do
       mintRecipeCid
       requester = issuer
       amount = 1.0
-      transferInstructionCids = [transferInstruction1Cid, transferInstruction2Cid, transferInstruction3Cid]
+      transferInstructionCids
       issuer
 
   etfCid <- submit issuer do
@@ -136,20 +103,18 @@ mintToOtherTokenETF = script do
   alice <- allocatePartyByHint (PartyIdHint "Alice")
 
   let instrumentId1 = show issuer <> "#MyToken1"
-  let instrumentIdFull1 = H.InstrumentId with admin = issuer, id = instrumentId1
-
   let instrumentId2 = show issuer <> "#MyToken2"
-  let instrumentIdFull2 = H.InstrumentId with admin = issuer, id = instrumentId2
-
   let instrumentId3 = show issuer <> "#MyToken3"
-  let instrumentIdFull3 = H.InstrumentId with admin = issuer, id = instrumentId3
+  let
+    [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3] =
+      map (\id -> H.InstrumentId with admin = issuer, id = id)
+        [instrumentId1, instrumentId2, instrumentId3]
 
   let etfInstrumentId = show issuer <> "#ThreeTokenETF"
 
   -- Issuer creates token factories (for minting tokens)
-  infra1 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId1
-  infra2 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId2
-  infra3 <- setupTokenInfrastructureWithInstrumentId issuer instrumentId3
+  infras <- forA [instrumentId1, instrumentId2, instrumentId3]
+    $ \instId -> setupTokenInfrastructureWithInstrumentId issuer instId
 
   -- NOTE: maybe we shouldn't use a factory for the ETF since you should only mint via the mint recipe
   etfFactoryCid <- submit issuer do
@@ -158,11 +123,8 @@ mintToOtherTokenETF = script do
       instrumentId = etfInstrumentId
 
   -- Issuer creates portfolio composition
-  let portfolioItems =
-        [ PortfolioItem with instrumentId = instrumentIdFull1; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentIdFull2; weight = 1.0
-        , PortfolioItem with instrumentId = instrumentIdFull3; weight = 1.0
-        ]
+  let portfolioItems = map (\id -> PortfolioItem with instrumentId = id; weight = 1.0)
+        [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3]
 
   portfolioCid <- submit issuer do
     createCmd PortfolioComposition.PortfolioComposition with
@@ -179,73 +141,33 @@ mintToOtherTokenETF = script do
       composition = portfolioCid
 
   -- Mint all three tokens
-  mintRequest1Cid <- submit alice do
-    createCmd IssuerMintRequest with
-      tokenFactoryCid = infra1.tokenFactoryCid
-      issuer
-      receiver = alice
-      amount = 1.0
+  mintRequests <- submit alice do
+    forA infras $ \infra -> do
+      createCmd IssuerMintRequest with
+        tokenFactoryCid = infra.tokenFactoryCid
+        issuer
+        receiver = alice
+        amount = 1.0
 
-  mintRequest2Cid <- submit alice do
-    createCmd IssuerMintRequest with
-      tokenFactoryCid = infra2.tokenFactoryCid
-      issuer
-      receiver = alice
-      amount = 1.0
-
-  mintRequest3Cid <- submit alice do
-    createCmd IssuerMintRequest with
-      tokenFactoryCid = infra3.tokenFactoryCid
-      issuer
-      receiver = alice
-      amount = 1.0
-
-  token1Cid <- submit issuer do
-    mintResult <- exerciseCmd mintRequest1Cid IssuerMintRequest.Accept
-
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
-
-  token2Cid <- submit issuer do
-    mintResult <- exerciseCmd mintRequest2Cid IssuerMintRequest.Accept
-
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
-
-  token3Cid <- submit issuer do
-    mintResult <- exerciseCmd mintRequest3Cid IssuerMintRequest.Accept
-
-    pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
+  tokenCids <- submit issuer do
+    forA mintRequests $ \mintRequestCid -> do
+      mintResult <- exerciseCmd mintRequestCid IssuerMintRequest.Accept
+      pure (toInterfaceContractId @H.Holding mintResult.tokenCid)
 
   -- create a transfer instruction of each portfolio item to the etf owner (issuer)
   now <- getTime
   let requestedAtPast = addRelTime now (seconds (-1))
   let future = addRelTime now (hours 1)
 
-  tokenTransferRequest1Cid <- createTransferRequest
+  tokenTransferRequests <- forA (zip infras tokenCids) \(infra, tokenCid) -> createTransferRequest
     alice issuer issuer 1.0 requestedAtPast future
-    infra1.transferFactoryCid token1Cid
+    infra.transferFactoryCid tokenCid
 
-  tokenTransferResult1 <- submit issuer do
-    exerciseCmd tokenTransferRequest1Cid TransferRequest.Accept
+  tokenTransferResults <- submit issuer do
+    forA tokenTransferRequests $ \tokenTransferRequestCid ->
+      exerciseCmd tokenTransferRequestCid TransferRequest.Accept
 
-  let transferInstruction1Cid = tokenTransferResult1.output.transferInstructionCid
-
-  tokenTransferRequest2Cid <- createTransferRequest
-    alice issuer issuer 1.0 requestedAtPast future
-    infra2.transferFactoryCid token2Cid
-
-  tokenTransferResult2 <- submit issuer do
-    exerciseCmd tokenTransferRequest2Cid TransferRequest.Accept
-
-  let transferInstruction2Cid = tokenTransferResult2.output.transferInstructionCid
-
-  tokenTransferRequest3Cid <- createTransferRequest
-    alice issuer issuer 1.0 requestedAtPast future
-    infra3.transferFactoryCid token3Cid
-
-  tokenTransferResult3 <- submit issuer do
-    exerciseCmd tokenTransferRequest3Cid TransferRequest.Accept
-
-  let transferInstruction3Cid = tokenTransferResult3.output.transferInstructionCid
+  let transferInstructionCids = map (\result ->  result.output.transferInstructionCid) tokenTransferResults
 
  -- ETF mint should check that there is a transfer instruction for each underlying asset, then accept each transfer instruction, and finally mint the ETF token
   etfMintRequestCid <- submit alice do
@@ -253,11 +175,10 @@ mintToOtherTokenETF = script do
       mintRecipeCid
       requester = alice
       amount = 1.0
-      transferInstructionCids = [transferInstruction1Cid, transferInstruction2Cid, transferInstruction3Cid]
+      transferInstructionCids
       issuer
 
   etfCid <- submit issuer do
     exerciseCmd etfMintRequestCid MyMintRequest.MintRequest_Accept
 
   pure ()
-
