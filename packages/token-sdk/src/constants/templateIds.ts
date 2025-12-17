@@ -39,3 +39,5 @@ export const mintRecipeTemplateId =
     "#minimal-token:ETF.MyMintRecipe:MyMintRecipe";
 export const etfMintRequestTemplateId =
     "#minimal-token:ETF.MyMintRequest:MyMintRequest";
+export const etfBurnRequestTemplateId =
+    "#minimal-token:ETF.MyBurnRequest:MyBurnRequest";

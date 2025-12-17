@@ -181,6 +181,15 @@ import {
     withdrawEtfMintRequest,
     EtfMintRequestParams,
 } from "./etf/mintRequest.js";
+import {
+    createEtfBurnRequest,
+    getLatestEtfBurnRequest,
+    getAllEtfBurnRequests,
+    acceptEtfBurnRequest,
+    declineEtfBurnRequest,
+    withdrawEtfBurnRequest,
+    EtfBurnRequestParams,
+} from "./etf/burnRequest.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -704,6 +713,31 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                 withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
                     withdrawEtfMintRequest(userLedger, userKeyPair, contractId),
             },
+            burnRequest: {
+                create: (
+                    userKeyPair: UserKeyPair,
+                    params: EtfBurnRequestParams
+                ) => createEtfBurnRequest(userLedger, userKeyPair, params),
+                getLatest: (issuer: Party) =>
+                    getLatestEtfBurnRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllEtfBurnRequests(userLedger, issuer),
+                accept: (
+                    userKeyPair: UserKeyPair,
+                    contractId: ContractId,
+                    transferInstructionCids: ContractId[]
+                ) =>
+                    acceptEtfBurnRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        transferInstructionCids
+                    ),
+                decline: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    declineEtfBurnRequest(userLedger, userKeyPair, contractId),
+                withdraw: (userKeyPair: UserKeyPair, contractId: ContractId) =>
+                    withdrawEtfBurnRequest(userLedger, userKeyPair, contractId),
+            },
         },
     };
 };
@@ -1181,6 +1215,28 @@ export const getWrappedSdkWithKeyPair = (
                     declineEtfMintRequest(userLedger, userKeyPair, contractId),
                 withdraw: (contractId: ContractId) =>
                     withdrawEtfMintRequest(userLedger, userKeyPair, contractId),
+            },
+            burnRequest: {
+                create: (params: EtfBurnRequestParams) =>
+                    createEtfBurnRequest(userLedger, userKeyPair, params),
+                getLatest: (issuer: Party) =>
+                    getLatestEtfBurnRequest(userLedger, issuer),
+                getAll: (issuer: Party) =>
+                    getAllEtfBurnRequests(userLedger, issuer),
+                accept: (
+                    contractId: ContractId,
+                    transferInstructionCids: ContractId[]
+                ) =>
+                    acceptEtfBurnRequest(
+                        userLedger,
+                        userKeyPair,
+                        contractId,
+                        transferInstructionCids
+                    ),
+                decline: (contractId: ContractId) =>
+                    declineEtfBurnRequest(userLedger, userKeyPair, contractId),
+                withdraw: (contractId: ContractId) =>
+                    withdrawEtfBurnRequest(userLedger, userKeyPair, contractId),
             },
         },
     };

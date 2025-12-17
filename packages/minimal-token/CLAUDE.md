@@ -137,6 +137,20 @@ The implementation includes Exchange-Traded Fund (ETF) contracts that enable min
   - `MintRequest_Decline` - Issuer declines request
   - `MintRequest_Withdraw` - Requester withdraws request
 
+**MyBurnRequest** (`daml/ETF/MyBurnRequest.daml`)
+- Request contract for burning ETF tokens and returning underlying assets
+- Requester provides ETF token to burn and issuer provides transfer instructions for underlying assets
+- Follows request/accept pattern for authorization (reverse of mint)
+- Validation ensures:
+  - Transfer instruction count matches portfolio composition items
+  - Each transfer sender is the issuer, receiver is the requester
+  - InstrumentId matches portfolio item
+  - Transfer amount equals `portfolioItem.weight × ETF amount`
+- Choices:
+  - `BurnRequest_Accept` - Validates transfers, accepts all transfer instructions (transferring underlying assets from issuer custody back to requester), burns ETF tokens
+  - `BurnRequest_Decline` - Issuer declines request
+  - `BurnRequest_Withdraw` - Requester withdraws request
+
 **ETF Minting Workflow:**
 1. Issuer creates `PortfolioComposition` defining underlying assets and weights
 2. Issuer creates `MyMintRecipe` referencing the portfolio and authorizing minters
@@ -149,7 +163,16 @@ The implementation includes Exchange-Traded Fund (ETF) contracts that enable min
    - Executes all transfer instructions (custody of underlying assets to issuer)
    - Mints ETF tokens to requester
 
-This pattern ensures ETF tokens are always backed by the correct underlying assets in issuer custody.
+**ETF Burning Workflow:**
+1. ETF token holder creates transfer requests for underlying assets (issuer → holder)
+2. Issuer accepts transfer requests, creating transfer instructions
+3. ETF token holder creates `MyBurnRequest` with ETF token CID and transfer instruction CIDs
+4. Issuer accepts `MyBurnRequest`, which:
+   - Validates transfer instructions match portfolio composition
+   - Executes all transfer instructions (custody of underlying assets back to holder)
+   - Burns ETF tokens from holder
+
+This pattern ensures ETF tokens are always backed by the correct underlying assets in issuer custody, and burning returns the correct proportions of underlying assets to the holder.
 
 ### Request/Accept Pattern
 
@@ -164,6 +187,7 @@ Examples:
 - `MyToken.TransferRequest` → Issuer accepts → Creates `MyTransferInstruction`
 - `MyToken.AllocationRequest` → Admin accepts → Creates `MyAllocation`
 - `ETF.MyMintRequest` → Issuer accepts → Validates transfers, executes transfer instructions, mints ETF token
+- `ETF.MyBurnRequest` → Issuer accepts → Validates transfers, executes transfer instructions, burns ETF token
 
 ### Registry API Pattern
 
@@ -250,6 +274,7 @@ Common helpers to reduce test duplication:
 ### `ETF/Test/ETFTest.daml`
 - `mintToSelfTokenETF` - ETF minting where issuer mints underlying tokens to themselves, creates transfer instructions, and mints ETF
 - `mintToOtherTokenETF` - ETF minting where Alice acquires underlying tokens, transfers to issuer, and mints ETF (demonstrates authorized minter pattern)
+- `burnTokenETF` - ETF burning where Alice mints ETF token, then issuer transfers underlying tokens back to Alice and burns the ETF (demonstrates complete mint-burn cycle)
 
 ### `Bond/Test/BondLifecycleTest.daml`
 - `testBondFullLifecycle` - Complete bond lifecycle including minting, coupon payments, transfers, and redemption

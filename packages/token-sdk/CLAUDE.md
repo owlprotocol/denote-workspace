@@ -40,6 +40,7 @@ Before running this SDK:
 - `tsx src/testScripts/transferWithPreapproval.ts` - Transfer with preapproval pattern
 - `tsx src/testScripts/bondLifecycleTest.ts` - Complete bond lifecycle demonstration (mint, coupon, transfer, redemption)
 - `tsx src/testScripts/etfMint.ts` - ETF minting demonstration following mintToOtherTokenETF pattern
+- `tsx src/testScripts/etfBurn.ts` - ETF burning demonstration following burnTokenETF pattern (complete mint-burn cycle)
 
 ### Other Commands
 - `pnpm clean` - Remove build artifacts
@@ -134,6 +135,7 @@ All helpers follow a consistent pattern with single-party perspective and templa
   - `portfolioCompositionTemplateId`: `#minimal-token:ETF.PortfolioComposition:PortfolioComposition`
   - `mintRecipeTemplateId`: `#minimal-token:ETF.MyMintRecipe:MyMintRecipe`
   - `etfMintRequestTemplateId`: `#minimal-token:ETF.MyMintRequest:MyMintRequest`
+  - `etfBurnRequestTemplateId`: `#minimal-token:ETF.MyBurnRequest:MyBurnRequest`
 
 ### Canton Ledger Interaction Pattern
 
@@ -765,6 +767,82 @@ await issuerWrappedSdk.etf.mintRequest.accept(etfMintRequestCid);
 - `acceptEtfMintRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer validates and mints
 - `declineEtfMintRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer declines
 - `withdrawEtfMintRequest(requesterLedger, requesterKeyPair, contractId)` - Requester withdraws
+
+**`etf/burnRequest.ts`** - ETF burn request/accept pattern
+- `createEtfBurnRequest(requesterLedger, requesterKeyPair, params)` - Requester creates burn request
+- `getLatestEtfBurnRequest(userLedger, issuer)` - Query latest
+- `getAllEtfBurnRequests(userLedger, issuer)` - Query all for issuer
+- `acceptEtfBurnRequest(issuerLedger, issuerKeyPair, contractId, transferInstructionCids)` - **CRITICAL**: Issuer validates and burns with transfer instruction CIDs
+- `declineEtfBurnRequest(issuerLedger, issuerKeyPair, contractId)` - Issuer declines
+- `withdrawEtfBurnRequest(requesterLedger, requesterKeyPair, contractId)` - Requester withdraws
+
+**Key Difference**: Unlike `acceptEtfMintRequest()`, the `acceptEtfBurnRequest()` function MUST include a `transferInstructionCids` array parameter to return underlying assets to the requester.
+
+#### ETF Burning Workflow
+
+**Phase 1: ETF Token Holder Creates Transfer Requests** (Issuer → Holder)
+```typescript
+// Issuer creates transfer requests for underlying assets back to holder
+const returnTransfer1 = buildTransfer({
+    sender: issuer.partyId,
+    receiver: holder.partyId,
+    amount: 1.0,
+    instrumentId: { admin: issuer.partyId, id: instrumentId1 },
+    requestedAt: new Date(Date.now() - 1000),
+    executeBefore: new Date(Date.now() + 3600000),
+    inputHoldingCids: [issuerToken1Cid],
+});
+
+await issuerWrappedSdk.transferRequest.create({
+    transferFactoryCid: transferFactory1Cid,
+    expectedAdmin: issuer.partyId,
+    transfer: returnTransfer1,
+    extraArgs: emptyExtraArgs(),
+});
+
+const returnTransferRequest1Cid = await issuerWrappedSdk.transferRequest.getLatest(issuer.partyId);
+// Repeat for token 2 and 3...
+```
+
+**Phase 2: Issuer Accepts Transfer Requests** (Creates Transfer Instructions)
+```typescript
+// **CRITICAL**: Capture each transfer instruction CID immediately after each accept
+await issuerWrappedSdk.transferRequest.accept(returnTransferRequest1Cid);
+const returnTransferInstruction1Cid = await issuerWrappedSdk.transferInstruction.getLatest(issuer.partyId);
+
+await issuerWrappedSdk.transferRequest.accept(returnTransferRequest2Cid);
+const returnTransferInstruction2Cid = await issuerWrappedSdk.transferInstruction.getLatest(issuer.partyId);
+
+await issuerWrappedSdk.transferRequest.accept(returnTransferRequest3Cid);
+const returnTransferInstruction3Cid = await issuerWrappedSdk.transferInstruction.getLatest(issuer.partyId);
+```
+
+**Phase 3: Holder Creates ETF Burn Request**
+```typescript
+await holderWrappedSdk.etf.burnRequest.create({
+    mintRecipeCid,
+    requester: holder.partyId,
+    amount: 1.0,
+    tokenFactoryCid: etfTokenFactoryCid,
+    inputHoldingCid: etfTokenCid,
+    issuer: issuer.partyId,
+});
+
+const etfBurnRequestCid = await holderWrappedSdk.etf.burnRequest.getLatest(issuer.partyId);
+```
+
+**Phase 4: Issuer Accepts Burn Request with Transfer Instruction CIDs**
+```typescript
+await issuerWrappedSdk.etf.burnRequest.accept(
+    etfBurnRequestCid,
+    [returnTransferInstruction1Cid, returnTransferInstruction2Cid, returnTransferInstruction3Cid]
+);
+
+// Result:
+// - Validates all 3 return transfer instructions match portfolio composition
+// - Executes all 3 transfer instructions (underlying assets → holder custody)
+// - Burns 1.0 ETF tokens from holder
+```
 
 #### Key ETF Patterns
 
