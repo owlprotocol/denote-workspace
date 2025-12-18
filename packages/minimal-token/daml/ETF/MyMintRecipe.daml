@@ -1,7 +1,6 @@
 module ETF.MyMintRecipe where
 
 import MyToken
-import MyTokenFactory
 import ETF.PortfolioComposition
 
 -- | MyMintRecipe defines how to mint MyToken tokens based on a portfolio composition.
@@ -11,7 +10,6 @@ template MyMintRecipe
   with
     issuer : Party
     instrumentId : Text
-    tokenFactory : ContractId MyTokenFactory
     authorizedMinters: [Party]
     composition: ContractId PortfolioComposition
   where

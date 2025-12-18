@@ -11,7 +11,6 @@ import { PortfolioItem } from "./portfolioComposition.js";
 export interface MintRecipeParams {
     issuer: Party;
     instrumentId: string;
-    tokenFactory: ContractId;
     authorizedMinters: Party[];
     composition: ContractId;
 }

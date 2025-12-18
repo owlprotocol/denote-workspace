@@ -55,7 +55,6 @@ mintToSelfTokenETF = script do
     createCmd MyMintRecipe with
       issuer
       instrumentId = etfInstrumentId
-      tokenFactory = etfFactoryCid
       authorizedMinters = [issuer]
       composition = portfolioCid
 
@@ -139,7 +138,6 @@ mintToOtherTokenETF = script do
     createCmd MyMintRecipe with
       issuer
       instrumentId = etfInstrumentId
-      tokenFactory = etfFactoryCid
       authorizedMinters = [issuer, alice]
       composition = portfolioCid
 
@@ -226,7 +224,6 @@ burnTokenETF = script do
     createCmd MyMintRecipe with
       issuer
       instrumentId = etfInstrumentId
-      tokenFactory = etfFactoryCid
       authorizedMinters = [issuer, alice]
       composition = portfolioCid
 

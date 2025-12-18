@@ -174,7 +174,6 @@ async function etfMint() {
     await charlieWrappedSdk.etf.mintRecipe.create({
         issuer: charlieAllocatedParty.partyId,
         instrumentId: etfInstrumentId,
-        tokenFactory: etfTokenFactoryCid,
         authorizedMinters: [
             charlieAllocatedParty.partyId,
             aliceAllocatedParty.partyId,
