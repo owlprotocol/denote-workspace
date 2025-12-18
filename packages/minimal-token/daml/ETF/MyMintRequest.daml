@@ -35,6 +35,8 @@ template MyMintRequest
         mintRecipe <- fetch mintRecipeCid
         portfolioComp <- fetch (mintRecipe.composition)
 
+        assertMsg "Mint recipe requester must be an authorized minter" (requester `elem` mintRecipe.authorizedMinters)
+
         assertMsg "Transfer instructions must be of same length as portfolio composition items" $ (length transferInstructionCids) == (length portfolioComp.items)
 
         forA_ (zip transferInstructionCids portfolioComp.items) $
