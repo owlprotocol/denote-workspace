@@ -12,21 +12,7 @@ import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
 import { getContractDisclosure } from "../contractDisclosure.js";
 import { InstrumentId } from "../../types/InstrumentId.js";
 import { CreatedEvent } from "../../types/CreatedEvent.js";
-
-export type LifecycleEventType = "CouponPayment" | "Redemption";
-
-export interface BondLifecycleEffect {
-    issuer: Party;
-    depository: Party;
-    eventType: LifecycleEventType;
-    targetInstrumentId: string;
-    targetVersion: string;
-    producedVersion?: string;
-    eventDate: number;
-    settlementTime?: number;
-    amount: number;
-    currencyInstrumentId: InstrumentId;
-}
+import { LifecycleEventType } from "./lifecycleEffect.js";
 
 export interface BondLifecycleInstructionParams {
     eventType: LifecycleEventType;
