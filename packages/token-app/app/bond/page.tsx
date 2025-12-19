@@ -2,20 +2,19 @@
 
 import { useState } from "react";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
-import { PartyView } from "@/components/PartyView";
+import { BondPartyView } from "@/components/BondPartyView";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const PARTIES = ["custodian", "alice", "bob"] as const;
+const PARTIES = ["custodian", "alice"] as const;
 
-export default function Home() {
+export default function BondPage() {
     const [selectedParty, setSelectedParty] = useState<string>("custodian");
     const [partyIds, setPartyIds] = useState<Record<string, string | null>>({
         custodian: null,
         alice: null,
-        bob: null,
     });
 
     const handlePartyCreated = (partyId: string, partyName: string) => {
@@ -31,7 +30,7 @@ export default function Home() {
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <h1 className="text-4xl font-bold tracking-tight">
-                            Token Management
+                            Bond Lifecycle Demo
                         </h1>
                         <ConnectionStatus />
                     </div>
@@ -56,15 +55,15 @@ export default function Home() {
                                 </Button>
                             ))}
                         </div>
-                        <Link href="/bond">
-                            <Button variant="outline">Bond Demo</Button>
+                        <Link href="/">
+                            <Button variant="outline">Simple Tokens</Button>
                         </Link>
                     </div>
                 </div>
 
                 <Separator />
 
-                <PartyView
+                <BondPartyView
                     partyName={selectedParty}
                     partyId={partyIds[selectedParty]}
                     allPartyIds={partyIds}

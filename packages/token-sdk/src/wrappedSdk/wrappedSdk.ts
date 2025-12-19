@@ -1,6 +1,153 @@
+import { Types } from "@canton-network/core-ledger-client";
 import { WalletSDK } from "@canton-network/wallet-sdk";
-import { UserKeyPair } from "../types/UserKeyPair.js";
 import { getSdkForParty } from "../sdkHelpers.js";
+import { ContractId, Party } from "../types/daml.js";
+import { UserKeyPair } from "../types/UserKeyPair.js";
+import {
+    getAllBalancesByInstrumentId,
+    GetAllBalancesByInstrumentIdParams,
+    getBalanceByInstrumentId,
+    GetBalanceByInstrumentIdParams,
+    getBalances,
+} from "./balances.js";
+import { getBondContract } from "./bonds/bond.js";
+import {
+    createBondRules,
+    getLatestBondRules,
+    getOrCreateBondRules,
+} from "./bonds/bondRules.js";
+import {
+    createBondFactory,
+    createBondInstrument,
+    CreateBondInstrumentParams,
+    getLatestBondFactory,
+    getLatestBondInstrument,
+    getOrCreateBondFactory,
+} from "./bonds/factory.js";
+import {
+    acceptBondIssuerMintRequest,
+    BondIssuerMintRequestParams,
+    createBondIssuerMintRequest,
+    declineBondIssuerMintRequest,
+    getAllBondIssuerMintRequests,
+    getLatestBondIssuerMintRequest,
+    withdrawBondIssuerMintRequest,
+} from "./bonds/issuerMintRequest.js";
+import {
+    acceptBondLifecycleClaimRequest,
+    BondLifecycleClaimRequestParams,
+    createBondLifecycleClaimRequest,
+    declineBondLifecycleClaimRequest,
+    getAllBondLifecycleClaimRequests,
+    getLatestBondLifecycleClaimRequest,
+    withdrawBondLifecycleClaimRequest,
+} from "./bonds/lifecycleClaimRequest.js";
+import {
+    getAllBondLifecycleEffects,
+    getLatestBondLifecycleEffect,
+} from "./bonds/lifecycleEffect.js";
+import {
+    abortBondLifecycleInstruction,
+    getAllBondLifecycleInstructions,
+    getBondLifecycleInstruction,
+    getBondLifecycleInstructionDisclosure,
+    getLatestBondLifecycleInstruction,
+    processBondLifecycleInstruction,
+} from "./bonds/lifecycleInstruction.js";
+import {
+    createBondLifecycleRule,
+    CreateBondLifecycleRuleParams,
+    getLatestBondLifecycleRule,
+    getOrCreateBondLifecycleRule,
+    processCouponPaymentEvent,
+    ProcessCouponPaymentEventParams,
+    processRedemptionEvent,
+    ProcessRedemptionEventParams,
+} from "./bonds/lifecycleRule.js";
+import {
+    createBondTransferFactory,
+    getLatestBondTransferFactory,
+    getOrCreateBondTransferFactory,
+} from "./bonds/transferFactory.js";
+import {
+    acceptBondTransferInstruction,
+    BondTransferInstructionAcceptParams,
+    getBondTransferInstructionDisclosure,
+    getLatestBondTransferInstruction,
+    rejectBondTransferInstruction,
+    withdrawBondTransferInstruction,
+} from "./bonds/transferInstruction.js";
+import {
+    acceptBondTransferRequest,
+    BondTransferRequestParams,
+    createBondTransferRequest,
+    declineBondTransferRequest,
+    getAllBondTransferRequests,
+    getLatestBondTransferRequest,
+    withdrawBondTransferRequest,
+} from "./bonds/transferRequest.js";
+import {
+    getBondInstrumentDisclosure,
+    getLockedBondDisclosure,
+    getTransferInstructionDisclosure,
+} from "./disclosure.js";
+import {
+    acceptEtfBurnRequest,
+    createEtfBurnRequest,
+    declineEtfBurnRequest,
+    EtfBurnRequestParams,
+    getAllEtfBurnRequests,
+    getLatestEtfBurnRequest,
+    withdrawEtfBurnRequest,
+} from "./etf/burnRequest.js";
+import {
+    addAuthorizedMinter,
+    AddAuthorizedMinterParams,
+    createAndUpdateComposition,
+    CreateAndUpdateCompositionParams,
+    createMintRecipe,
+    getLatestMintRecipe,
+    getOrCreateMintRecipe,
+    MintRecipeParams,
+    removeAuthorizedMinter,
+    RemoveAuthorizedMinterParams,
+    updateComposition,
+    UpdateCompositionParams,
+} from "./etf/mintRecipe.js";
+import {
+    acceptEtfMintRequest,
+    createEtfMintRequest,
+    declineEtfMintRequest,
+    EtfMintRequestParams,
+    getAllEtfMintRequests,
+    getLatestEtfMintRequest,
+    withdrawEtfMintRequest,
+} from "./etf/mintRequest.js";
+import {
+    createPortfolioComposition,
+    getAllPortfolioCompositions,
+    getLatestPortfolioComposition,
+    getPortfolioComposition,
+    PortfolioCompositionParams,
+} from "./etf/portfolioComposition.js";
+import {
+    acceptIssuerBurnRequest,
+    createIssuerBurnRequest,
+    declineIssuerBurnRequest,
+    getAllIssuerBurnRequests,
+    getLatestIssuerBurnRequest,
+    IssuerBurnRequestParams,
+    withdrawIssuerBurnRequest,
+} from "./issuerBurnRequest.js";
+import {
+    acceptIssuerMintRequest,
+    createIssuerMintRequest,
+    declineIssuerMintRequest,
+    getAllIssuerMintRequests,
+    getLatestIssuerMintRequest,
+    IssuerMintRequestParams,
+    withdrawIssuerMintRequest,
+} from "./issuerMintRequest.js";
 import {
     createTokenFactory,
     getLatestTokenFactory,
@@ -19,12 +166,17 @@ import {
     getOrCreateTransferFactory,
 } from "./transferFactory.js";
 import {
-    getBalanceByInstrumentId,
-    GetBalanceByInstrumentIdParams,
-    getBalances,
-    getAllBalancesByInstrumentId,
-    GetAllBalancesByInstrumentIdParams,
-} from "./balances.js";
+    acceptTransferInstruction,
+    getLatestTokenTransferInstruction,
+    rejectTransferInstruction,
+    TransferInstructionAcceptParams,
+} from "./transferInstruction.js";
+import {
+    getLatestTransferPreapproval,
+    TransferPreapprovalParams,
+    transferPreapprovalSend,
+    TransferPreapprovalSendParams,
+} from "./transferPreapproval.js";
 import {
     createTransferPreapprovalProposal,
     CreateTransferPreapprovalProposalParams,
@@ -35,161 +187,14 @@ import {
     TransferPreapprovalProposalParams,
 } from "./transferPreapprovalProposal.js";
 import {
-    getLatestTransferPreapproval,
-    TransferPreapprovalParams,
-    transferPreapprovalSend,
-    TransferPreapprovalSendParams,
-} from "./transferPreapproval.js";
-import {
-    createIssuerMintRequest,
-    getLatestIssuerMintRequest,
-    getAllIssuerMintRequests,
-    acceptIssuerMintRequest,
-    declineIssuerMintRequest,
-    withdrawIssuerMintRequest,
-    IssuerMintRequestParams,
-} from "./issuerMintRequest.js";
-import {
-    createIssuerBurnRequest,
-    getLatestIssuerBurnRequest,
-    getAllIssuerBurnRequests,
-    acceptIssuerBurnRequest,
-    declineIssuerBurnRequest,
-    withdrawIssuerBurnRequest,
-    IssuerBurnRequestParams,
-} from "./issuerBurnRequest.js";
-import {
-    createTransferRequest,
-    getLatestTransferRequest,
     acceptTransferRequest,
+    createTransferRequest,
     declineTransferRequest,
-    withdrawTransferRequest,
     getAllTransferRequests,
+    getLatestTransferRequest,
     TransferRequestParams,
+    withdrawTransferRequest,
 } from "./transferRequest.js";
-import { ContractId, Party } from "../types/daml.js";
-import {
-    acceptTransferInstruction,
-    rejectTransferInstruction,
-    TransferInstructionAcceptParams,
-    getLatestTokenTransferInstruction,
-} from "./transferInstruction.js";
-import {
-    getBondInstrumentDisclosure,
-    getLockedBondDisclosure,
-    getTransferInstructionDisclosure,
-} from "./disclosure.js";
-import { Types } from "@canton-network/core-ledger-client";
-import {
-    acceptBondIssuerMintRequest,
-    BondIssuerMintRequestParams,
-    createBondIssuerMintRequest,
-    declineBondIssuerMintRequest,
-    getAllBondIssuerMintRequests,
-    getLatestBondIssuerMintRequest,
-    withdrawBondIssuerMintRequest,
-} from "./bonds/issuerMintRequest.js";
-import {
-    createBondLifecycleRule,
-    CreateBondLifecycleRuleParams,
-    getLatestBondLifecycleRule,
-    getOrCreateBondLifecycleRule,
-    processCouponPaymentEvent,
-    ProcessCouponPaymentEventParams,
-    processRedemptionEvent,
-    ProcessRedemptionEventParams,
-} from "./bonds/lifecycleRule.js";
-import {
-    createBondFactory,
-    getLatestBondFactory,
-    getOrCreateBondFactory,
-    createBondInstrument,
-    getLatestBondInstrument,
-    CreateBondInstrumentParams,
-} from "./bonds/factory.js";
-import {
-    acceptBondLifecycleClaimRequest,
-    BondLifecycleClaimRequestParams,
-    createBondLifecycleClaimRequest,
-    declineBondLifecycleClaimRequest,
-    getAllBondLifecycleClaimRequests,
-    getLatestBondLifecycleClaimRequest,
-    withdrawBondLifecycleClaimRequest,
-} from "./bonds/lifecycleClaimRequest.js";
-import {
-    createBondRules,
-    getLatestBondRules,
-    getOrCreateBondRules,
-} from "./bonds/bondRules.js";
-import {
-    createBondTransferFactory,
-    getLatestBondTransferFactory,
-    getOrCreateBondTransferFactory,
-} from "./bonds/transferFactory.js";
-import {
-    acceptBondTransferRequest,
-    BondTransferRequestParams,
-    createBondTransferRequest,
-    declineBondTransferRequest,
-    getAllBondTransferRequests,
-    getLatestBondTransferRequest,
-    withdrawBondTransferRequest,
-} from "./bonds/transferRequest.js";
-import {
-    acceptBondTransferInstruction,
-    getBondTransferInstructionDisclosure,
-    getLatestBondTransferInstruction,
-    rejectBondTransferInstruction,
-    withdrawBondTransferInstruction,
-    BondTransferInstructionAcceptParams,
-} from "./bonds/transferInstruction.js";
-import {
-    abortBondLifecycleInstruction,
-    getBondLifecycleInstruction,
-    getBondLifecycleInstructionDisclosure,
-    getLatestBondLifecycleInstruction,
-    processBondLifecycleInstruction,
-} from "./bonds/lifecycleInstruction.js";
-import { getLatestBondLifecycleEffect } from "./bonds/lifecycleEffect.js";
-import {
-    createPortfolioComposition,
-    getLatestPortfolioComposition,
-    getAllPortfolioCompositions,
-    getPortfolioComposition,
-    PortfolioCompositionParams,
-} from "./etf/portfolioComposition.js";
-import {
-    createMintRecipe,
-    getLatestMintRecipe,
-    getOrCreateMintRecipe,
-    addAuthorizedMinter,
-    removeAuthorizedMinter,
-    updateComposition,
-    createAndUpdateComposition,
-    MintRecipeParams,
-    AddAuthorizedMinterParams,
-    RemoveAuthorizedMinterParams,
-    UpdateCompositionParams,
-    CreateAndUpdateCompositionParams,
-} from "./etf/mintRecipe.js";
-import {
-    createEtfMintRequest,
-    getLatestEtfMintRequest,
-    getAllEtfMintRequests,
-    acceptEtfMintRequest,
-    declineEtfMintRequest,
-    withdrawEtfMintRequest,
-    EtfMintRequestParams,
-} from "./etf/mintRequest.js";
-import {
-    createEtfBurnRequest,
-    getLatestEtfBurnRequest,
-    getAllEtfBurnRequests,
-    acceptEtfBurnRequest,
-    declineEtfBurnRequest,
-    withdrawEtfBurnRequest,
-    EtfBurnRequestParams,
-} from "./etf/burnRequest.js";
 
 export const getWrappedSdk = (sdk: WalletSDK) => {
     if (!sdk.userLedger) {
@@ -459,6 +464,8 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
                     getBondLifecycleInstruction(userLedger, contractId),
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleInstruction(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleInstructions(userLedger, party),
                 getDisclosure: (contractId: ContractId) =>
                     getBondLifecycleInstructionDisclosure(
                         userLedger,
@@ -468,6 +475,12 @@ export const getWrappedSdk = (sdk: WalletSDK) => {
             lifecycleEffect: {
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleEffect(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleEffects(userLedger, party),
+            },
+            bond: {
+                get: (contractId: ContractId) =>
+                    getBondContract(userLedger, contractId),
             },
         },
         tokenFactory: {
@@ -994,6 +1007,8 @@ export const getWrappedSdkWithKeyPair = (
                     getBondLifecycleInstruction(userLedger, contractId),
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleInstruction(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleInstructions(userLedger, party),
                 getDisclosure: (contractId: ContractId) =>
                     getBondLifecycleInstructionDisclosure(
                         userLedger,
@@ -1003,6 +1018,12 @@ export const getWrappedSdkWithKeyPair = (
             lifecycleEffect: {
                 getLatest: (party: Party) =>
                     getLatestBondLifecycleEffect(userLedger, party),
+                getAll: (party: Party) =>
+                    getAllBondLifecycleEffects(userLedger, party),
+            },
+            bond: {
+                get: (contractId: ContractId) =>
+                    getBondContract(userLedger, contractId),
             },
         },
         tokenFactory: {
