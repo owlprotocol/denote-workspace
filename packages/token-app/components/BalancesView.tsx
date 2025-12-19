@@ -21,7 +21,7 @@ export function BalancesView({ partyId, instruments }: BalancesViewProps) {
               );
               const name =
                   instrument?.name ||
-                  instrumentId.match(/^[^#]+#(.+)$/)?.[1] ||
+                  /^[^#]+#(.+)$/.exec(instrumentId)?.[1] ||
                   instrumentId;
               return { admin, total: balance.total, instrumentName: name };
           })

@@ -479,8 +479,8 @@ export function CustodianView({ partyId, partyName }: CustodianViewProps) {
                                 );
                                 const instrumentName =
                                     requestInstrument?.name ||
-                                    requestInstrumentId.match(
-                                        /^[^#]+#(.+)$/
+                                    /^[^#]+#(.+)$/.exec(
+                                        requestInstrumentId
                                     )?.[1] ||
                                     requestInstrumentId;
                                 const amount = Number(request.transfer.amount);
