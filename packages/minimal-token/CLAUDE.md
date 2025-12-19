@@ -114,11 +114,12 @@ The implementation includes Exchange-Traded Fund (ETF) contracts that enable min
 
 **MyMintRecipe** (`daml/ETF/MyMintRecipe.daml`)
 - Defines how to mint ETF tokens based on a portfolio composition
-- References a `PortfolioComposition` contract and `MyTokenFactory`
+- References a `PortfolioComposition` contract (no separate token factory - creates tokens directly)
 - Maintains list of `authorizedMinters` who can request ETF minting
 - Issuer can update composition and manage authorized minters
+- **Security Note**: MyMintRecipe_Mint creates MyToken directly (no factory field), preventing issuers from bypassing validation to mint unbacked ETF tokens
 - Choices:
-  - `MyMintRecipe_Mint` - Mint ETF tokens (called by MyMintRequest after validation)
+  - `MyMintRecipe_Mint` - Creates ETF tokens directly (called by MyMintRequest after validation)
   - `MyMintRecipe_CreateAndUpdateComposition` - Create new composition, optionally archive old
   - `MyMintRecipe_UpdateComposition` - Update composition reference
   - `MyMintRecipe_AddAuthorizedMinter` / `MyMintRecipe_RemoveAuthorizedMinter` - Manage minters
@@ -153,7 +154,7 @@ The implementation includes Exchange-Traded Fund (ETF) contracts that enable min
 
 **ETF Minting Workflow:**
 1. Issuer creates `PortfolioComposition` defining underlying assets and weights
-2. Issuer creates `MyMintRecipe` referencing the portfolio and authorizing minters
+2. Issuer creates `MyMintRecipe` referencing the portfolio and authorizing minters (no token factory needed)
 3. Authorized party acquires underlying tokens (via minting or transfer)
 4. Authorized party creates transfer requests for each underlying asset (sender → issuer)
 5. Issuer accepts transfer requests, creating transfer instructions
@@ -161,7 +162,8 @@ The implementation includes Exchange-Traded Fund (ETF) contracts that enable min
 7. Issuer accepts `MyMintRequest`, which:
    - Validates transfer instructions match portfolio composition
    - Executes all transfer instructions (custody of underlying assets to issuer)
-   - Mints ETF tokens to requester
+   - Creates ETF tokens directly via MyMintRecipe_Mint choice (no factory bypass possible)
+   - Transfers minted ETF tokens to requester
 
 **ETF Burning Workflow:**
 1. ETF token holder creates transfer requests for underlying assets (issuer → holder)
