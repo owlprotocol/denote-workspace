@@ -35,12 +35,6 @@ mintToSelfTokenETF = script do
   infras <- forA [instrumentId1, instrumentId2, instrumentId3]
     $ \instId -> setupTokenInfrastructureWithInstrumentId issuer instId
 
-  -- NOTE: maybe we shouldn't use a factory for the ETF since you should only mint via the mint recipe
-  etfFactoryCid <- submit issuer do
-    createCmd MyTokenFactory with
-      issuer
-      instrumentId = etfInstrumentId
-
   -- Issuer creates portfolio composition
   let portfolioItems = map (\id -> PortfolioItem with instrumentId = id; weight = 1.0)
         [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3]
@@ -117,12 +111,6 @@ mintToOtherTokenETF = script do
   -- Issuer creates token factories (for minting tokens)
   infras <- forA [instrumentId1, instrumentId2, instrumentId3]
     $ \instId -> setupTokenInfrastructureWithInstrumentId issuer instId
-
-  -- NOTE: maybe we shouldn't use a factory for the ETF since you should only mint via the mint recipe
-  etfFactoryCid <- submit issuer do
-    createCmd MyTokenFactory with
-      issuer
-      instrumentId = etfInstrumentId
 
   -- Issuer creates portfolio composition
   let portfolioItems = map (\id -> PortfolioItem with instrumentId = id; weight = 1.0)
@@ -204,12 +192,6 @@ burnTokenETF = script do
   infras <- forA [instrumentId1, instrumentId2, instrumentId3]
     $ \instId -> setupTokenInfrastructureWithInstrumentId issuer instId
 
-  -- NOTE: maybe we shouldn't use a factory for the ETF since you should only mint via the mint recipe
-  etfFactoryCid <- submit issuer do
-    createCmd MyTokenFactory with
-      issuer
-      instrumentId = etfInstrumentId
-
   -- Issuer creates portfolio composition
   let portfolioItems = map (\id -> PortfolioItem with instrumentId = id; weight = 1.0)
         [instrumentIdFull1, instrumentIdFull2, instrumentIdFull3]
@@ -274,7 +256,6 @@ burnTokenETF = script do
     createCmd MyBurnRequest  with
       mintRecipeCid
       requester = alice
-      tokenFactoryCid = etfFactoryCid
       issuer
       amount = 1.0
       inputHoldingCid = etfCid

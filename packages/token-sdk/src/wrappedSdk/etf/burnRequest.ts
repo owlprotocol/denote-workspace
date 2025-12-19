@@ -11,7 +11,6 @@ export interface EtfBurnRequestParams {
     mintRecipeCid: ContractId;
     requester: Party;
     amount: number;
-    tokenFactoryCid: ContractId;
     inputHoldingCid: ContractId;
     issuer: Party;
 }

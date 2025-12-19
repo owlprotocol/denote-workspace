@@ -8,7 +8,6 @@ import Splice.Api.Token.MetadataV1 as MD
 import ETF.MyMintRecipe
 import ETF.PortfolioComposition (PortfolioItem)
 import MyToken
-import MyTokenFactory
 
 template MyBurnRequest
   with
@@ -17,7 +16,6 @@ template MyBurnRequest
     requester: Party
     -- ^ The party requesting the burning
     amount: Decimal
-    tokenFactoryCid: ContractId MyTokenFactory
     -- ^ The amount of ETF tokens to burn
     inputHoldingCid: ContractId MyToken
     -- ^ The token holding to use as input. Will be split if needed.
@@ -41,6 +39,13 @@ template MyBurnRequest
 
         assertMsg "Transfer instructions must be of same length as portfolio composition items" $ (length transferInstructionCids) == (length portfolioComp.items)
 
+        -- Validate input token
+        inputToken <- fetch inputHoldingCid
+        assertMsg "Token owner must match" (inputToken.owner == requester)
+        assertMsg "Token issuer must match factory issuer" (inputToken.issuer == issuer)
+        assertMsg "Token instrument ID must match" (inputToken.instrumentId == mintRecipe.instrumentId)
+        assertMsg "Insufficient tokens to burn" (inputToken.amount >= amount)
+
         forA_ (zip transferInstructionCids portfolioComp.items) $
           \(tiCid, portfolioItem) -> validateTransferInstruction tiCid portfolioItem amount issuer requester
         -- For each transfer instruction:
@@ -51,10 +56,26 @@ template MyBurnRequest
               context = MD.emptyChoiceContext
               meta = MD.emptyMetadata
 
-        exercise tokenFactoryCid MyTokenFactory.Burn with
-          owner = requester
-          amount = amount
-          inputHoldingCid = inputHoldingCid
+
+        -- Split and burn: use a self-transfer to split off the exact amount, then archive it
+        -- This follows the splice splitAndBurn pattern
+        if inputToken.amount == amount then do
+          -- Exact match: archive the entire token
+          archive inputHoldingCid
+          pure BurnResult with
+            burnedCid = inputHoldingCid
+            leftoverCid = None
+            meta = MD.emptyMetadata
+        else do
+          transferResult <- exercise inputHoldingCid MyToken_Transfer with
+            receiver = requester
+            amount = amount
+          -- Archive the newly created token (the transferred portion to be burned)
+          archive transferResult.transferredCid
+          pure BurnResult with
+            burnedCid = transferResult.transferredCid
+            leftoverCid = transferResult.remainderCid
+            meta = MD.emptyMetadata
 
 
     choice BurnRequest_Decline : ()
@@ -68,6 +89,13 @@ template MyBurnRequest
       controller requester
       do
         pure ()
+
+-- | Result of burning tokens
+data BurnResult = BurnResult with
+    burnedCid : ContractId MyToken
+    leftoverCid : Optional (ContractId MyToken)
+    meta : MD.Metadata
+  deriving (Show, Eq)
 
 validateTransferInstruction : ContractId TI.TransferInstruction -> PortfolioItem -> Decimal -> Party -> Party -> Update ()
 validateTransferInstruction tiCid portfolioItem amount issuer requester = do

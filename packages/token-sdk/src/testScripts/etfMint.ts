@@ -120,12 +120,6 @@ async function etfMint() {
         await charlieWrappedSdk.transferFactory.getOrCreate(rulesCid);
     console.info(`✓ Transfer factory 3 created: ${transferFactory3Cid}`);
 
-    // Create ETF token factory
-    const etfTokenFactoryCid = await charlieWrappedSdk.tokenFactory.getOrCreate(
-        etfInstrumentId
-    );
-    console.info(`✓ ETF token factory created: ${etfTokenFactoryCid}\n`);
-
     // === PHASE 3: PORTFOLIO COMPOSITION CREATION ===
     console.info("3. Creating portfolio composition...");
 
