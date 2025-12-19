@@ -102,6 +102,80 @@ This pattern is used by both:
 - Orchestrates atomic execution of multiple allocation legs
 - ExecuteAll choice exercises all legs atomically (requires all senders + receivers + executor)
 
+### ETF Components
+
+The implementation includes Exchange-Traded Fund (ETF) contracts that enable minting composite tokens backed by underlying assets:
+
+**PortfolioComposition** (`daml/ETF/PortfolioComposition.daml`)
+- Defines a named collection of assets with weights for ETF composition
+- Contains `owner`, `name`, and `items` (list of PortfolioItem)
+- PortfolioItem specifies `instrumentId` and `weight` (proportion) for each underlying asset
+- Reusable across multiple ETF mint recipes
+
+**MyMintRecipe** (`daml/ETF/MyMintRecipe.daml`)
+- Defines how to mint ETF tokens based on a portfolio composition
+- References a `PortfolioComposition` contract (no separate token factory - creates tokens directly)
+- Maintains list of `authorizedMinters` who can request ETF minting
+- Issuer can update composition and manage authorized minters
+- **Security Note**: MyMintRecipe_Mint creates MyToken directly (no factory field), preventing issuers from bypassing validation to mint unbacked ETF tokens
+- Choices:
+  - `MyMintRecipe_Mint` - Creates ETF tokens directly (called by MyMintRequest after validation)
+  - `MyMintRecipe_CreateAndUpdateComposition` - Create new composition, optionally archive old
+  - `MyMintRecipe_UpdateComposition` - Update composition reference
+  - `MyMintRecipe_AddAuthorizedMinter` / `MyMintRecipe_RemoveAuthorizedMinter` - Manage minters
+
+**MyMintRequest** (`daml/ETF/MyMintRequest.daml`)
+- Request contract for minting ETF tokens with backing assets
+- Requester provides transfer instructions for all underlying assets
+- Follows request/accept pattern for authorization
+- Validation ensures:
+  - Transfer instruction count matches portfolio composition items
+  - Each transfer sender is the requester, receiver is the issuer
+  - InstrumentId matches portfolio item
+  - Transfer amount equals `portfolioItem.weight × ETF amount`
+- Choices:
+  - `MintRequest_Accept` - Validates transfers, accepts all transfer instructions (transferring underlying assets to issuer custody), mints ETF tokens
+  - `MintRequest_Decline` - Issuer declines request
+  - `MintRequest_Withdraw` - Requester withdraws request
+
+**MyBurnRequest** (`daml/ETF/MyBurnRequest.daml`)
+- Request contract for burning ETF tokens and returning underlying assets
+- Requester provides ETF token to burn and issuer provides transfer instructions for underlying assets
+- Follows request/accept pattern for authorization (reverse of mint)
+- Validation ensures:
+  - Transfer instruction count matches portfolio composition items
+  - Each transfer sender is the issuer, receiver is the requester
+  - InstrumentId matches portfolio item
+  - Transfer amount equals `portfolioItem.weight × ETF amount`
+- Choices:
+  - `BurnRequest_Accept` - Validates transfers, accepts all transfer instructions (transferring underlying assets from issuer custody back to requester), burns ETF tokens
+  - `BurnRequest_Decline` - Issuer declines request
+  - `BurnRequest_Withdraw` - Requester withdraws request
+
+**ETF Minting Workflow:**
+1. Issuer creates `PortfolioComposition` defining underlying assets and weights
+2. Issuer creates `MyMintRecipe` referencing the portfolio and authorizing minters (no token factory needed)
+3. Authorized party acquires underlying tokens (via minting or transfer)
+4. Authorized party creates transfer requests for each underlying asset (sender → issuer)
+5. Issuer accepts transfer requests, creating transfer instructions
+6. Authorized party creates `MyMintRequest` with all transfer instruction CIDs
+7. Issuer accepts `MyMintRequest`, which:
+   - Validates transfer instructions match portfolio composition
+   - Executes all transfer instructions (custody of underlying assets to issuer)
+   - Creates ETF tokens directly via MyMintRecipe_Mint choice (no factory bypass possible)
+   - Transfers minted ETF tokens to requester
+
+**ETF Burning Workflow:**
+1. ETF token holder creates transfer requests for underlying assets (issuer → holder)
+2. Issuer accepts transfer requests, creating transfer instructions
+3. ETF token holder creates `MyBurnRequest` with ETF token CID and transfer instruction CIDs
+4. Issuer accepts `MyBurnRequest`, which:
+   - Validates transfer instructions match portfolio composition
+   - Executes all transfer instructions (custody of underlying assets back to holder)
+   - Burns ETF tokens from holder
+
+This pattern ensures ETF tokens are always backed by the correct underlying assets in issuer custody, and burning returns the correct proportions of underlying assets to the holder.
+
 ### Request/Accept Pattern
 
 The codebase uses a consistent request/accept authorization pattern:
@@ -111,9 +185,11 @@ The codebase uses a consistent request/accept authorization pattern:
 3. This ensures both sender and admin authorize the operation
 
 Examples:
-- `MyToken.IssuerMintRequest` -> Issuer accepts -> Mints token
-- `MyToken.TransferRequest` -> Issuer accepts -> Creates `MyTransferInstruction`
-- `MyToken.AllocationRequest` -> Admin accepts -> Creates `MyAllocation`
+- `MyToken.IssuerMintRequest` → Issuer accepts → Mints token
+- `MyToken.TransferRequest` → Issuer accepts → Creates `MyTransferInstruction`
+- `MyToken.AllocationRequest` → Admin accepts → Creates `MyAllocation`
+- `ETF.MyMintRequest` → Issuer accepts → Validates transfers, executes transfer instructions, mints ETF token
+- `ETF.MyBurnRequest` → Issuer accepts → Validates transfers, executes transfer instructions, burns ETF token
 
 ### Registry API Pattern
 
@@ -163,7 +239,7 @@ CIP-0056 interfaces use `ExtraArgs` and `Metadata` extensively for extensibility
 
 ## Test Organization
 
-The test suite is organized by feature area for clarity and maintainability (**17 tests total, all passing**):
+The test suite is organized by feature area for clarity and maintainability (**20 tests total, all passing**):
 
 ### `Test/TestUtils.daml`
 Common helpers to reduce test duplication:
@@ -196,6 +272,14 @@ Common helpers to reduce test duplication:
 
 ### `Test/TransferPreapproval.daml`
 - `testTransferPreapproval` - Transfer preapproval pattern
+
+### `ETF/Test/ETFTest.daml`
+- `mintToSelfTokenETF` - ETF minting where issuer mints underlying tokens to themselves, creates transfer instructions, and mints ETF
+- `mintToOtherTokenETF` - ETF minting where Alice acquires underlying tokens, transfers to issuer, and mints ETF (demonstrates authorized minter pattern)
+- `burnTokenETF` - ETF burning where Alice mints ETF token, then issuer transfers underlying tokens back to Alice and burns the ETF (demonstrates complete mint-burn cycle)
+
+### `Bond/Test/BondLifecycleTest.daml`
+- `testBondFullLifecycle` - Complete bond lifecycle including minting, coupon payments, transfers, and redemption
 
 ### `Scripts/Holding.daml`
 - `setupHolding` - Utility function for setting up holdings

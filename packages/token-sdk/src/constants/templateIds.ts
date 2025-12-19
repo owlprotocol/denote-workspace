@@ -31,3 +31,13 @@ export const bondLifecycleInstructionTemplateId =
 export const bondLifecycleEffectTemplateId =
     "#minimal-token:Bond.BondLifecycleEffect:BondLifecycleEffect";
 export const lockedBondTemplateId = "#minimal-token:Bond.Bond:LockedBond";
+
+// ETF template IDs
+export const portfolioCompositionTemplateId =
+    "#minimal-token:ETF.PortfolioComposition:PortfolioComposition";
+export const mintRecipeTemplateId =
+    "#minimal-token:ETF.MyMintRecipe:MyMintRecipe";
+export const etfMintRequestTemplateId =
+    "#minimal-token:ETF.MyMintRequest:MyMintRequest";
+export const etfBurnRequestTemplateId =
+    "#minimal-token:ETF.MyBurnRequest:MyBurnRequest";

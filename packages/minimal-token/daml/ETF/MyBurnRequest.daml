@@ -1,0 +1,110 @@
+module ETF.MyBurnRequest where
+
+import DA.Foldable (forA_)
+
+import Splice.Api.Token.TransferInstructionV1 as TI
+import Splice.Api.Token.MetadataV1 as MD
+
+import ETF.MyMintRecipe
+import ETF.PortfolioComposition (PortfolioItem)
+import MyToken
+
+template MyBurnRequest
+  with
+    mintRecipeCid: ContractId MyMintRecipe
+    -- ^ The mint recipe to be used for burning
+    requester: Party
+    -- ^ The party requesting the burning
+    amount: Decimal
+    -- ^ The amount of ETF tokens to burn
+    inputHoldingCid: ContractId MyToken
+    -- ^ The token holding to use as input. Will be split if needed.
+    issuer: Party
+    -- ^ The ETF issuer
+  where
+    signatory requester
+    observer issuer
+
+    ensure amount > 0.0
+
+    choice BurnRequest_Accept : BurnResult
+      -- ^ Accept the burn request and burn the tokens.
+      with
+        transferInstructionCids: [ContractId TI.TransferInstruction]
+        -- ^ The transfer instructions to be executed as part of the burning process. Expected to be in the same order as the portfolio composition
+      controller issuer
+      do
+        mintRecipe <- fetch mintRecipeCid
+        portfolioComp <- fetch (mintRecipe.composition)
+
+        assertMsg "Transfer instructions must be of same length as portfolio composition items" $ (length transferInstructionCids) == (length portfolioComp.items)
+
+        -- Validate input token
+        inputToken <- fetch inputHoldingCid
+        assertMsg "Token owner must match" (inputToken.owner == requester)
+        assertMsg "Token issuer must match factory issuer" (inputToken.issuer == issuer)
+        assertMsg "Token instrument ID must match" (inputToken.instrumentId == mintRecipe.instrumentId)
+        assertMsg "Insufficient tokens to burn" (inputToken.amount >= amount)
+
+        forA_ (zip transferInstructionCids portfolioComp.items) $
+          \(tiCid, portfolioItem) -> validateTransferInstruction tiCid portfolioItem amount issuer requester
+        -- For each transfer instruction:
+        -- Accept each transfer instruction
+        forA_ transferInstructionCids $
+          \tiCid -> exercise tiCid TI.TransferInstruction_Accept with
+            extraArgs = MD.ExtraArgs with
+              context = MD.emptyChoiceContext
+              meta = MD.emptyMetadata
+
+
+        -- Split and burn: use a self-transfer to split off the exact amount, then archive it
+        -- This follows the splice splitAndBurn pattern
+        if inputToken.amount == amount then do
+          -- Exact match: archive the entire token
+          archive inputHoldingCid
+          pure BurnResult with
+            burnedCid = inputHoldingCid
+            leftoverCid = None
+            meta = MD.emptyMetadata
+        else do
+          transferResult <- exercise inputHoldingCid MyToken_Transfer with
+            receiver = requester
+            amount = amount
+          -- Archive the newly created token (the transferred portion to be burned)
+          archive transferResult.transferredCid
+          pure BurnResult with
+            burnedCid = transferResult.transferredCid
+            leftoverCid = transferResult.remainderCid
+            meta = MD.emptyMetadata
+
+
+    choice BurnRequest_Decline : ()
+      -- ^ Decline the request.
+      controller issuer
+      do
+        pure ()
+
+    choice BurnRequest_Withdraw : ()
+      -- ^ Withdraw the request.
+      controller requester
+      do
+        pure ()
+
+-- | Result of burning tokens
+data BurnResult = BurnResult with
+    burnedCid : ContractId MyToken
+    leftoverCid : Optional (ContractId MyToken)
+    meta : MD.Metadata
+  deriving (Show, Eq)
+
+validateTransferInstruction : ContractId TI.TransferInstruction -> PortfolioItem -> Decimal -> Party -> Party -> Update ()
+validateTransferInstruction tiCid portfolioItem amount issuer requester = do
+  ti <- fetch tiCid
+
+  let tiView = view ti
+
+  assertMsg "Transfer instruction sender does not match issuer" (tiView.transfer.sender == issuer)
+
+  assertMsg "Transfer instruction receiver does not match requester" (tiView.transfer.receiver == requester)
+  assertMsg ("Transfer instruction instrumentId does not match portfolio item: " <> show tiView.transfer.instrumentId <> ", " <> show portfolioItem.instrumentId) (tiView.transfer.instrumentId == portfolioItem.instrumentId)
+  assertMsg "Transfer instruction amount does not match expected amount" (tiView.transfer.amount == (portfolioItem.weight * amount))
