@@ -95,5 +95,6 @@ export function useAllBalancesForAllInstruments(
         isLoadingBalances,
         hasBalanceError,
         setupInstruments,
+        balanceQueries,
     };
 }

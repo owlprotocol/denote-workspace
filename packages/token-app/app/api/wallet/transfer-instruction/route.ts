@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
                 };
                 const contractId = jsActive.createdEvent.contractId;
 
-                if (createArg.transfer?.receiver !== partyId) {
+                if (
+                    createArg.transfer?.sender !== partyId &&
+                    createArg.transfer?.receiver !== partyId
+                ) {
                     return null;
                 }
 
