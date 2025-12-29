@@ -9,7 +9,7 @@ export function useBalance(
     owner: string | null,
     instrumentId?: { admin: string; id: string } | null
 ) {
-    return useQuery<TokenBalance>({
+    return useQuery<Record<string, TokenBalance> | TokenBalance>({
         queryKey: ["balances", owner, instrumentId],
         queryFn: async () => {
             if (!owner) throw new Error("Owner required");
@@ -28,7 +28,7 @@ export function useBalance(
                 throw new Error(error.error || "Failed to get balance");
             }
 
-            return response.json() as Promise<TokenBalance>;
+            return response.json();
         },
         enabled: !!owner,
         refetchInterval: 5000,

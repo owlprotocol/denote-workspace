@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useBalance } from "@/lib/queries/balance";
+import { useBalance, TokenBalance } from "@/lib/queries/balance";
 import { useIssuerMintRequest } from "@/lib/queries/issuerMintRequest";
 import { useIssuerBurnRequest } from "@/lib/queries/issuerBurnRequest";
 import { useTokenFactory } from "@/lib/queries/tokenFactory";
@@ -51,12 +51,14 @@ export function UserView({
         (i) => i.instrumentId === selectedInstrumentId
     );
 
-    const { data: balance } = useBalance(
+    const { data: balanceData } = useBalance(
         partyId,
         custodianPartyId && selectedInstrumentId
             ? { admin: custodianPartyId, id: selectedInstrumentId }
             : null
     );
+
+    const balance = balanceData as TokenBalance | undefined;
 
     const transferFactory = tokenFactoryQuery.getTransferFactory.data;
 

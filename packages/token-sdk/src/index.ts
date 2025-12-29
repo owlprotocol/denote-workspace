@@ -3,3 +3,4 @@ export * from "./helpers/index.js";
 export * from "./types/index.js";
 export * from "./wrappedSdk/index.js";
 export * from "./sdkHelpers.js";
+export * from "./testScripts/etfSetup.js";

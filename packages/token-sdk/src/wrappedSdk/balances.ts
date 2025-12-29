@@ -42,15 +42,16 @@ export async function getBalances(
     > = {};
 
     utxos.forEach((utxo) => {
-        const instrumentId = instrumentIdToString(utxo.instrumentId);
-        if (!balances[instrumentId]) {
-            balances[instrumentId] = { total: 0, utxos: [] };
+        const { id } = utxo.instrumentId;
+
+        if (!balances[id]) {
+            balances[id] = { total: 0, utxos: [] };
         }
 
         const amount = Number(utxo.amount);
 
-        balances[instrumentId].total += amount;
-        balances[instrumentId].utxos.push({
+        balances[id].total += amount;
+        balances[id].utxos.push({
             amount,
             contractId: utxo.contractId,
         });
