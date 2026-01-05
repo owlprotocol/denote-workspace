@@ -262,25 +262,18 @@ async function startCustodianService() {
                             );
                             // Don't mark as processed - will retry next poll
                         }
-                        // The interval happens after every handleRequest call
-                        await new Promise((resolve) =>
-                            setTimeout(resolve, POLLING_FREQUENCY_MS)
-                        );
                     }
                 } else {
                     console.log(`[CUSTODIAN] No new requests`);
-                    // If no requests, still wait for the interval before the next poll
-                    await new Promise((resolve) =>
-                        setTimeout(resolve, POLLING_FREQUENCY_MS)
-                    );
                 }
             } catch (error) {
                 console.error(`[CUSTODIAN] Polling error:`, error);
-                // If polling itself fails, wait for the interval before retrying the poll
-                await new Promise((resolve) =>
-                    setTimeout(resolve, POLLING_FREQUENCY_MS)
-                );
             }
+
+            // The interval happens after every poll loop
+            await new Promise((resolve) =>
+                setTimeout(resolve, POLLING_FREQUENCY_MS)
+            );
         }
     }
 
