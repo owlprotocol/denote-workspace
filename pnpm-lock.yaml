@@ -218,6 +218,9 @@ importers:
       '@canton-network/wallet-sdk':
         specifier: ^0.16.0
         version: 0.16.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
