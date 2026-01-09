@@ -46,12 +46,16 @@ const fiveNSdkConfig: Config = {
             clientId: CLIENT_ID_5N,
             clientSecret: CLIENT_SECRET_5N,
         }),
-    ledgerFactory: (userId: string, authTokenProvider: AuthTokenProvider) =>
+    ledgerFactory: (
+        userId: string,
+        authTokenProvider: AuthTokenProvider,
+        isAdmin = false
+    ) =>
         new LedgerController(
             userId,
             FIVEN_LEDGER_API_URL,
             undefined,
-            false,
+            isAdmin,
             authTokenProvider
         ),
     tokenStandardFactory: (

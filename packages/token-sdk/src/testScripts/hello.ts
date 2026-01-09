@@ -5,7 +5,6 @@ import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
 
 async function hello() {
     const sdk = await getDefaultSdkAndConnect();
-    await sdk.connectAdmin();
 
     // NOTE: this is of course for testing
     const aliceKeyPair = keyPairFromSeed("alice");
