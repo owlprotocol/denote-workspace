@@ -2,24 +2,35 @@ import { LedgerController } from "@canton-network/wallet-sdk";
 import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
 import { ContractId, Party } from "../../types/daml.js";
 import { bondLifecycleEffectTemplateId } from "../../constants/templateIds.js";
+import { InstrumentId } from "../../types/InstrumentId.js";
+
+export type LifecycleEventType = "CouponPayment" | "Redemption";
 
 export interface BondLifecycleEffectParams {
-    producedVersion: string | null;
-    eventType: "CouponPayment" | "Redemption";
+    issuer: Party;
+    depository: Party;
+    eventType: LifecycleEventType;
     targetInstrumentId: string;
     targetVersion: string;
-    eventDate: string;
+    producedVersion?: string;
+    eventDate: number;
+    settlementTime?: number;
     amount: number;
+    currencyInstrumentId: InstrumentId;
 }
 
 export interface BondLifecycleEffect {
     contractId: ContractId;
-    producedVersion: string | null;
-    eventType: "CouponPayment" | "Redemption";
+    issuer: Party;
+    depository: Party;
+    eventType: LifecycleEventType;
     targetInstrumentId: string;
     targetVersion: string;
-    eventDate: string;
+    producedVersion?: string;
+    eventDate: number;
+    settlementTime?: number;
     amount: number;
+    currencyInstrumentId: InstrumentId;
 }
 
 export async function getLatestBondLifecycleEffect(
@@ -77,12 +88,7 @@ export async function getAllBondLifecycleEffects(
 
             return {
                 contractId,
-                producedVersion: createArg.producedVersion,
-                eventType: createArg.eventType,
-                targetInstrumentId: createArg.targetInstrumentId,
-                targetVersion: createArg.targetVersion,
-                eventDate: createArg.eventDate,
-                amount: createArg.amount,
+                ...createArg,
             };
         })
         .filter(
