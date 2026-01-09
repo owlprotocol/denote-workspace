@@ -1,4 +1,4 @@
-interface TokenResponse5N {
+export interface TokenResponse5N {
     access_token: string;
     token_type: string;
     scope: string;
@@ -48,8 +48,7 @@ export async function get5NToken({
             );
         }
 
-        const responseJson = (await response.json()) as TokenResponse5N;
-        return responseJson.access_token;
+        return (await response.json()) as TokenResponse5N;
     } catch (error) {
         console.error("Failed to obtain 5N token:", error);
         throw error;

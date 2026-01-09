@@ -12,7 +12,7 @@ async function print5NToken() {
         clientSecret: CLIENT_SECRET_5N,
     });
 
-    console.log(token);
+    console.log(token.access_token);
 }
 
 print5NToken()
