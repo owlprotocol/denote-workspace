@@ -15,18 +15,18 @@ import { CreatedEvent } from "../../types/CreatedEvent.js";
 
 export type LifecycleEventType = "CouponPayment" | "Redemption";
 
-export interface BondLifecycleEffect {
-    issuer: Party;
-    depository: Party;
-    eventType: LifecycleEventType;
-    targetInstrumentId: string;
-    targetVersion: string;
-    producedVersion?: string;
-    eventDate: number;
-    settlementTime?: number;
-    amount: number;
-    currencyInstrumentId: InstrumentId;
-}
+// export interface BondLifecycleEffect {
+//     issuer: Party;
+//     depository: Party;
+//     eventType: LifecycleEventType;
+//     targetInstrumentId: string;
+//     targetVersion: string;
+//     producedVersion?: string;
+//     eventDate: number;
+//     settlementTime?: number;
+//     amount: number;
+//     currencyInstrumentId: InstrumentId;
+// }
 
 export interface BondLifecycleInstructionParams {
     eventType: LifecycleEventType;
