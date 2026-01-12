@@ -95,7 +95,9 @@ export const getSdkForParty = async (partyId: string): Promise<WalletSDK> => {
     const sdkPromise = (async () => {
         const sdk = getDefaultSdk();
         await sdk.connect();
-        await sdk.connectTopology(LOCALNET_SCAN_PROXY_API_URL);
+        await sdk.connectTopology(
+            USE_5N ? FIVEN_SCAN_PROXY_API_URL : LOCALNET_SCAN_PROXY_API_URL
+        );
         await sdk.setPartyId(partyId);
         return sdk;
     })();

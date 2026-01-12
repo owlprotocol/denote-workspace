@@ -1,11 +1,9 @@
 import { MINIMAL_TOKEN_PACKAGE_ID } from "./constants/MINIMAL_TOKEN_PACKAGE_ID.js";
-import { FIVEN_SCAN_PROXY_API_URL, getDefaultSdk } from "./sdkHelpers.js";
+import { getDefaultSdkAndConnect } from "./sdkHelpers.js";
 
 export async function checkDars() {
-    const sdk = getDefaultSdk();
-
-    await sdk.connect();
-    await sdk.connectTopology(FIVEN_SCAN_PROXY_API_URL);
+    const sdk = await getDefaultSdkAndConnect();
+    await sdk.connectAdmin();
 
     const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
         MINIMAL_TOKEN_PACKAGE_ID
