@@ -10,7 +10,6 @@ import { getWrappedSdkWithKeyPair } from "../wrappedSdk/wrappedSdk.js";
  * 1. Allocates parties (custodian, alice)
  * 2. Creates infrastructure for 3 underlying tokens
  * 3. Mints underlying tokens to Alice (100 each)
- * 4. Creates ETF token factory
  *
  * Note: Does NOT create portfolio composition or mint recipe (done in UI)
  */
@@ -74,7 +73,7 @@ export async function etfSetup() {
     console.info(`  Alice (minter):     ${aliceAllocatedParty.partyId}\n`);
 
     // === PHASE 2: INFRASTRUCTURE SETUP ===
-    console.info("2. Setting up infrastructure (underlying tokens + ETF)...");
+    console.info("2. Setting up infrastructure (underlying tokens)...");
 
     // Instrument IDs for 3 underlying tokens
     const instrumentId1 = custodianAllocatedParty.partyId + "#Token1";
@@ -113,12 +112,9 @@ export async function etfSetup() {
 
     const transferFactory3Cid =
         await custodianWrappedSdk.transferFactory.getOrCreate(rulesCid);
-    console.info(`✓ Transfer factory 3 created: ${transferFactory3Cid}`);
+    console.info(`✓ Transfer factory 3 created: ${transferFactory3Cid}\n`);
 
-    // Create ETF token factory
-    const etfTokenFactoryCid =
-        await custodianWrappedSdk.tokenFactory.getOrCreate(etfInstrumentId);
-    console.info(`✓ ETF token factory created: ${etfTokenFactoryCid}\n`);
+    // Note: ETF tokens are created directly via MyMintRecipe (no factory needed)
 
     // === PHASE 3: MINT UNDERLYING TOKENS TO ALICE ===
     console.info("3. Minting underlying tokens to Alice (100 each)...");
@@ -198,7 +194,6 @@ export async function etfSetup() {
         },
         etf: {
             instrumentId: etfInstrumentId,
-            tokenFactoryCid: etfTokenFactoryCid,
         },
         rulesCid: rulesCid,
     };

@@ -8,7 +8,10 @@ import {
     useLifecycleClaimRequest,
     useLifecycleInstruction,
 } from "@/lib/queries/bondLifecycle";
-import type { BondLifecycleInstruction } from "@denotecapital/token-sdk";
+import type {
+    BondLifecycleInstruction,
+    TokenBalance,
+} from "@denotecapital/token-sdk";
 import { useBondInstruments } from "@/lib/queries/bondInstruments";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransferInstruction } from "@/lib/queries/transferInstruction";
@@ -359,7 +362,8 @@ export function BondUserView({
                                 <div className="p-3 border rounded-lg">
                                     <p className="text-sm font-medium">Bonds</p>
                                     <p className="text-2xl font-bold">
-                                        {selectedBalance.total || 0}
+                                        {(selectedBalance as TokenBalance)
+                                            .total || 0}
                                     </p>
                                 </div>
                             )}
@@ -369,7 +373,8 @@ export function BondUserView({
                                         Currency
                                     </p>
                                     <p className="text-2xl font-bold">
-                                        {currencyBalance.total || 0}
+                                        {(currencyBalance as TokenBalance)
+                                            .total || 0}
                                     </p>
                                 </div>
                             )}
