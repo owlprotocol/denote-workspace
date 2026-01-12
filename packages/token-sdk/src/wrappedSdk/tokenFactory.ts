@@ -14,7 +14,7 @@ export interface TokenFactoryParams {
 export const tokenFactoryTemplateId =
     "#minimal-token:MyTokenFactory:MyTokenFactory";
 
-const getCreateTokenFactoryCommand = (params: TokenFactoryParams) =>
+export const getCreateTokenFactoryCommand = (params: TokenFactoryParams) =>
     getCreateCommand({ templateId: tokenFactoryTemplateId, params });
 
 // TODO: do not pass userKeyPair here

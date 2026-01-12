@@ -1,24 +1,11 @@
-import {
-    localNetAuthDefault,
-    localNetLedgerDefault,
-    localNetTokenStandardDefault,
-    WalletSDKImpl,
-} from "@canton-network/wallet-sdk";
 import fs from "fs/promises";
 import path from "path";
 import { MINIMAL_TOKEN_PACKAGE_ID } from "./constants/MINIMAL_TOKEN_PACKAGE_ID.js";
-
-const sdk = new WalletSDKImpl().configure({
-    logger: console,
-    authFactory: localNetAuthDefault,
-    ledgerFactory: localNetLedgerDefault,
-    tokenStandardFactory: localNetTokenStandardDefault,
-});
+import { getDefaultSdkAndConnect } from "./sdkHelpers.js";
 
 export async function uploadDars() {
-    await sdk.connect();
+    const sdk = await getDefaultSdkAndConnect();
     await sdk.connectAdmin();
-    await sdk.connectTopology(new URL("http://localhost:2000/api/validator"));
 
     const isDarUploaded = await sdk.userLedger?.isPackageUploaded(
         MINIMAL_TOKEN_PACKAGE_ID
