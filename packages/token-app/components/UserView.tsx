@@ -584,8 +584,8 @@ export function UserView({
                                 );
                                 const instrumentName =
                                     requestInstrument?.name ||
-                                    request.transfer.instrumentId.id.match(
-                                        /^[^#]+#(.+)$/
+                                    /^[^#]+#(.+)$/.exec(
+                                        request.transfer.instrumentId.id
                                     )?.[1] ||
                                     request.transfer.instrumentId.id;
                                 const amount = Math.round(
@@ -657,8 +657,8 @@ export function UserView({
                                 );
                                 const instrumentName =
                                     requestInstrument?.name ||
-                                    instruction.transfer.instrumentId.id.match(
-                                        /^[^#]+#(.+)$/
+                                    /^[^#]+#(.+)$/.exec(
+                                        instruction.transfer.instrumentId.id
                                     )?.[1] ||
                                     instruction.transfer.instrumentId.id;
                                 const amount = Number(
