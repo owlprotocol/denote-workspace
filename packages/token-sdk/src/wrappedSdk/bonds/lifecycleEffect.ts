@@ -2,24 +2,22 @@ import { LedgerController } from "@canton-network/wallet-sdk";
 import { ActiveContractResponse } from "../../types/ActiveContractResponse.js";
 import { ContractId, Party } from "../../types/daml.js";
 import { bondLifecycleEffectTemplateId } from "../../constants/templateIds.js";
+import { InstrumentId } from "../../types/InstrumentId.js";
+import { WithContractId } from "../../types/WithContractId.js";
+
+export type LifecycleEventType = "CouponPayment" | "Redemption";
 
 export interface BondLifecycleEffectParams {
-    producedVersion: string | null;
-    eventType: "CouponPayment" | "Redemption";
+    issuer: Party;
+    depository: Party;
+    eventType: LifecycleEventType;
     targetInstrumentId: string;
     targetVersion: string;
-    eventDate: string;
+    producedVersion?: string;
+    eventDate: number;
+    settlementTime?: number;
     amount: number;
-}
-
-export interface BondLifecycleEffect {
-    contractId: ContractId;
-    producedVersion: string | null;
-    eventType: "CouponPayment" | "Redemption";
-    targetInstrumentId: string;
-    targetVersion: string;
-    eventDate: string;
-    amount: number;
+    currencyInstrumentId: InstrumentId;
 }
 
 export async function getLatestBondLifecycleEffect(
@@ -58,34 +56,33 @@ export async function getLatestBondLifecycleEffect(
 export async function getAllBondLifecycleEffects(
     ledger: LedgerController,
     party: Party
-): Promise<BondLifecycleEffect[]> {
+): Promise<WithContractId<BondLifecycleEffectParams>[]> {
     const end = await ledger.ledgerEnd();
-    const effects = (await ledger.activeContracts({
+    const activeContracts = (await ledger.activeContracts({
         offset: end.offset,
         templateIds: [bondLifecycleEffectTemplateId],
         filterByParty: true,
         parties: [party],
     })) as ActiveContractResponse<BondLifecycleEffectParams>[];
 
-    return effects
-        .map((contract) => {
-            const jsActive = contract.contractEntry.JsActiveContract;
-            if (!jsActive) return null;
+    const filteredEntries = activeContracts.filter(({ contractEntry }) => {
+        const jsActive = contractEntry.JsActiveContract;
+        if (!jsActive) return false;
+        return true;
+        // TODO: consider filtering by issuer or other criteria
+        // const { createArgument } = jsActive.createdEvent;
+    });
 
-            const createArg = jsActive.createdEvent.createArgument;
-            const contractId = jsActive.createdEvent.contractId;
+    return filteredEntries.map((contract) => {
+        const bondLifecycleEffect =
+            contract.contractEntry.JsActiveContract!.createdEvent
+                .createArgument;
 
-            return {
-                contractId,
-                producedVersion: createArg.producedVersion,
-                eventType: createArg.eventType,
-                targetInstrumentId: createArg.targetInstrumentId,
-                targetVersion: createArg.targetVersion,
-                eventDate: createArg.eventDate,
-                amount: createArg.amount,
-            };
-        })
-        .filter(
-            (effect): effect is NonNullable<typeof effect> => effect !== null
-        );
+        return {
+            ...bondLifecycleEffect,
+            contractId:
+                contract.contractEntry.JsActiveContract!.createdEvent
+                    .contractId,
+        };
+    });
 }

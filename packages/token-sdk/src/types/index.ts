@@ -4,3 +4,4 @@ export * from "./CreatedEvent.js";
 export * from "./daml.js";
 export * from "./InstrumentId.js";
 export * from "./UserKeyPair.js";
+export * from "./WithContractId.js";
